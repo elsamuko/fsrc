@@ -23,8 +23,6 @@ std::list<std::string> fromFile( const std::experimental::filesystem::path& file
     const std::string content( length, '\0' );
     file.read( ( char* ) content.data(), length );
 
-    // boost::split( lines, content, boost::is_any_of( "\r\n" ), boost::token_compress_off );
-
     int pos = 0;
 
     for( size_t i = 0; i < length; ++i ) {
@@ -96,8 +94,12 @@ int main( int argc, char* argv[] ) {
 
                     if( pos != std::string::npos ) {
                         ss << path << " L" << i << " " << line.substr( 0, pos );
-                        // highlight first hit
+#if WIN32
+                        ss << line.substr( pos, term.size() );
+#else
+                        // highlight first hit on linux
                         ss << "\033[1;31m" << line.substr( pos, term.size() ) << "\033[0m";
+#endif
                         ss << line.substr( pos  + term.size() );
                         ss << std::endl;
                     }
