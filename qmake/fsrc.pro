@@ -1,5 +1,6 @@
 CONFIG -= qt
 CONFIG += c++17
+CONFIG += console
 
 MAIN_DIR =..
 SRC_DIR  =../src
