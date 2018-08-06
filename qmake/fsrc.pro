@@ -5,7 +5,7 @@ MAIN_DIR =..
 SRC_DIR  =../src
 INCLUDEPATH += $${SRC_DIR}
 
-SOURCES += $${SRC_DIR}/fscr.cpp
+SOURCES += $${SRC_DIR}/fsrc.cpp
 
 HEADERS += $${SRC_DIR}/threadpool.hpp
 SOURCES += $${SRC_DIR}/threadpool.cpp
