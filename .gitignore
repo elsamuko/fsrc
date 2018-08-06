@@ -1,0 +1,17 @@
+*
+
+!.gitignore
+
+!*/
+
+!*.md
+!*.sh
+
+!*.pro
+!*.pri
+
+!*.cpp
+!*.hpp
+!*.fl
+
+tmp
