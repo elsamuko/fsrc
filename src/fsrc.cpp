@@ -27,7 +27,7 @@ std::string fileHead( const std::experimental::filesystem::path& filename, const
 // binary files have usually zero padding
 bool isTextFile( const std::experimental::filesystem::path& filename ) {
     std::string head = fileHead( filename, 1000 );
-    bool hasDoubleZero = head.find( { 0, 0 } ) != std::string::npos;
+    bool hasDoubleZero = head.find( std::string( { 0, 0 } ) ) != std::string::npos;
     return !hasDoubleZero;
 }
 
