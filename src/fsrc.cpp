@@ -10,6 +10,27 @@
 
 #define LOG( A ) std::cout << A << std::endl;
 
+std::string fileHead( const std::experimental::filesystem::path& filename, const size_t count ) {
+    std::ifstream file( filename.c_str(), std::ios::binary );
+    file.seekg( 0, std::ios::end );
+    size_t length = ( size_t ) file.tellg();
+    file.seekg( 0, std::ios::beg );
+
+    // read count bytes, or length, if file is too small
+    if( length > count ) { length = count; }
+
+    const std::string content( length, '\0' );
+    file.read( ( char* ) content.data(), length );
+    return content;
+}
+
+// binary files have usually zero padding
+bool isTextFile( const std::experimental::filesystem::path& filename ) {
+    std::string head = fileHead( filename, 1000 );
+    bool hasDoubleZero = head.find( { 0, 0 } ) != std::string::npos;
+    return !hasDoubleZero;
+}
+
 std::list<std::string> fromFile( const std::experimental::filesystem::path& filename ) {
     std::list<std::string> lines;
     std::ifstream file( filename.c_str(), std::ios::binary );
@@ -78,42 +99,39 @@ int main( int argc, char* argv[] ) {
     onAllFiles( searchpath, [&m, &pool, &term]( const std::experimental::filesystem::path & path ) {
         pool.add( [&m, path, &term] {
 
-            std::experimental::filesystem::path ext = path.extension();
-            const std::vector<std::experimental::filesystem::path> exts = { ".cpp", ".cc", ".h", ".hpp", ".pro", ".pri", ".py", ".prf", ".conf" };
+            // search only in text files
+            if( !isTextFile( path ) ) { return; }
 
-            if( contains( exts, ext ) ) {
-                const std::list<std::string> lines = fromFile( path );
+            const std::list<std::string> lines = fromFile( path );
 
-                std::stringstream ss;
-                size_t i = 0;
+            std::stringstream ss;
+            size_t i = 0;
 
-                for( const std::string& line : lines ) {
-                    i++;
+            for( const std::string& line : lines ) {
+                i++;
 
-                    size_t pos = line.find( term );
+                size_t pos = line.find( term );
 
-                    if( pos != std::string::npos ) {
-                        ss << path << " L" << i << " " << line.substr( 0, pos );
+                if( pos != std::string::npos ) {
+                    ss << path << " L" << i << " " << line.substr( 0, pos );
 #if WIN32
-                        ss << line.substr( pos, term.size() );
+                    ss << line.substr( pos, term.size() );
 #else
-                        // highlight first hit on linux
-                        ss << "\033[1;31m" << line.substr( pos, term.size() ) << "\033[0m";
+                    // highlight first hit on linux
+                    ss << "\033[1;31m" << line.substr( pos, term.size() ) << "\033[0m";
 #endif
-                        ss << line.substr( pos  + term.size() );
-                        ss << std::endl;
-                    }
-                }
-
-                std::string res = ss.str();
-
-                if( !res.empty() ) {
-                    m.lock();
-                    LOG( res );
-                    m.unlock();
+                    ss << line.substr( pos  + term.size() );
+                    ss << std::endl;
                 }
             }
 
+            std::string res = ss.str();
+
+            if( !res.empty() ) {
+                m.lock();
+                LOG( res );
+                m.unlock();
+            }
         } );
     } );
 
