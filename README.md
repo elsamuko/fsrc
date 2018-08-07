@@ -28,11 +28,9 @@ g++ -std=c++17 -O2 -msse2 -flto *.cpp -o fsrc -lstdc++fs -lpthread
 Or install Qt and open fsrc.pro in the qmake folder.
 
 ### macOS (untested)
-You need clang++ with C++17 support, the one coming with XCode (9.x) doesn't work yet  
+You need clang++ with C++17 support, the one coming with XCode (9.x) doesn't work yet. You can download prebuild clang++ binaries here:  
+http://releases.llvm.org/download.html  
+Download the the latest distribution and extract it to /opt/llvm, then go into the src folder and run  
 ```
-brew install llvm --with-clang
-```  
-Then go into the src folder and run  
-```
-/usr/local/opt/llvm/bin/clang++ -std=c++17 -O2 -msse2 -flto *.cpp -o fsrc -lstdc++fs -lpthread
+/opt/llvm/bin/clang++ -std=c++17 -O2 -msse2 -flto *.cpp -o fsrc -L/opt/llvm/lib -lc++experimental -lpthread
 ```  
