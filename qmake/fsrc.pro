@@ -3,6 +3,7 @@ CONFIG += c++17
 CONFIG += console
 
 MAIN_DIR =..
+DESTDIR=$${MAIN_DIR} # to test on itself
 SRC_DIR  =../src
 INCLUDEPATH += $${SRC_DIR}
 
