@@ -5,10 +5,33 @@
 #include <fstream>
 #include <algorithm>
 #include <experimental/filesystem>
+#include <cstdio>
 
 #include "threadpool.hpp"
 
 #define LOG( A ) std::cout << A << std::endl;
+
+std::list<std::string> run( const std::string& command ) {
+    std::string buffer( 100, '\0' );
+    std::list<std::string> result;
+
+    FILE* pipe = popen( command.c_str(), "r" );
+
+    if( !pipe ) { return result; }
+
+    while( !feof( pipe ) ) {
+        if( fgets( ( char* )buffer.data(), 101, pipe ) != NULL ) {
+            result.push_back( buffer.c_str() );
+        }
+    }
+
+    for( std::string& line : result ) {
+        line.pop_back(); // remove newline
+    }
+
+    pclose( pipe );
+    return result;
+}
 
 std::string fileHead( const std::experimental::filesystem::path& filename, const size_t count ) {
     std::ifstream file( filename.c_str(), std::ios::binary );
@@ -98,6 +121,19 @@ void onAllFiles( const std::experimental::filesystem::path searchpath, const std
     pool.waitForAllJobs();
 }
 
+void onGitFiles( const std::list<std::string>& filenames, const std::function<void( const std::experimental::filesystem::path& )>& func ) {
+    ThreadPool pool;
+
+    for( const std::string& filename : filenames ) {
+        std::experimental::filesystem::path path( filename );
+        pool.add( [path, func] {
+            func( path );
+        } );
+    }
+
+    pool.waitForAllJobs();
+}
+
 template<class C, class T>
 bool contains( const C& v, const T& x ) {
     return std::end( v ) != std::find( begin( v ), end( v ), x );
@@ -114,9 +150,10 @@ int main( int argc, char* argv[] ) {
     std::experimental::filesystem::path searchpath = ".";
     const std::string term = argv[1];
     auto tp = std::chrono::system_clock::now();
-    LOG( "Searching for \"" << term << "\":\n" );
 
-    onAllFiles( searchpath, [&m, &term]( const std::experimental::filesystem::path & path ) {
+    std::list<std::string> gitFiles = run( "git ls-files 2> /dev/null" );
+
+    auto searchFunc = [&m, &term]( const std::experimental::filesystem::path & path ) {
 
         // search only in text files
         if( !isTextFile( path ) ) { return; }
@@ -151,7 +188,15 @@ int main( int argc, char* argv[] ) {
             LOG( res );
             m.unlock();
         }
-    } );
+    };
+
+    if( !gitFiles.empty() ) {
+        LOG( "Searching for \"" << term << "\" in repo:\n" );
+        onGitFiles( gitFiles, searchFunc );
+    } else {
+        LOG( "Searching for \"" << term << "\" in folder:\n" );
+        onAllFiles( searchpath, searchFunc );
+    }
 
     auto duration = std::chrono::system_clock::now() - tp;
     std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>( duration );
