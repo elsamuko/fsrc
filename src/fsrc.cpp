@@ -74,7 +74,28 @@ void onAllFiles( const std::experimental::filesystem::path searchpath, const std
         return;
     }
 
-    std::for_each( std::experimental::filesystem::recursive_directory_iterator( searchpath ), std::experimental::filesystem::recursive_directory_iterator(), func );
+    auto start = std::experimental::filesystem::recursive_directory_iterator( searchpath );
+    auto end   = std::experimental::filesystem::recursive_directory_iterator();
+
+    ThreadPool pool;
+
+    while( start != end ) {
+
+        std::experimental::filesystem::path path = start->path();
+
+        if( path.string().find( ".git" ) != std::string::npos ) {
+            start.disable_recursion_pending();
+            start++;
+            path = start->path();
+        }
+
+        pool.add( [path, func] {
+            func( path );
+        } );
+        start++;
+    }
+
+    pool.waitForAllJobs();
 }
 
 template<class C, class T>
@@ -89,53 +110,48 @@ int main( int argc, char* argv[] ) {
         return 0;
     }
 
-    ThreadPool pool;
     std::mutex m;
     std::experimental::filesystem::path searchpath = ".";
     const std::string term = argv[1];
     auto tp = std::chrono::system_clock::now();
     LOG( "Searching for \"" << term << "\":\n" );
 
-    onAllFiles( searchpath, [&m, &pool, &term]( const std::experimental::filesystem::path & path ) {
-        pool.add( [&m, path, &term] {
+    onAllFiles( searchpath, [&m, &term]( const std::experimental::filesystem::path & path ) {
 
-            // search only in text files
-            if( !isTextFile( path ) ) { return; }
+        // search only in text files
+        if( !isTextFile( path ) ) { return; }
 
-            const std::list<std::string> lines = fromFile( path );
+        const std::list<std::string> lines = fromFile( path );
 
-            std::stringstream ss;
-            size_t i = 0;
+        std::stringstream ss;
+        size_t i = 0;
 
-            for( const std::string& line : lines ) {
-                i++;
+        for( const std::string& line : lines ) {
+            i++;
 
-                size_t pos = line.find( term );
+            size_t pos = line.find( term );
 
-                if( pos != std::string::npos ) {
-                    ss << path << " L" << i << " " << line.substr( 0, pos );
+            if( pos != std::string::npos ) {
+                ss << path << " L" << i << " " << line.substr( 0, pos );
 #if WIN32
-                    ss << line.substr( pos, term.size() );
+                ss << line.substr( pos, term.size() );
 #else
-                    // highlight first hit on linux
-                    ss << "\033[1;31m" << line.substr( pos, term.size() ) << "\033[0m";
+                // highlight first hit on linux
+                ss << "\033[1;31m" << line.substr( pos, term.size() ) << "\033[0m";
 #endif
-                    ss << line.substr( pos  + term.size() );
-                    ss << std::endl;
-                }
+                ss << line.substr( pos  + term.size() );
+                ss << std::endl;
             }
+        }
 
-            std::string res = ss.str();
+        std::string res = ss.str();
 
-            if( !res.empty() ) {
-                m.lock();
-                LOG( res );
-                m.unlock();
-            }
-        } );
+        if( !res.empty() ) {
+            m.lock();
+            LOG( res );
+            m.unlock();
+        }
     } );
-
-    pool.waitForAllJobs();
 
     auto duration = std::chrono::system_clock::now() - tp;
     std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>( duration );
