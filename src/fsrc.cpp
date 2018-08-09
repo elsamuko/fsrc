@@ -11,6 +11,11 @@
 
 #define LOG( A ) std::cout << A << std::endl;
 
+#if WIN32
+#define popen _popen
+#define pclose _pclose
+#endif
+
 std::list<std::string> run( const std::string& command ) {
     std::string buffer( 100, '\0' );
     std::list<std::string> result;
@@ -151,8 +156,6 @@ int main( int argc, char* argv[] ) {
     const std::string term = argv[1];
     auto tp = std::chrono::system_clock::now();
 
-    std::list<std::string> gitFiles = run( "git ls-files 2> /dev/null" );
-
     auto searchFunc = [&m, &term]( const std::experimental::filesystem::path & path ) {
 
         // search only in text files
@@ -189,6 +192,13 @@ int main( int argc, char* argv[] ) {
             m.unlock();
         }
     };
+
+    #if WIN32
+        std::string nullDevice = "NUL";
+    #else
+        std::string nullDevice = "/dev/null";
+    #endif
+        std::list<std::string> gitFiles = run( "git ls-files 2> " + nullDevice );
 
     if( !gitFiles.empty() ) {
         LOG( "Searching for \"" << term << "\" in repo:\n" );
