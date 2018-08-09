@@ -15,8 +15,9 @@ struct Searcher {
 
         const std::list<std::string> lines = utils::fromFile( path );
 
-        std::stringstream ss;
         size_t i = 0;
+        std::list<std::function<void()>> prints;
+        bool hit = false;
 
         for( const std::string& line : lines ) {
             i++;
@@ -24,23 +25,23 @@ struct Searcher {
             size_t pos = line.find( term );
 
             if( pos != std::string::npos ) {
-                ss << path << " L" << i << " " << line.substr( 0, pos );
-#if WIN32
-                ss << line.substr( pos, term.size() );
-#else
-                // highlight first hit on linux
-                ss << "\033[1;31m" << line.substr( pos, term.size() ) << "\033[0m";
-#endif
-                ss << line.substr( pos  + term.size() );
-                ss << std::endl;
+                hit = true;
+                prints.push_back( utils::printFunc( Color::Neutral, "\nL%4i : %s", i, line.substr( 0, pos ).c_str() ) );
+                prints.push_back( utils::printFunc( Color::Red, line.substr( pos, term.size() ) ) );
+                prints.push_back( utils::printFunc( Color::Neutral, line.substr( pos  + term.size() ) ) );
             }
         }
 
-        std::string res = ss.str();
+        if( hit ) {
+            prints.push_front( utils::printFunc( Color::Green, path ) );
+            prints.push_back( utils::printFunc( Color::Neutral, "\n\n" ) );
+        }
 
-        if( !res.empty() ) {
+        if( !prints.empty() ) {
             m.lock();
-            LOG( res );
+
+            for( std::function<void()> func : prints ) { func(); }
+
             m.unlock();
         }
     }

@@ -1,5 +1,10 @@
 #include "utils.hpp"
 
+#include <iostream>
+#include <fstream>
+#include <algorithm>
+#include <cstdio>
+
 std::list<std::string> utils::run( const std::string& command ) {
     std::string buffer( 100, '\0' );
     std::list<std::string> result;
