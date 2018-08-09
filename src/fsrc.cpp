@@ -1,167 +1,19 @@
 #include <iostream>
-#include <string>
 #include <sstream>
-#include <list>
-#include <fstream>
-#include <algorithm>
-#include <experimental/filesystem>
-#include <cstdio>
 
 #include "threadpool.hpp"
+#include "utils.hpp"
 
 #define LOG( A ) std::cout << A << std::endl;
 
-#if WIN32
-#define popen _popen
-#define pclose _pclose
-#endif
-
-std::list<std::string> run( const std::string& command ) {
-    std::string buffer( 100, '\0' );
-    std::list<std::string> result;
-
-    FILE* pipe = popen( command.c_str(), "r" );
-
-    if( !pipe ) { return result; }
-
-    while( !feof( pipe ) ) {
-        if( fgets( ( char* )buffer.data(), 101, pipe ) != NULL ) {
-            result.push_back( buffer.c_str() );
-        }
-    }
-
-    for( std::string& line : result ) {
-        line.pop_back(); // remove newline
-    }
-
-    pclose( pipe );
-    return result;
-}
-
-std::string fileHead( const std::experimental::filesystem::path& filename, const size_t count ) {
-    std::ifstream file( filename.c_str(), std::ios::binary );
-    file.seekg( 0, std::ios::end );
-    size_t length = ( size_t ) file.tellg();
-    file.seekg( 0, std::ios::beg );
-
-    // read count bytes, or length, if file is too small
-    if( length > count ) { length = count; }
-
-    const std::string content( length, '\0' );
-    file.read( ( char* ) content.data(), length );
-    return content;
-}
-
-// binary files have usually zero padding
-bool isTextFile( const std::experimental::filesystem::path& filename ) {
-    std::string head = fileHead( filename, 1000 );
-    bool hasDoubleZero = head.find( std::string( { 0, 0 } ) ) != std::string::npos;
-    return !hasDoubleZero;
-}
-
-std::list<std::string> fromFile( const std::experimental::filesystem::path& filename ) {
-    std::list<std::string> lines;
-    std::ifstream file( filename.c_str(), std::ios::binary );
-
-    if( !file ) { return lines;}
-
-    file.seekg( 0, std::ios::end );
-    size_t length = ( size_t ) file.tellg();
-    file.seekg( 0, std::ios::beg );
-
-    const std::string content( length, '\0' );
-    file.read( ( char* ) content.data(), length );
-
-    int pos = 0;
-
-    for( size_t i = 0; i < length; ++i ) {
-        // just skip windows line endings
-        if( content[i] == '\r' ) {
-            ++i;
-        }
-
-        // cut at unix line endings
-        if( content[i] == '\n' ) {
-            lines.push_back( content.substr( pos, i - pos ) );
-            pos = i + 1;
-        }
-    }
-
-    return lines;
-}
-
-void onAllFiles( const std::experimental::filesystem::path searchpath, const std::function<void( const std::experimental::filesystem::path& )>& func ) {
-
-    if( !std::experimental::filesystem::exists( searchpath ) ) {
-        LOG( searchpath << " does not exist" );
-        return;
-    }
-
-    if( !std::experimental::filesystem::is_directory( searchpath ) ) {
-        LOG( searchpath << " is not a dir" );
-        return;
-    }
-
-    auto start = std::experimental::filesystem::recursive_directory_iterator( searchpath );
-    auto end   = std::experimental::filesystem::recursive_directory_iterator();
-
-    ThreadPool pool;
-
-    while( start != end ) {
-
-        std::experimental::filesystem::path path = start->path();
-
-        if( path.string().find( ".git" ) != std::string::npos ) {
-            start.disable_recursion_pending();
-            start++;
-            path = start->path();
-        }
-
-        pool.add( [path, func] {
-            func( path );
-        } );
-        start++;
-    }
-
-    pool.waitForAllJobs();
-}
-
-void onGitFiles( const std::list<std::string>& filenames, const std::function<void( const std::experimental::filesystem::path& )>& func ) {
-    ThreadPool pool;
-
-    for( const std::string& filename : filenames ) {
-        std::experimental::filesystem::path path( filename );
-        pool.add( [path, func] {
-            func( path );
-        } );
-    }
-
-    pool.waitForAllJobs();
-}
-
-template<class C, class T>
-bool contains( const C& v, const T& x ) {
-    return std::end( v ) != std::find( begin( v ), end( v ), x );
-}
-
-int main( int argc, char* argv[] ) {
-
-    if( argc != 2 ) {
-        LOG( "Usage: fscr <term>" );
-        return 0;
-    }
-
-    std::mutex m;
-    std::experimental::filesystem::path searchpath = ".";
-    const std::string term = argv[1];
-    auto tp = std::chrono::system_clock::now();
-
-    auto searchFunc = [&m, &term]( const std::experimental::filesystem::path & path ) {
-
+struct Searcher {
+    mutable std::mutex m;
+    std::string term;
+    void search( const std::experimental::filesystem::path& path ) const {
         // search only in text files
-        if( !isTextFile( path ) ) { return; }
+        if( !utils::isTextFile( path ) ) { return; }
 
-        const std::list<std::string> lines = fromFile( path );
+        const std::list<std::string> lines = utils::fromFile( path );
 
         std::stringstream ss;
         size_t i = 0;
@@ -191,21 +43,85 @@ int main( int argc, char* argv[] ) {
             LOG( res );
             m.unlock();
         }
-    };
+    }
+};
 
-    #if WIN32
-        std::string nullDevice = "NUL";
-    #else
-        std::string nullDevice = "/dev/null";
-    #endif
-        std::list<std::string> gitFiles = run( "git ls-files 2> " + nullDevice );
+void onAllFiles( const std::experimental::filesystem::path searchpath, const Searcher& searcher ) {
+
+    if( !std::experimental::filesystem::exists( searchpath ) ) {
+        LOG( searchpath << " does not exist" );
+        return;
+    }
+
+    if( !std::experimental::filesystem::is_directory( searchpath ) ) {
+        LOG( searchpath << " is not a dir" );
+        return;
+    }
+
+    auto start = std::experimental::filesystem::recursive_directory_iterator( searchpath );
+    auto end   = std::experimental::filesystem::recursive_directory_iterator();
+
+    ThreadPool pool;
+
+    while( start != end ) {
+
+        std::experimental::filesystem::path path = start->path();
+
+        if( path.string().find( ".git" ) != std::string::npos ) {
+            start.disable_recursion_pending();
+            start++;
+            path = start->path();
+        }
+
+        pool.add( [path, &searcher] {
+            searcher.search( path );
+        } );
+        start++;
+    }
+
+    pool.waitForAllJobs();
+}
+
+void onGitFiles( const std::list<std::string>& filenames, const Searcher& searcher ) {
+    ThreadPool pool;
+
+    for( const std::string& filename : filenames ) {
+        std::experimental::filesystem::path path( filename );
+        pool.add( [path, &searcher] {
+            searcher.search( path );
+        } );
+    }
+
+    pool.waitForAllJobs();
+}
+
+int main( int argc, char* argv[] ) {
+
+    if( argc != 2 ) {
+        LOG( "Usage: fscr <term>" );
+        return 0;
+    }
+
+    std::experimental::filesystem::path searchpath = ".";
+    const std::string term = argv[1];
+    auto tp = std::chrono::system_clock::now();
+
+    Searcher searcher;
+    searcher.term = argv[1];
+
+#if WIN32
+    std::string nullDevice = "NUL";
+#else
+    std::string nullDevice = "/dev/null";
+#endif
+    std::list<std::string> gitFiles = utils::run( "git ls-files 2> " + nullDevice );
 
     if( !gitFiles.empty() ) {
         LOG( "Searching for \"" << term << "\" in repo:\n" );
-        onGitFiles( gitFiles, searchFunc );
+        onGitFiles( gitFiles, searcher );
     } else {
         LOG( "Searching for \"" << term << "\" in folder:\n" );
-        onAllFiles( searchpath, searchFunc );
+        onAllFiles( searchpath, searcher );
     }
 
     auto duration = std::chrono::system_clock::now() - tp;

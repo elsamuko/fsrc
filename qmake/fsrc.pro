@@ -9,6 +9,9 @@ INCLUDEPATH += $${SRC_DIR}
 
 SOURCES += $${SRC_DIR}/fsrc.cpp
 
+HEADERS += $${SRC_DIR}/utils.hpp
+SOURCES += $${SRC_DIR}/utils.cpp
+
 HEADERS += $${SRC_DIR}/threadpool.hpp
 SOURCES += $${SRC_DIR}/threadpool.cpp
 
