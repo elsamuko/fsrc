@@ -26,7 +26,7 @@ struct Searcher {
             auto end   = std::sregex_iterator();
 
             if( std::distance( begin, end ) > 0 ) {
-                prints.push_back( utils::printFunc( Color::Neutral, "\nL%4i : ", i ) );
+                prints.push_back( utils::printFunc( Color::Blue, "\nL%4i : ", i ) );
             }
 
             for( std::sregex_iterator match = begin; match != end; ++match ) {
