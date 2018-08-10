@@ -72,7 +72,8 @@ void onAllFiles( const std::experimental::filesystem::path searchpath, const Sea
 
         std::experimental::filesystem::path path = start->path();
 
-        if( path.string().find( ".git" ) != std::string::npos ) {
+        if( std::experimental::filesystem::is_directory( path ) &&
+                ( path.string().find( ".git" ) != std::string::npos ) ) {
             start.disable_recursion_pending();
             start++;
             path = start->path();
