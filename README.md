@@ -16,7 +16,7 @@ L 205 :         catch (const fs::filesystem_error& ex)
 L 215 :         boost::filesystem::ifstream file(p);
 
 Searched in 148 ms
-user@home:~/boost$
+user@home:/usr/include/boost$
 ```
 ## Building
 
