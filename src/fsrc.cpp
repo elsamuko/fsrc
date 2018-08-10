@@ -33,7 +33,7 @@ struct Searcher {
         }
 
         if( hit ) {
-            prints.push_front( utils::printFunc( Color::Green, "%s", path.c_str() ) );
+            prints.push_front( utils::printFunc( Color::Green, "%s", path.string().c_str() ) );
             prints.push_back( utils::printFunc( Color::Neutral, "%s", "\n\n" ) );
         }
 
