@@ -94,26 +94,6 @@ void ThreadPool::waitForAllJobs() {
     }
 }
 
-void ThreadPool::resume() {
-    mStopped.store( false );
-}
-
-void ThreadPool::suspend() {
-
-    mStopped.store( true );
-
-    // clear queue
-    {
-        std::unique_lock<std::mutex> lock( mJobMutex );
-        int size = mJobs.size();
-        mJobCount -= size;
-        std::queue<Job> empty;
-        std::swap( mJobs, empty );
-    }
-
-    this->waitForAllJobs();
-}
-
 int ThreadPool::size() const {
     return mWorkers.size();
 }

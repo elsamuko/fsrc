@@ -16,8 +16,6 @@ class ThreadPool {
         ~ThreadPool();
         bool add( const ThreadPool::Job& job );
         void waitForAllJobs();
-        void suspend();
-        void resume();
         int size() const;
     private:
         void workOff();
