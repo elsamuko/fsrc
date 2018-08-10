@@ -1,9 +1,42 @@
 #include "utils.hpp"
 
+#include <map>
 #include <iostream>
 #include <fstream>
 #include <algorithm>
 #include <cstdio>
+
+#if WIN32
+#include "Windows.h"
+#define popen _popen
+#define pclose _pclose
+const std::map<Color, WORD> colors = {
+    {Color::Red,     FOREGROUND_RED},
+    {Color::Green,   FOREGROUND_GREEN},
+};
+#else
+const std::map<Color, std::string> colors = {
+    {Color::Red,     "\033[1;31m"},
+    {Color::Green,   "\033[1;32m"},
+};
+#endif
+
+void utils::printColor( Color color, const std::string& text ) {
+    if( color == Color::Neutral ) {
+        std::cout << text << std::flush;
+    } else {
+#if WIN32
+        HANDLE h = ::GetStdHandle( STD_OUTPUT_HANDLE );
+        CONSOLE_SCREEN_BUFFER_INFO csbiInfo = {};
+        ::GetConsoleScreenBufferInfo( h, &csbiInfo );
+        ::SetConsoleTextAttribute( h, colors.at( color ) | FOREGROUND_INTENSITY );
+        std::cout << text << std::flush;
+        ::SetConsoleTextAttribute( h, csbiInfo.wAttributes );
+#else
+        std::cout << colors.at( color ) << text << "\033[0m" << std::flush;
+#endif
+    }
+}
 
 std::list<std::string> utils::run( const std::string& command ) {
     std::string buffer( 100, '\0' );

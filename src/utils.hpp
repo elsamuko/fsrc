@@ -1,16 +1,9 @@
 #pragma once
 
-#include <map>
 #include <list>
 #include <string>
-#include <iostream>
 #include <functional>
 #include <experimental/filesystem>
-
-#if WIN32
-#define popen _popen
-#define pclose _pclose
-#endif
 
 enum class Color {
     Red,
@@ -18,16 +11,25 @@ enum class Color {
     Neutral
 };
 
-const std::map<Color, std::string> colors = {
-    {Color::Red,     "\033[1;31m"},
-    {Color::Green,   "\033[1;32m"},
-};
-
 namespace utils {
+
+//! prints text in color to stdout
+void printColor( Color color, const std::string& text );
+
+//! runs shell command
+//! \returns output of command as list
 std::list<std::string> run( const std::string& command );
+
+//! gets count bytes of filename
 std::string fileHead( const std::experimental::filesystem::path& filename, const size_t count );
+
+//! \returns true, if filename has no "\0\0" in the first 1000 bytes
 bool isTextFile( const std::experimental::filesystem::path& filename );
+
+//! \returns content of filename as list
 std::list<std::string> fromFile( const std::experimental::filesystem::path& filename );
+
+//! \returns function, which prints format in color to stdout
 template <typename ... Args>
 std::function<void()> printFunc( Color color, const char* format, Args const& ... args ) {
 
@@ -35,19 +37,7 @@ std::function<void()> printFunc( Color color, const char* format, Args const& ..
     std::string text( size, '\0' );
     snprintf( ( char* )text.c_str(), text.size() + 1, format, args... );
 
-    return [text, color] {
-#if WIN32
-        std::cout << text << std::flush;
-#else
-
-        if( color == Color::Neutral ) {
-            std::cout << text << std::flush;
-        } else {
-            std::cout << colors.at( color ) << text << "\033[0m" << std::flush;
-        }
-
-#endif
-
-    };
+    return [color, text] { printColor( color, text ); };
 }
+
 }
