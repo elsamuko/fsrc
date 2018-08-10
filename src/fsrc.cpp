@@ -27,14 +27,14 @@ struct Searcher {
             if( pos != std::string::npos ) {
                 hit = true;
                 prints.push_back( utils::printFunc( Color::Neutral, "\nL%4i : %s", i, line.substr( 0, pos ).c_str() ) );
-                prints.push_back( utils::printFunc( Color::Red, line.substr( pos, term.size() ) ) );
-                prints.push_back( utils::printFunc( Color::Neutral, line.substr( pos  + term.size() ) ) );
+                prints.push_back( utils::printFunc( Color::Red, "%s", line.substr( pos, term.size() ).c_str() ) );
+                prints.push_back( utils::printFunc( Color::Neutral, "%s", line.substr( pos  + term.size() ).c_str() ) );
             }
         }
 
         if( hit ) {
-            prints.push_front( utils::printFunc( Color::Green, path ) );
-            prints.push_back( utils::printFunc( Color::Neutral, "\n\n" ) );
+            prints.push_front( utils::printFunc( Color::Green, "%s", path.c_str() ) );
+            prints.push_back( utils::printFunc( Color::Neutral, "%s", "\n\n" ) );
         }
 
         if( !prints.empty() ) {

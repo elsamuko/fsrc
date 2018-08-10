@@ -29,11 +29,11 @@ std::string fileHead( const std::experimental::filesystem::path& filename, const
 bool isTextFile( const std::experimental::filesystem::path& filename );
 std::list<std::string> fromFile( const std::experimental::filesystem::path& filename );
 template <typename ... Args>
-std::function<void()> printFunc( Color color, const std::string& format, Args const& ... args ) {
+std::function<void()> printFunc( Color color, const char* format, Args const& ... args ) {
 
-    int size = snprintf( nullptr, 0, format.c_str(), args... );
+    int size = snprintf( nullptr, 0, format, args... );
     std::string text( size, '\0' );
-    snprintf( ( char* )text.c_str(), text.size() + 1, format.c_str(), args... );
+    snprintf( ( char* )text.c_str(), text.size() + 1, format, args... );
 
     return [text, color] {
 #if WIN32
