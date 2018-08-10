@@ -1,5 +1,6 @@
 #include <iostream>
 #include <sstream>
+#include <regex>
 
 #include "threadpool.hpp"
 #include "utils.hpp"
@@ -8,7 +9,7 @@
 
 struct Searcher {
     mutable std::mutex m;
-    std::string term;
+    std::regex regex;
     void search( const std::experimental::filesystem::path& path ) const {
         // search only in text files
         if( !utils::isTextFile( path ) ) { return; }
@@ -17,27 +18,30 @@ struct Searcher {
 
         size_t i = 0;
         std::list<std::function<void()>> prints;
-        bool hit = false;
 
         for( const std::string& line : lines ) {
             i++;
 
-            size_t pos = line.find( term );
+            auto begin = std::sregex_iterator( line.cbegin(), line.cend(), regex );
+            auto end   = std::sregex_iterator();
 
-            if( pos != std::string::npos ) {
-                hit = true;
-                prints.push_back( utils::printFunc( Color::Neutral, "\nL%4i : %s", i, line.substr( 0, pos ).c_str() ) );
-                prints.push_back( utils::printFunc( Color::Red, "%s", line.substr( pos, term.size() ).c_str() ) );
-                prints.push_back( utils::printFunc( Color::Neutral, "%s", line.substr( pos  + term.size() ).c_str() ) );
+            if( std::distance( begin, end ) > 0 ) {
+                prints.push_back( utils::printFunc( Color::Neutral, "\nL%4i : ", i ) );
+            }
+
+            for( std::sregex_iterator match = begin; match != end; ++match ) {
+                prints.push_back( utils::printFunc( Color::Neutral, "%s", match->prefix().str().c_str() ) );
+                prints.push_back( utils::printFunc( Color::Red, "%s", match->str().c_str() ) );
+
+                if( std::distance( match, end ) == 1 ) {
+                    prints.push_back( utils::printFunc( Color::Neutral, "%s", match->suffix().str().c_str() ) );
+                }
             }
         }
 
-        if( hit ) {
+        if( !prints.empty() ) {
             prints.push_front( utils::printFunc( Color::Green, "%s", path.string().c_str() ) );
             prints.push_back( utils::printFunc( Color::Neutral, "%s", "\n\n" ) );
-        }
-
-        if( !prints.empty() ) {
             m.lock();
 
             for( std::function<void()> func : prints ) { func(); }
@@ -108,7 +112,13 @@ int main( int argc, char* argv[] ) {
     auto tp = std::chrono::system_clock::now();
 
     Searcher searcher;
-    searcher.term = argv[1];
+
+    try {
+        searcher.regex = argv[1];
+    } catch( const std::regex_error& e ) {
+        LOG( "Invalid regex: " << e.what() );
+        return -1;
+    }
 
 #if WIN32
     std::string nullDevice = "NUL";
