@@ -95,6 +95,7 @@ std::list<std::string> utils::fromFile( const std::experimental::filesystem::pat
 
     const std::string content( length, '\0' );
     file.read( ( char* ) content.data(), length );
+    const char* data = content.data();
 
     int pos = 0;
 
@@ -106,7 +107,7 @@ std::list<std::string> utils::fromFile( const std::experimental::filesystem::pat
 
         // cut at unix line endings
         if( content[i] == '\n' ) {
-            lines.push_back( content.substr( pos, i - pos ) );
+            lines.emplace_back( data + pos, data + i );
             pos = i + 1;
         }
     }
