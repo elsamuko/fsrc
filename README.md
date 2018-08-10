@@ -4,15 +4,19 @@ This tool is meant to search large codebases for text snippets. It uses a thread
 
 ## Usage
 ```
-user@home:~/boost$ fsrc filesystem
+user@home:/usr/include/boost$ fsrc filesystem
 Searching for "filesystem":
 
 ...
-"./boost/spirit/home/x3/support/utility/testing.hpp" L205         catch (const fs::filesystem_error& ex)
-"./boost/spirit/home/x3/support/utility/testing.hpp" L215         boost::filesystem::ifstream file(p);
+./boost/spirit/home/x3/support/utility/testing.hpp
+L  11 : #include <boost/filesystem.hpp>
+L  12 : #include <boost/filesystem/fstream.hpp>
+L  16 :     namespace fs = boost::filesystem;
+L 205 :         catch (const fs::filesystem_error& ex)
+L 215 :         boost::filesystem::ifstream file(p);
 
 Searched in 148 ms
-user@home:~/boost$
+user@home:/usr/include/boost$
 ```
 ## Building
 
