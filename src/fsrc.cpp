@@ -17,7 +17,8 @@ namespace rx = std;
 struct Searcher {
     mutable std::mutex m;
     rx::regex regex;
-    void search( const std::experimental::filesystem::path& path ) const {
+    void search( const fs::path& path ) const {
+
         // search only in text files
         if( !utils::isTextFile( path ) ) { return; }
 
@@ -60,28 +61,28 @@ struct Searcher {
     }
 };
 
-void onAllFiles( const std::experimental::filesystem::path searchpath, const Searcher& searcher ) {
+void onAllFiles( const fs::path searchpath, const Searcher& searcher ) {
 
-    if( !std::experimental::filesystem::exists( searchpath ) ) {
+    if( !fs::exists( searchpath ) ) {
         LOG( searchpath << " does not exist" );
         return;
     }
 
-    if( !std::experimental::filesystem::is_directory( searchpath ) ) {
+    if( !fs::is_directory( searchpath ) ) {
         LOG( searchpath << " is not a dir" );
         return;
     }
 
-    auto start = std::experimental::filesystem::recursive_directory_iterator( searchpath );
-    auto end   = std::experimental::filesystem::recursive_directory_iterator();
+    auto start = fs::recursive_directory_iterator( searchpath );
+    auto end   = fs::recursive_directory_iterator();
 
     ThreadPool pool;
 
     while( start != end ) {
 
-        std::experimental::filesystem::path path = start->path();
+        fs::path path = start->path();
 
-        if( std::experimental::filesystem::is_directory( path ) &&
+        if( fs::is_directory( path ) &&
                 ( path.string().find( ".git" ) != std::string::npos ) ) {
             start.disable_recursion_pending();
             start++;
@@ -101,7 +102,7 @@ void onGitFiles( const std::list<std::string>& filenames, const Searcher& search
     ThreadPool pool;
 
     for( const std::string& filename : filenames ) {
-        std::experimental::filesystem::path path( filename );
+        fs::path path( filename );
         pool.add( [path, &searcher] {
             searcher.search( path );
         } );
@@ -117,7 +118,7 @@ int main( int argc, char* argv[] ) {
         return 0;
     }
 
-    std::experimental::filesystem::path searchpath = ".";
+    fs::path searchpath = ".";
     const std::string term = argv[1];
     auto tp = std::chrono::system_clock::now();
 

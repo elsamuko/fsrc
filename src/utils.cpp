@@ -62,7 +62,7 @@ std::list<std::string> utils::run( const std::string& command ) {
     return result;
 }
 
-std::string utils::fileHead( const std::experimental::filesystem::path& filename, const size_t count ) {
+std::string utils::fileHead( const fs::path& filename, const size_t count ) {
     std::ifstream file( filename.c_str(), std::ios::binary );
     file.seekg( 0, std::ios::end );
     size_t length = ( size_t ) file.tellg();
@@ -77,13 +77,13 @@ std::string utils::fileHead( const std::experimental::filesystem::path& filename
 }
 
 // binary files have usually zero padding
-bool utils::isTextFile( const std::experimental::filesystem::path& filename ) {
+bool utils::isTextFile( const fs::path& filename ) {
     std::string head = fileHead( filename, 1000 );
     bool hasDoubleZero = head.find( std::string( { 0, 0 } ) ) != std::string::npos;
     return !hasDoubleZero;
 }
 
-std::pair<std::string, std::list<std::string_view>> utils::fromFile( const std::experimental::filesystem::path& filename ) {
+std::pair<std::string, std::list<std::string_view>> utils::fromFile( const fs::path& filename ) {
     std::pair<std::string, std::list<std::string_view>> lines;
     std::ifstream file( filename.c_str(), std::ios::binary );
 
@@ -92,6 +92,8 @@ std::pair<std::string, std::list<std::string_view>> utils::fromFile( const std::
     file.seekg( 0, std::ios::end );
     size_t length = ( size_t ) file.tellg();
     file.seekg( 0, std::ios::beg );
+
+    if( !length ) { return lines;}
 
     lines.first.resize( length );
     file.read( ( char* ) lines.first.data(), length );

@@ -8,4 +8,4 @@ QMAKE_LFLAGS_RELEASE += -flto
 QMAKE_LFLAGS_DEBUG += -pg
 
 DEFINES += 'WITH_BOOST=1'
-LIBS += -lboost_regex
+LIBS += -lboost_regex -lboost_system -lboost_filesystem

@@ -3,7 +3,15 @@
 #include <list>
 #include <string>
 #include <functional>
+
+#if WITH_BOOST
+#include <boost/filesystem.hpp>
+namespace fs = boost::filesystem;
+#else
 #include <experimental/filesystem>
+namespace fs = std::experimental::filesystem;
+#endif
+
 
 enum class Color {
     Red,
@@ -22,13 +30,13 @@ void printColor( Color color, const std::string& text );
 std::list<std::string> run( const std::string& command );
 
 //! gets count bytes of filename
-std::string fileHead( const std::experimental::filesystem::path& filename, const size_t count );
+std::string fileHead( const fs::path& filename, const size_t count );
 
 //! \returns true, if filename has no "\0\0" in the first 1000 bytes
-bool isTextFile( const std::experimental::filesystem::path& filename );
+bool isTextFile( const fs::path& filename );
 
 //! \returns content of filename as list
-std::pair<std::string, std::list<std::string_view>> fromFile( const std::experimental::filesystem::path& filename );
+std::pair<std::string, std::list<std::string_view>> fromFile( const fs::path& filename );
 
 //! \returns function, which prints format in color to stdout
 template <typename ... Args>
