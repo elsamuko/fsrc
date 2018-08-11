@@ -21,12 +21,12 @@ struct Searcher {
         // search only in text files
         if( !utils::isTextFile( path ) ) { return; }
 
-        const std::list<std::string> lines = utils::fromFile( path );
+        const std::pair<std::string, std::list<std::string_view>> lines = utils::fromFile( path );
 
         size_t i = 0;
         std::list<std::function<void()>> prints;
 
-        for( const std::string& line : lines ) {
+        for( const std::string_view& line : lines.second ) {
             i++;
 
             if( line.empty() ) { continue; }

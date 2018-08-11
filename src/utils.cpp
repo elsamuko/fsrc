@@ -83,8 +83,8 @@ bool utils::isTextFile( const std::experimental::filesystem::path& filename ) {
     return !hasDoubleZero;
 }
 
-std::list<std::string> utils::fromFile( const std::experimental::filesystem::path& filename ) {
-    std::list<std::string> lines;
+std::pair<std::string, std::list<std::string_view>> utils::fromFile( const std::experimental::filesystem::path& filename ) {
+    std::pair<std::string, std::list<std::string_view>> lines;
     std::ifstream file( filename.c_str(), std::ios::binary );
 
     if( !file ) { return lines;}
@@ -93,21 +93,21 @@ std::list<std::string> utils::fromFile( const std::experimental::filesystem::pat
     size_t length = ( size_t ) file.tellg();
     file.seekg( 0, std::ios::beg );
 
-    const std::string content( length, '\0' );
-    file.read( ( char* ) content.data(), length );
-    const char* data = content.data();
+    lines.first.resize( length );
+    file.read( ( char* ) lines.first.data(), length );
+    const char* data = lines.first.data();
 
     int pos = 0;
 
     for( size_t i = 0; i < length; ++i ) {
         // just skip windows line endings
-        if( content[i] == '\r' ) {
+        if( lines.first[i] == '\r' ) {
             ++i;
         }
 
         // cut at unix line endings
-        if( content[i] == '\n' ) {
-            lines.emplace_back( data + pos, data + i );
+        if( lines.first[i] == '\n' ) {
+            lines.second.emplace_back( data + pos, i - pos );
             pos = i + 1;
         }
     }

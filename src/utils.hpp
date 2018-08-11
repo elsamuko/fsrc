@@ -28,7 +28,7 @@ std::string fileHead( const std::experimental::filesystem::path& filename, const
 bool isTextFile( const std::experimental::filesystem::path& filename );
 
 //! \returns content of filename as list
-std::list<std::string> fromFile( const std::experimental::filesystem::path& filename );
+std::pair<std::string, std::list<std::string_view>> fromFile( const std::experimental::filesystem::path& filename );
 
 //! \returns function, which prints format in color to stdout
 template <typename ... Args>
