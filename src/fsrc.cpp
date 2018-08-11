@@ -15,9 +15,11 @@ namespace rx = std;
 #define LOG( A ) std::cout << A << std::endl;
 
 struct Searcher {
-    mutable std::mutex m;
+    std::mutex m;
     rx::regex regex;
-    void search( const fs::path& path ) const {
+    std::atomic_int hits = 0;
+
+    void search( const fs::path& path ) {
 
         // search only in text files
         if( !utils::isTextFile( path ) ) { return; }
@@ -40,6 +42,7 @@ struct Searcher {
             }
 
             for( rx::cregex_iterator match = begin; match != end; ++match ) {
+                hits++;
                 prints.push_back( utils::printFunc( Color::Neutral, "%s", match->prefix().str().c_str() ) );
                 prints.push_back( utils::printFunc( Color::Red, "%s", match->str().c_str() ) );
 
@@ -61,7 +64,7 @@ struct Searcher {
     }
 };
 
-void onAllFiles( const fs::path searchpath, const Searcher& searcher ) {
+void onAllFiles( const fs::path searchpath, Searcher& searcher ) {
 
     if( !fs::exists( searchpath ) ) {
         LOG( searchpath << " does not exist" );
@@ -98,7 +101,7 @@ void onAllFiles( const fs::path searchpath, const Searcher& searcher ) {
     pool.waitForAllJobs();
 }
 
-void onGitFiles( const std::list<std::string>& filenames, const Searcher& searcher ) {
+void onGitFiles( const std::list<std::string>& filenames, Searcher& searcher ) {
     ThreadPool pool;
 
     for( const std::string& filename : filenames ) {
@@ -148,7 +151,7 @@ int main( int argc, char* argv[] ) {
 
     auto duration = std::chrono::system_clock::now() - tp;
     std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>( duration );
-    LOG( "Searched in " << ms.count() << " ms" );
+    LOG( "Found " << searcher.hits << " hits in " << ms.count() << " ms" );
 
     return 0;
 }
