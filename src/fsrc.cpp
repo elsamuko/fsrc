@@ -5,11 +5,18 @@
 #include "threadpool.hpp"
 #include "utils.hpp"
 
+#if WITH_BOOST
+#include <boost/regex.hpp>
+namespace rx = boost;
+#else
+namespace rx = std;
+#endif
+
 #define LOG( A ) std::cout << A << std::endl;
 
 struct Searcher {
     mutable std::mutex m;
-    std::regex regex;
+    rx::regex regex;
     void search( const std::experimental::filesystem::path& path ) const {
         // search only in text files
         if( !utils::isTextFile( path ) ) { return; }
@@ -22,14 +29,16 @@ struct Searcher {
         for( const std::string& line : lines ) {
             i++;
 
-            auto begin = std::sregex_iterator( line.cbegin(), line.cend(), regex );
-            auto end   = std::sregex_iterator();
+            if( line.empty() ) { continue; }
+
+            auto begin = rx::cregex_iterator( &line.front(), &line.back(), regex );
+            auto end   = rx::cregex_iterator();
 
             if( std::distance( begin, end ) > 0 ) {
                 prints.push_back( utils::printFunc( Color::Blue, "\nL%4i : ", i ) );
             }
 
-            for( std::sregex_iterator match = begin; match != end; ++match ) {
+            for( rx::cregex_iterator match = begin; match != end; ++match ) {
                 prints.push_back( utils::printFunc( Color::Neutral, "%s", match->prefix().str().c_str() ) );
                 prints.push_back( utils::printFunc( Color::Red, "%s", match->str().c_str() ) );
 
@@ -116,7 +125,7 @@ int main( int argc, char* argv[] ) {
 
     try {
         searcher.regex = argv[1];
-    } catch( const std::regex_error& e ) {
+    } catch( const rx::regex_error& e ) {
         LOG( "Invalid regex: " << e.what() );
         return -1;
     }
