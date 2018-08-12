@@ -85,18 +85,22 @@ void onAllFiles( const fs::path searchpath, Searcher& searcher ) {
     while( start != end ) {
 
         fs::path path = start->path();
+        fs::file_status status = start.status();
 
-        if( fs::is_directory( path ) &&
-                ( path.string().find( ".git" ) != std::string::npos ) ) {
+        if( fs::is_directory( status ) && ( path.string().find( "/.git" ) != std::string::npos ) ) {
             start.disable_recursion_pending();
             start++;
-            path = start->path();
-                searcher.files++;
+            status = start.status();
         }
 
-        pool.add( [path, &searcher] {
-            searcher.search( path );
-        } );
+        if( fs::is_regular_file( status ) ) {
+            path = start->path();
+            pool.add( [path, &searcher] {
+                searcher.files++;
+                searcher.search( path );
+            } );
+        }
+
         start++;
     }
 
