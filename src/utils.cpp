@@ -16,6 +16,7 @@ const std::map<Color, WORD> colors = {
     {Color::Blue,    FOREGROUND_BLUE},
 };
 #else
+#include <dirent.h>
 const std::map<Color, std::string> colors = {
     {Color::Red,     "\033[1;31m"},
     {Color::Green,   "\033[1;32m"},
@@ -116,3 +117,26 @@ std::pair<std::string, std::list<std::string_view>> utils::fromFile( const fs::p
 
     return lines;
 }
+
+#if !WIN32
+void utils::recurseDirUnix( const std::string& filename, const std::function<void( const std::string& filename )> callback ) {
+    DIR* dir = opendir( filename.c_str() );
+    struct dirent* dp = nullptr;
+
+    while( ( dp = readdir( dir ) ) != NULL ) {
+        if( !strcmp( dp->d_name, "." ) ) { continue; }
+
+        if( !strcmp( dp->d_name, ".." ) ) { continue; }
+
+        if( !strcmp( dp->d_name, ".git" ) ) { continue; }
+
+        if( dp->d_type == DT_REG ) { callback( filename + "/" + dp->d_name ); }
+
+        if( dp->d_type == DT_DIR ) { utils::recurseDirUnix( filename + "/" + dp->d_name, callback ); }
+
+        // if( dp->d_type == DT_LNK ) { continue; }
+    }
+
+    closedir( dir );
+}
+#endif

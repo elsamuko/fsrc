@@ -5,7 +5,7 @@
 #include <functional>
 
 #if WITH_BOOST
-#include <boost/filesystem.hpp>
+#include "boost/filesystem.hpp"
 namespace fs = boost::filesystem;
 namespace os = boost::system;
 #else
@@ -51,5 +51,9 @@ std::function<void()> printFunc( Color color, const char* format, Args const& ..
 
     return [color, text] { printColor( color, text ); };
 }
+
+#if !WIN32
+void recurseDirUnix( const std::string& filename, const std::function<void( const std::string& filename )> callback );
+#endif
 
 }
