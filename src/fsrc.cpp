@@ -67,19 +67,14 @@ struct Searcher {
 
 void onAllFiles( const fs::path searchpath, Searcher& searcher ) {
 
-    if( !fs::exists( searchpath ) ) {
-        LOG( searchpath << " does not exist" );
-        return;
-    }
-
-    if( !fs::is_directory( searchpath ) ) {
-        LOG( searchpath << " is not a dir" );
-        return;
-    }
-
-    auto start = fs::recursive_directory_iterator( searchpath );
+    os::error_code ec;
+    auto start = fs::recursive_directory_iterator( directory, ec );
     auto end   = fs::recursive_directory_iterator();
 
+    if( !ec ) {
+        LOG( "Cannot recurse " << directory << " : " << ec.message() );
+        return;
+    }
     ThreadPool pool;
 
     while( start != end ) {

@@ -7,9 +7,12 @@
 #if WITH_BOOST
 #include <boost/filesystem.hpp>
 namespace fs = boost::filesystem;
+namespace os = boost::system;
 #else
+#include <system_error>
 #include <experimental/filesystem>
 namespace fs = std::experimental::filesystem;
+namespace os = std;
 #endif
 
 
