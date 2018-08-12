@@ -71,7 +71,7 @@ void onAllFiles( const std::string directory, Searcher& searcher ) {
     auto start = fs::recursive_directory_iterator( directory, ec );
     auto end   = fs::recursive_directory_iterator();
 
-    if( !ec ) {
+    if( ec ) {
         LOG( "Cannot recurse " << directory << " : " << ec.message() );
         return;
     }
