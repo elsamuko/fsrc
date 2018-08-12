@@ -18,6 +18,7 @@ struct Searcher {
     std::mutex m;
     rx::regex regex;
     std::atomic_int hits = 0;
+    std::atomic_int files = 0;
 
     void search( const fs::path& path ) {
 
@@ -90,6 +91,7 @@ void onAllFiles( const fs::path searchpath, Searcher& searcher ) {
             start.disable_recursion_pending();
             start++;
             path = start->path();
+                searcher.files++;
         }
 
         pool.add( [path, &searcher] {
@@ -151,7 +153,7 @@ int main( int argc, char* argv[] ) {
 
     auto duration = std::chrono::system_clock::now() - tp;
     std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>( duration );
-    LOG( "Found " << searcher.hits << " hits in " << ms.count() << " ms" );
+    LOG( "Found " << searcher.hits << " hits in " << searcher.files << " files in " << ms.count() << " ms" );
 
     return 0;
 }
