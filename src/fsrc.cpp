@@ -20,6 +20,7 @@ struct Searcher {
     rx::regex regex;
     std::atomic_int hits = 0;
     std::atomic_int files = 0;
+    std::atomic_int filesMatched = 0;
 
     void search( const fs::path& path ) {
 
@@ -55,6 +56,7 @@ struct Searcher {
         }
 
         if( !prints.empty() ) {
+            filesMatched++;
             prints.push_front( utils::printFunc( Color::Green, "%s", path.string().c_str() ) );
             prints.push_back( utils::printFunc( Color::Neutral, "%s", "\n\n" ) );
             m.lock();
@@ -173,7 +175,9 @@ int main( int argc, char* argv[] ) {
 
     auto duration = std::chrono::system_clock::now() - tp;
     std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>( duration );
-    LOG( "Found " << searcher.hits << " hits in " << searcher.files << " files in " << ms.count() << " ms" );
+    LOG( "Found " << searcher.hits << " hits in "
+         << searcher.filesMatched << "/" << searcher.files
+         << " files in " << ms.count() << " ms" );
 
     return 0;
 }
