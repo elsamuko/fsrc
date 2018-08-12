@@ -1,6 +1,7 @@
 CONFIG -= qt
 CONFIG += c++17
 CONFIG += console
+CONFIG += static
 
 MAIN_DIR =..
 DESTDIR=$${MAIN_DIR} # to test on itself
