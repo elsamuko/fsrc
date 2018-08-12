@@ -63,7 +63,7 @@ std::list<std::string> utils::run( const std::string& command ) {
 }
 
 std::string utils::fileHead( const fs::path& filename, const size_t count ) {
-    std::ifstream file( filename.c_str(), std::ios::binary );
+    std::ifstream file( filename.c_str(), std::ios::binary | std::ios::in );
     file.seekg( 0, std::ios::end );
     size_t length = ( size_t ) file.tellg();
     file.seekg( 0, std::ios::beg );
@@ -85,7 +85,7 @@ bool utils::isTextFile( const fs::path& filename ) {
 
 std::pair<std::string, std::list<std::string_view>> utils::fromFile( const fs::path& filename ) {
     std::pair<std::string, std::list<std::string_view>> lines;
-    std::ifstream file( filename.c_str(), std::ios::binary );
+    std::ifstream file( filename.c_str(), std::ios::binary | std::ios::in );
 
     if( !file ) { return lines;}
 
