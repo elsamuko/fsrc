@@ -65,7 +65,7 @@ struct Searcher {
     }
 };
 
-void onAllFiles( const fs::path searchpath, Searcher& searcher ) {
+void onAllFiles( const std::string directory, Searcher& searcher ) {
 
     os::error_code ec;
     auto start = fs::recursive_directory_iterator( directory, ec );
@@ -75,6 +75,7 @@ void onAllFiles( const fs::path searchpath, Searcher& searcher ) {
         LOG( "Cannot recurse " << directory << " : " << ec.message() );
         return;
     }
+
     ThreadPool pool;
 
     while( start != end ) {
@@ -131,7 +132,7 @@ int main( int argc, char* argv[] ) {
         return 0;
     }
 
-    fs::path searchpath = ".";
+    std::string directory = ".";
     const std::string term = argv[1];
     auto tp = std::chrono::system_clock::now();
 
@@ -156,7 +157,7 @@ int main( int argc, char* argv[] ) {
         onGitFiles( gitFiles, searcher );
     } else {
         LOG( "Searching for \"" << term << "\" in folder:\n" );
-        onAllFiles( searchpath, searcher );
+        onAllFiles( directory, searcher );
     }
 
     auto duration = std::chrono::system_clock::now() - tp;
