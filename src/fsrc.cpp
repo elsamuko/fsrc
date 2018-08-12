@@ -6,7 +6,8 @@
 #include "utils.hpp"
 
 #if WITH_BOOST
-#include <boost/regex.hpp>
+#include "boost/regex.hpp"
+#include "boost/asio.hpp"
 namespace rx = boost;
 #else
 namespace rx = std;
@@ -67,6 +68,18 @@ struct Searcher {
 
 void onAllFiles( const std::string directory, Searcher& searcher ) {
 
+#if !WIN32
+    boost::asio::thread_pool pool( std::thread::hardware_concurrency() );
+
+    utils::recurseDirUnix( directory, [&pool, &searcher]( const std::string & filename ) {
+        boost::asio::post( pool, [filename, &searcher] {
+            searcher.files++;
+            searcher.search( filename );
+        } );
+    } );
+
+    pool.join();
+#else
     os::error_code ec;
     auto start = fs::recursive_directory_iterator( directory, ec );
     auto end   = fs::recursive_directory_iterator();
@@ -109,7 +122,7 @@ void onAllFiles( const std::string directory, Searcher& searcher ) {
         start++;
     }
 
-    pool.waitForAllJobs();
+#endif
 }
 
 void onGitFiles( const std::list<std::string>& filenames, Searcher& searcher ) {
@@ -121,8 +134,6 @@ void onGitFiles( const std::list<std::string>& filenames, Searcher& searcher ) {
             searcher.search( path );
         } );
     }
-
-    pool.waitForAllJobs();
 }
 
 int main( int argc, char* argv[] ) {
