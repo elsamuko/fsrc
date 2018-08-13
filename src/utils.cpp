@@ -130,9 +130,15 @@ void utils::recurseDirUnix( const std::string& filename, const std::function<voi
 
         if( !strcmp( dp->d_name, ".git" ) ) { continue; }
 
-        if( dp->d_type == DT_REG ) { callback( filename + "/" + dp->d_name ); continue; }
+        if( dp->d_type == DT_REG ) {
+            callback( filename + "/" + dp->d_name );
+            continue;
+        }
 
-        if( dp->d_type == DT_DIR ) { utils::recurseDirUnix( filename + "/" + dp->d_name, callback ); continue; }
+        if( dp->d_type == DT_DIR ) {
+            utils::recurseDirUnix( filename + "/" + dp->d_name, callback );
+            continue;
+        }
 
         // if( dp->d_type == DT_LNK ) { continue; }
     }
