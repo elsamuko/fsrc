@@ -18,5 +18,6 @@ SOURCES += $${SRC_DIR}/threadpool.cpp
 
 include( setup.pri )
 linux: include( linux.pri )
-win32: CONFIG += static
 win32: include( win.pri )
+
+include( boost.pri )
