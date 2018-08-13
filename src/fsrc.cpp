@@ -71,16 +71,27 @@ struct Searcher {
 void onAllFiles( const std::string directory, Searcher& searcher ) {
 
 #if !WIN32
+#if WITH_BOOST
     boost::asio::thread_pool pool( std::thread::hardware_concurrency() );
+#else
+    ThreadPool pool;
+#endif
 
     utils::recurseDirUnix( directory, [&pool, &searcher]( const std::string & filename ) {
+#if WITH_BOOST
         boost::asio::post( pool, [filename, &searcher] {
+#else
+        pool.add( [filename, &searcher] {
+#endif
             searcher.files++;
             searcher.search( filename );
         } );
     } );
 
+#if WITH_BOOST
     pool.join();
+#endif
+
 #else
     os::error_code ec;
     auto start = fs::recursive_directory_iterator( directory, ec );
