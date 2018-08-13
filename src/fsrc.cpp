@@ -70,13 +70,13 @@ struct Searcher {
 
 void onAllFiles( const fs::path::string_type directory, Searcher& searcher ) {
 
-#if !WIN32
 #if WITH_BOOST
     boost::asio::thread_pool pool( std::thread::hardware_concurrency() );
 #else
     ThreadPool pool;
 #endif
 
+#if !WIN32
     utils::recurseDirUnix( directory, [&pool, &searcher]( const std::string & filename ) {
 #if WITH_BOOST
         boost::asio::post( pool, [filename, &searcher] {
@@ -88,20 +88,22 @@ void onAllFiles( const fs::path::string_type directory, Searcher& searcher ) {
         } );
     } );
 
-#if WITH_BOOST
-    pool.join();
-#endif
-
 #else
-    ThreadPool pool;
 
     utils::recurseDirWin( directory, [&pool, &searcher]( const std::wstring & filename ) {
+#if WITH_BOOST
+        boost::asio::post( pool, [filename, &searcher] {
+#else
         pool.add( [filename, &searcher] {
+#endif
             searcher.files++;
             searcher.search( filename );
         } );
     } );
+#endif
 
+#if WITH_BOOST
+    pool.join();
 #endif
 }
 
