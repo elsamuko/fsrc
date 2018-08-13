@@ -23,6 +23,20 @@ enum class Color {
     Neutral
 };
 
+#if WIN32
+namespace std {
+struct string_view {
+    const char* data = nullptr;
+    size_t size = 0;
+    string_view( const char* data = nullptr, size_t size = 0 ) :
+        data( data ), size( size ) {}
+    bool empty() const { return size == 0 ; }
+    const char& front() const { return data[0]; }
+    const char& back() const { return data[size - 1]; }
+};
+}
+#endif
+
 namespace utils {
 
 //! prints text in color to stdout
