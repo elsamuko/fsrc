@@ -42,7 +42,7 @@ void utils::printColor( Color color, const std::string& text ) {
 }
 
 std::list<std::string> utils::run( const std::string& command ) {
-    std::string buffer( MAX_PATH, '\0' );
+    std::string buffer( 1024, '\0' );
     std::list<std::string> result;
 
     FILE* pipe = popen( command.c_str(), "r" );
@@ -149,8 +149,7 @@ void utils::recurseDirUnix( const std::string& filename, const std::function<voi
 
     closedir( dir );
 }
-#endif
-
+#else
 void utils::recurseDirWin( const std::wstring& filename, const std::function<void ( const std::wstring& filename, const size_t filesize )>& callback ) {
     WIN32_FIND_DATAW data = {};
 
@@ -178,3 +177,4 @@ void utils::recurseDirWin( const std::wstring& filename, const std::function<voi
 
     FindClose( file );
 }
+#endif
