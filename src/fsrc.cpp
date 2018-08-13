@@ -37,7 +37,7 @@ struct Searcher {
 
             if( line.empty() ) { continue; }
 
-            auto begin = rx::cregex_iterator( &line.front(), &line.back(), regex );
+            auto begin = rx::cregex_iterator( &line.front(), 1 + &line.back(), regex );
             auto end   = rx::cregex_iterator();
 
             if( std::distance( begin, end ) > 0 ) {
