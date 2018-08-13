@@ -146,3 +146,31 @@ void utils::recurseDirUnix( const std::string& filename, const std::function<voi
     closedir( dir );
 }
 #endif
+
+void utils::recurseDirWin( const std::wstring& filename, const std::function<void ( const std::wstring& )> callback ) {
+    WIN32_FIND_DATAW data = {};
+
+    std::wstring withGlob = filename + L"\\*";
+    HANDLE file = FindFirstFileExW( withGlob.c_str(), FindExInfoBasic, &data, FindExSearchNameMatch, nullptr, 0 );
+
+    if( !file ) { return; }
+
+    while( FindNextFileW( file, &data ) ) {
+
+        if( !wcscmp( data.cFileName, L".." ) ) { continue; }
+
+        if( !wcscmp( data.cFileName, L".git" ) ) { continue; }
+
+        if( data.dwFileAttributes == FILE_ATTRIBUTE_ARCHIVE ) {
+            callback( filename + L"\\" + data.cFileName );
+            continue;
+        }
+
+        if( data.dwFileAttributes == FILE_ATTRIBUTE_DIRECTORY ) {
+            recurseDirWin( filename + L"\\" + data.cFileName, callback );
+            continue;
+        }
+    }
+
+    FindClose( file );
+}
