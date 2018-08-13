@@ -41,24 +41,24 @@ struct Searcher {
             auto end   = rx::cregex_iterator();
 
             if( std::distance( begin, end ) > 0 ) {
-                prints.push_back( utils::printFunc( Color::Blue, "\nL%4i : ", i ) );
+                prints.emplace_back( utils::printFunc( Color::Blue, "\nL%4i : ", i ) );
             }
 
             for( rx::cregex_iterator match = begin; match != end; ++match ) {
                 hits++;
-                prints.push_back( utils::printFunc( Color::Neutral, "%s", match->prefix().str().c_str() ) );
-                prints.push_back( utils::printFunc( Color::Red, "%s", match->str().c_str() ) );
+                prints.emplace_back( utils::printFunc( Color::Neutral, "%s", match->prefix().str().c_str() ) );
+                prints.emplace_back( utils::printFunc( Color::Red, "%s", match->str().c_str() ) );
 
                 if( std::distance( match, end ) == 1 ) {
-                    prints.push_back( utils::printFunc( Color::Neutral, "%s", match->suffix().str().c_str() ) );
+                    prints.emplace_back( utils::printFunc( Color::Neutral, "%s", match->suffix().str().c_str() ) );
                 }
             }
         }
 
         if( !prints.empty() ) {
             filesMatched++;
-            prints.push_front( utils::printFunc( Color::Green, "%s", path.string().c_str() ) );
-            prints.push_back( utils::printFunc( Color::Neutral, "%s", "\n\n" ) );
+            prints.emplace_front( utils::printFunc( Color::Green, "%s", path.string().c_str() ) );
+            prints.emplace_back( utils::printFunc( Color::Neutral, "%s", "\n\n" ) );
             m.lock();
 
             for( std::function<void()> func : prints ) { func(); }

@@ -67,9 +67,9 @@ std::function<void()> printFunc( Color color, const char* format, Args const& ..
 }
 
 #if !WIN32
-void recurseDirUnix( const std::string& filename, const std::function<void( const std::string& filename )> callback );
+void recurseDirUnix( const std::string& filename, const std::function<void( const std::string& filename )>& callback );
 #else
-void recurseDirWin( const std::wstring& filename, const std::function<void( const std::wstring& filename )> callback );
+void recurseDirWin( const std::wstring& filename, const std::function<void( const std::wstring& )>& callback );
 #endif
 
 }

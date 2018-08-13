@@ -42,7 +42,7 @@ void utils::printColor( Color color, const std::string& text ) {
 }
 
 std::list<std::string> utils::run( const std::string& command ) {
-    std::string buffer( 100, '\0' );
+    std::string buffer( MAX_PATH, '\0' );
     std::list<std::string> result;
 
     FILE* pipe = popen( command.c_str(), "r" );
@@ -51,7 +51,7 @@ std::list<std::string> utils::run( const std::string& command ) {
 
     while( !feof( pipe ) ) {
         if( fgets( ( char* )buffer.data(), 101, pipe ) != NULL ) {
-            result.push_back( buffer.c_str() );
+            result.emplace_back( buffer.c_str() );
         }
     }
 
@@ -119,7 +119,7 @@ std::pair<std::string, std::list<std::string_view>> utils::fromFile( const fs::p
 }
 
 #if !WIN32
-void utils::recurseDirUnix( const std::string& filename, const std::function<void( const std::string& filename )> callback ) {
+void utils::recurseDirUnix( const std::string& filename, const std::function<void( const std::string& filename )>& callback ) {
     DIR* dir = opendir( filename.c_str() );
     struct dirent* dp = nullptr;
 
@@ -147,7 +147,7 @@ void utils::recurseDirUnix( const std::string& filename, const std::function<voi
 }
 #endif
 
-void utils::recurseDirWin( const std::wstring& filename, const std::function<void ( const std::wstring& )> callback ) {
+void utils::recurseDirWin( const std::wstring& filename, const std::function<void ( const std::wstring& )>& callback ) {
     WIN32_FIND_DATAW data = {};
 
     std::wstring withGlob = filename + L"\\*";
