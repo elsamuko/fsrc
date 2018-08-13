@@ -144,6 +144,7 @@ void onGitFiles( const std::list<std::string>& filenames, Searcher& searcher ) {
     for( const std::string& filename : filenames ) {
         fs::path path( filename );
         pool.add( [path, &searcher] {
+            searcher.files++;
             searcher.search( path );
         } );
     }
