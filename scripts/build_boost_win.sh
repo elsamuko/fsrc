@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-OS=linux
+OS=win
 PROJECT=boost
 VERSION="1.68.0"
 VERSION_DL="${VERSION//./_}"
@@ -42,26 +42,25 @@ function doUnzip {
 
 function doBuild {
     cd "$BUILD_DIR"
-    
-    ./bootstrap.sh
+
+    cmd /c bootstrap.bat
 
     # debug
-    ./b2 -j 8 --stagedir=stage_debug toolset=gcc variant=debug \
-        link=static threading=multi address-model=64 \
-        cxxflags="-std=c++17"
+    ./b2.exe -j 8 --stagedir=stage_debug   toolset=msvc-14.0 variant=debug   \
+        link=static runtime-link=static threading=multi address-model=64
 
     # release
-    ./b2 -j 8 --stagedir=stage_release toolset=gcc variant=release \
-        link=static threading=multi address-model=64 \
-        cxxflags="-std=c++17 -msse2 -oFast" linkflags="-flto"
+    ./b2.exe -j 8 --stagedir=stage_release toolset=msvc-14.0 variant=release \
+        link=static runtime-link=static threading=multi address-model=64 \
+        cxxflags="/Qpar /Ox /Ob2 /Oi /Ot /Oy /GT /GL" linkflags="/LTCG /OPT:REF /OPT:ICF"
 }
 
 function doCopy {
     mkdir -p "$TARGET_DIR/lib/$OS/debug"
     mkdir -p "$TARGET_DIR/lib/$OS/release"
     mkdir -p "$TARGET_DIR/include"
-    cp -r "$BUILD_DIR/stage_debug/lib/"*.a "$TARGET_DIR/lib/$OS/debug/"
-    cp -r "$BUILD_DIR/stage_release/lib/"*.a "$TARGET_DIR/lib/$OS/release/"
+    cp -r "$BUILD_DIR/stage_debug/lib/"*.lib "$TARGET_DIR/lib/$OS/debug/"
+    cp -r "$BUILD_DIR/stage_release/lib/"*.lib "$TARGET_DIR/lib/$OS/release/"
     cp -r "$BUILD_DIR/boost/"* "$TARGET_DIR/include/boost"
 }
 
