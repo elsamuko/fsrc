@@ -22,12 +22,12 @@ struct Searcher {
     std::atomic_int files = 0;
     std::atomic_int filesMatched = 0;
 
-    void search( const fs::path& path ) {
+    void search( const fs::path& path, const size_t filesize = 0 ) {
 
         // search only in text files
         if( !utils::isTextFile( path ) ) { return; }
 
-        const std::pair<std::string, std::list<std::string_view>> lines = utils::fromFile( path );
+        const std::pair<std::string, std::list<std::string_view>> lines = utils::fromFile( path, filesize );
 
         size_t i = 0;
         std::list<std::function<void()>> prints;
@@ -90,14 +90,14 @@ void onAllFiles( const fs::path::string_type directory, Searcher& searcher ) {
 
 #else
 
-    utils::recurseDirWin( directory, [&pool, &searcher]( const std::wstring & filename ) {
+    utils::recurseDirWin( directory, [&pool, &searcher]( const std::wstring & filename, const size_t filesize ) {
 #if WITH_BOOST
-        boost::asio::post( pool, [filename, &searcher] {
+        boost::asio::post( pool, [filename, filesize, &searcher] {
 #else
-        pool.add( [filename, &searcher] {
+        pool.add( [filename, filesize, &searcher] {
 #endif
             searcher.files++;
-            searcher.search( filename );
+            searcher.search( filename, filesize );
         } );
     } );
 #endif

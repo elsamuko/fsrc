@@ -84,15 +84,19 @@ bool utils::isTextFile( const fs::path& filename ) {
     return !hasDoubleZero;
 }
 
-std::pair<std::string, std::list<std::string_view>> utils::fromFile( const fs::path& filename ) {
+std::pair<std::string, std::list<std::string_view>> utils::fromFile( const fs::path& filename, const size_t filesize ) {
     std::pair<std::string, std::list<std::string_view>> lines;
     std::ifstream file( filename.c_str(), std::ios::binary | std::ios::in );
 
     if( !file ) { return lines;}
 
-    file.seekg( 0, std::ios::end );
-    size_t length = ( size_t ) file.tellg();
-    file.seekg( 0, std::ios::beg );
+    size_t length = filesize;
+
+    if( !filesize ) {
+        file.seekg( 0, std::ios::end );
+        length = ( size_t ) file.tellg();
+        file.seekg( 0, std::ios::beg );
+    }
 
     if( !length ) { return lines;}
 
@@ -147,7 +151,7 @@ void utils::recurseDirUnix( const std::string& filename, const std::function<voi
 }
 #endif
 
-void utils::recurseDirWin( const std::wstring& filename, const std::function<void ( const std::wstring& )>& callback ) {
+void utils::recurseDirWin( const std::wstring& filename, const std::function<void ( const std::wstring& filename, const size_t filesize )>& callback ) {
     WIN32_FIND_DATAW data = {};
 
     std::wstring withGlob = filename + L"\\*";
@@ -162,7 +166,7 @@ void utils::recurseDirWin( const std::wstring& filename, const std::function<voi
         if( !wcscmp( data.cFileName, L".git" ) ) { continue; }
 
         if( data.dwFileAttributes == FILE_ATTRIBUTE_ARCHIVE ) {
-            callback( filename + L"\\" + data.cFileName );
+            callback( filename + L"\\" + data.cFileName, data.nFileSizeLow );
             continue;
         }
 

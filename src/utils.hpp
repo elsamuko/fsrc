@@ -53,7 +53,7 @@ std::string fileHead( const fs::path& filename, const size_t count );
 bool isTextFile( const fs::path& filename );
 
 //! \returns content of filename as list
-std::pair<std::string, std::list<std::string_view>> fromFile( const fs::path& filename );
+std::pair<std::string, std::list<std::string_view>> fromFile( const fs::path& filename, const size_t filesize = 0 );
 
 //! \returns function, which prints format in color to stdout
 template <typename ... Args>
@@ -69,7 +69,7 @@ std::function<void()> printFunc( Color color, const char* format, Args const& ..
 #if !WIN32
 void recurseDirUnix( const std::string& filename, const std::function<void( const std::string& filename )>& callback );
 #else
-void recurseDirWin( const std::wstring& filename, const std::function<void( const std::wstring& )>& callback );
+void recurseDirWin( const std::wstring& filename, const std::function<void( const std::wstring& filename, const size_t filesize )>& callback );
 #endif
 
 }
