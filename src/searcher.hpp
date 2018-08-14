@@ -29,9 +29,9 @@ struct Searcher {
     std::mutex m;
     rx::regex regex;
     SearchOptions opts;
-    std::atomic_int hits = 0;
-    std::atomic_int files = 0;
-    std::atomic_int filesMatched = 0;
+    std::atomic_int hits = {0};
+    std::atomic_int files = {0};
+    std::atomic_int filesMatched = {0};
 
     Searcher( const SearchOptions& opts ) : opts( opts ) {
         try {
