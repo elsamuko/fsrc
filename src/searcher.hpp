@@ -3,13 +3,8 @@
 #include <mutex>
 #include <atomic>
 
-#if WITH_BOOST
 #include "boost/regex.hpp"
 namespace rx = boost;
-#else
-#include <regex>
-namespace rx = std;
-#endif
 
 #if WIN32
 #include <io.h>

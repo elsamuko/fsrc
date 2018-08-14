@@ -1,61 +1,44 @@
-#include "threadpool.hpp"
 #include "searcher.hpp"
 #include "utils.hpp"
 
-#if WITH_BOOST
 #include "boost/asio.hpp"
-#endif
 
 void onAllFiles( const fs::path::string_type directory, Searcher& searcher ) {
 
-#if WITH_BOOST
     // max 8 threads, else start/stop needs longer than the actual work
     boost::asio::thread_pool pool( std::min( std::thread::hardware_concurrency(), 8u ) );
-#else
-    ThreadPool pool;
-#endif
 
 #if !WIN32
     utils::recurseDirUnix( directory, [&pool, &searcher]( const std::string & filename ) {
-#if WITH_BOOST
         boost::asio::post( pool, [filename, &searcher] {
-#else
-        pool.add( [filename, &searcher] {
-#endif
             searcher.files++;
             searcher.search( filename );
         } );
     } );
-
 #else
-
     utils::recurseDirWin( directory, [&pool, &searcher]( const std::wstring & filename, const size_t filesize ) {
-#if WITH_BOOST
         boost::asio::post( pool, [filename, filesize, &searcher] {
-#else
-        pool.add( [filename, filesize, &searcher] {
-#endif
             searcher.files++;
             searcher.search( filename, filesize );
         } );
     } );
 #endif
 
-#if WITH_BOOST
     pool.join();
-#endif
 }
 
 void onGitFiles( const std::list<std::string>& filenames, Searcher& searcher ) {
-    ThreadPool pool;
+    // max 8 threads, else start/stop needs longer than the actual work
+    boost::asio::thread_pool pool( std::min( std::thread::hardware_concurrency(), 8u ) );
 
     for( const std::string& filename : filenames ) {
-        fs::path path( filename );
-        pool.add( [path, &searcher] {
+        boost::asio::post( pool, [filename, &searcher] {
             searcher.files++;
-            searcher.search( path );
+            searcher.search( filename );
         } );
     }
+
+    pool.join();
 }
 
 int main( int argc, char* argv[] ) {
