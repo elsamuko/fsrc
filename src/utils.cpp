@@ -18,7 +18,7 @@ const std::map<Color, WORD> colors = {
 };
 #else
 #include <dirent.h>
-const std::map<Color, std::string> colors = {
+const std::map<Color, const char*> colors = {
     {Color::Red,     "\033[1;31m"},
     {Color::Green,   "\033[1;32m"},
     {Color::Blue,    "\033[1;34m"},
@@ -27,17 +27,20 @@ const std::map<Color, std::string> colors = {
 
 void utils::printColor( Color color, const std::string& text ) {
     if( color == Color::Neutral ) {
-        std::cout << text << std::flush;
+        fputs( text.c_str(), stdout );
     } else {
 #if WIN32
-        HANDLE h = ::GetStdHandle( STD_OUTPUT_HANDLE );
-        CONSOLE_SCREEN_BUFFER_INFO csbiInfo = {};
-        ::GetConsoleScreenBufferInfo( h, &csbiInfo );
+        const static HANDLE h = ::GetStdHandle( STD_OUTPUT_HANDLE );
+        const static WORD attributes = []( const HANDLE h ) {
+            CONSOLE_SCREEN_BUFFER_INFO csbiInfo = {};
+            ::GetConsoleScreenBufferInfo( h, &csbiInfo );
+            return csbiInfo.wAttributes;
+        }( h );
         ::SetConsoleTextAttribute( h, colors.at( color ) | FOREGROUND_INTENSITY );
-        std::cout << text << std::flush;
-        ::SetConsoleTextAttribute( h, csbiInfo.wAttributes );
+        fputs( text.c_str(), stdout );
+        ::SetConsoleTextAttribute( h, attributes );
 #else
-        std::cout << colors.at( color ) << text << "\033[0m" << std::flush;
+        printf( "%s%s\033[0m", colors.at( color ), text.c_str() );
 #endif
     }
 }
