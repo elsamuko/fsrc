@@ -1,6 +1,20 @@
 #!/usr/bin/env bash
 
-OS=linux
+case $(uname) in
+    Linux)
+        OS=linux
+        ;;
+    Darwin)
+        OS=mac
+        ;;
+    CYGWIN*)
+        OS=win
+        ;;
+    *)
+        echo "Unknown OS" && exit 1
+        ;;
+esac
+
 PROJECT=boost
 VERSION="1.68.0"
 VERSION_DL="${VERSION//./_}"
@@ -26,7 +40,6 @@ function doPrepare {
         rm -rf "$TARGET_DIR"
     fi
     mkdir -p "$PROJECT_DIR"
-    mkdir -p "$TARGET_DIR/include/boost"
     mkdir -p "$SRC_DIR"
 }
 
@@ -40,7 +53,38 @@ function doUnzip {
     tar xzf "$DOWNLOAD" -C "$SRC_DIR"
 }
 
-function doBuild {
+function macBuild {
+    cd "$BUILD_DIR"
+
+    ./bootstrap.sh
+
+    # debug
+    ./b2 -j 8 --stagedir=stage_debug toolset=clang variant=debug \
+        link=static threading=multi address-model=64 \
+        cxxflags="-std=c++17 -stdlib=libc++ -mmacosx-version-min=10.10" linkflags="-lc++"
+
+    # release
+    ./b2 -j 8 --stagedir=stage_release toolset=clang variant=release \
+        link=static threading=multi address-model=64 \
+        cxxflags="-std=c++17 -msse2 -oFast -stdlib=libc++ -mmacosx-version-min=10.10" linkflags="-lc++ -flto"
+}
+
+function winBuild {
+    cd "$BUILD_DIR"
+
+    cmd /c bootstrap.bat
+
+    # debug
+    ./b2.exe -j 8 --stagedir=stage_debug   toolset=msvc-14.0 variant=debug   \
+        link=static runtime-link=static threading=multi address-model=64
+
+    # release
+    ./b2.exe -j 8 --stagedir=stage_release toolset=msvc-14.0 variant=release \
+        link=static runtime-link=static threading=multi address-model=64 \
+        cxxflags="/Qpar /Ox /Ob2 /Oi /Ot /Oy /GT /GL" linkflags="/LTCG /OPT:REF /OPT:ICF"
+}
+
+function linuxBuild {
     cd "$BUILD_DIR"
     
     ./bootstrap.sh
@@ -59,9 +103,9 @@ function doBuild {
 function doCopy {
     mkdir -p "$TARGET_DIR/lib/$OS/debug"
     mkdir -p "$TARGET_DIR/lib/$OS/release"
-    mkdir -p "$TARGET_DIR/include"
-    cp -r "$BUILD_DIR/stage_debug/lib/"*.a "$TARGET_DIR/lib/$OS/debug/"
-    cp -r "$BUILD_DIR/stage_release/lib/"*.a "$TARGET_DIR/lib/$OS/release/"
+    mkdir -p "$TARGET_DIR/include/boost"
+    cp -r "$BUILD_DIR/stage_debug/lib/"*.* "$TARGET_DIR/lib/$OS/debug/"
+    cp -r "$BUILD_DIR/stage_release/lib/"*.* "$TARGET_DIR/lib/$OS/release/"
     cp -r "$BUILD_DIR/boost/"* "$TARGET_DIR/include/boost"
 }
 
@@ -76,7 +120,7 @@ echo "Unzip"
 doUnzip | indent
 
 echo "Build"
-doBuild 2>&1 | indent
+"${OS}Build" 2>&1 | indent
 
 echo "Copy"
 doCopy | indent
