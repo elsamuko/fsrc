@@ -5,7 +5,7 @@ This tool is meant to search large codebases for text snippets. It uses a thread
 ## Usage
 ```
 user@home:/usr/include/boost$ fsrc filesystem
-Searching for "filesystem":
+Searching for "filesystem" in folder:
 
 ...
 ./boost/spirit/home/x3/support/utility/testing.hpp
@@ -15,26 +15,21 @@ L  16 :     namespace fs = boost::filesystem;
 L 205 :         catch (const fs::filesystem_error& ex)
 L 215 :         boost::filesystem::ifstream file(p);
 
-Searched in 148 ms
+Found 449 hits in 68/12520 files in 320 ms
 user@home:/usr/include/boost$
 ```
+
 ## Building
 
 ### Windows
-You need VS2015 or newer. Add the source files from the src folder in a solution, compile, done.
-For more comfort, install a current Qt distribution and open fsrc.pro in the qmake folder.
+You need VS2015 and cygwin with curl.
 
 ### Linux
-You need g++8 or newer, then run this in the source folder  
-```
-g++ -std=c++17 -O2 -msse2 -flto *.cpp -o fsrc -lstdc++fs -lpthread
-```  
-Or install Qt and open fsrc.pro in the qmake folder.
+You need g++ 6 or newer.
 
 ### macOS
-You need clang++ with C++17 support, the one coming with XCode (9.x) doesn't work yet. You can download prebuild clang++ binaries here:  
-http://releases.llvm.org/download.html  
-Download the the latest distribution and extract it to /opt/llvm, then go into the src folder and run  
-```
-/opt/llvm/bin/clang++ -std=c++17 -O2 -msse2 -flto *.cpp -o fsrc -L/opt/llvm/lib -lc++experimental -lpthread
-```  
+You need XCode 8 or later.
+
+# General
+Run `./script/build_boost.sh` to build boost deps.  
+You need Qt/qmake to open the fscr.pro build file.
