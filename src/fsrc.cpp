@@ -139,14 +139,13 @@ int main( int argc, char* argv[] ) {
         return -1;
     }
 
+    if( fs::exists( ".git" ) ) {
 #if WIN32
-    std::string nullDevice = "NUL";
+        std::string nullDevice = "NUL";
 #else
-    std::string nullDevice = "/dev/null";
+        std::string nullDevice = "/dev/null";
 #endif
-    std::list<std::string> gitFiles = utils::run( "git ls-files 2> " + nullDevice );
-
-    if( !gitFiles.empty() ) {
+        std::list<std::string> gitFiles = utils::run( "git ls-files 2> " + nullDevice );
         LOG( "Searching for \"" << term << "\" in repo:\n" );
         onGitFiles( gitFiles, searcher );
     } else {
