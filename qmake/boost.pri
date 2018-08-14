@@ -8,6 +8,7 @@ linux {
     LIBS += $${BOOST_LIB_DIR}/libboost_regex.a
     LIBS += $${BOOST_LIB_DIR}/libboost_filesystem.a
     LIBS += $${BOOST_LIB_DIR}/libboost_system.a
+    LIBS += $${BOOST_LIB_DIR}/libboost_program_options.a
 }
 
 win32 {

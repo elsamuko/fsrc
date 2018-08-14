@@ -3,20 +3,20 @@
 
 #include "boost/asio.hpp"
 
-void onAllFiles( const fs::path::string_type directory, Searcher& searcher ) {
+void onAllFiles( Searcher& searcher ) {
 
     // max 8 threads, else start/stop needs longer than the actual work
     boost::asio::thread_pool pool( std::min( std::thread::hardware_concurrency(), 8u ) );
 
 #if !WIN32
-    utils::recurseDirUnix( directory, [&pool, &searcher]( const std::string & filename ) {
+    utils::recurseDirUnix( searcher.opts.path.native(), [&pool, &searcher]( const std::string & filename ) {
         boost::asio::post( pool, [filename, &searcher] {
             searcher.files++;
             searcher.search( filename );
         } );
     } );
 #else
-    utils::recurseDirWin( directory, [&pool, &searcher]( const std::wstring & filename, const size_t filesize ) {
+    utils::recurseDirWin( searcher.opts.path.native(), [&pool, &searcher]( const std::wstring & filename, const size_t filesize ) {
         boost::asio::post( pool, [filename, filesize, &searcher] {
             searcher.files++;
             searcher.search( filename, filesize );
@@ -41,25 +41,16 @@ void onGitFiles( const std::list<std::string>& filenames, Searcher& searcher ) {
     pool.join();
 }
 
+
 int main( int argc, char* argv[] ) {
 
-    if( argc != 2 ) {
-        LOG( "Usage: fscr <term>" );
-        return 0;
-    }
+    SearchOptions opts = SearchOptions::parseArgs( argc, argv );
 
-    fs::path::string_type directory = fs::current_path().c_str();
-    const std::string term = argv[1];
+    if( !opts ) { return -1; }
+
     auto tp = std::chrono::system_clock::now();
 
-    Searcher searcher;
-
-    try {
-        searcher.regex = argv[1];
-    } catch( const rx::regex_error& e ) {
-        LOG( "Invalid regex: " << e.what() );
-        return -1;
-    }
+    Searcher searcher( opts );
 
     if( fs::exists( ".git" ) ) {
 #if WIN32
@@ -68,11 +59,11 @@ int main( int argc, char* argv[] ) {
         std::string nullDevice = "/dev/null";
 #endif
         std::list<std::string> gitFiles = utils::run( "git ls-files 2> " + nullDevice );
-        LOG( "Searching for \"" << term << "\" in repo:\n" );
+        LOG( "Searching for \"" << searcher.opts.term << "\" in repo:\n" );
         onGitFiles( gitFiles, searcher );
     } else {
-        LOG( "Searching for \"" << term << "\" in folder:\n" );
-        onAllFiles( directory, searcher );
+        LOG( "Searching for \"" << searcher.opts.term << "\" in folder:\n" );
+        onAllFiles( searcher );
     }
 
     auto duration = std::chrono::system_clock::now() - tp;
