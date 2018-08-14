@@ -5,9 +5,10 @@
 #include <fstream>
 #include <algorithm>
 #include <cstdio>
+#include <cstring>
 
 #if WIN32
-#include "Windows.h"
+#include <Windows.h>
 #define popen _popen
 #define pclose _pclose
 const std::map<Color, WORD> colors = {

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mutex>
+#include <atomic>
 
 #if WITH_BOOST
 #include "boost/regex.hpp"

@@ -1,6 +1,6 @@
 #include "searcher.hpp"
 
-void Searcher::search( const boost::filesystem::path& path, const size_t filesize ) {
+void Searcher::search( const fs::path& path, const size_t filesize ) {
 
     // search only in text files
     if( !utils::isTextFile( path ) ) { return; }
