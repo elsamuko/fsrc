@@ -168,7 +168,7 @@ void utils::recurseDirWin( const std::wstring& filename, const std::function<voi
 
         if( !wcscmp( data.cFileName, L".git" ) ) { continue; }
 
-        if( data.dwFileAttributes == FILE_ATTRIBUTE_ARCHIVE ) {
+        if( data.dwFileAttributes & FILE_ATTRIBUTE_ARCHIVE ) {
             callback( filename + L"\\" + data.cFileName, data.nFileSizeLow );
             continue;
         }
