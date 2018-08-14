@@ -3,13 +3,13 @@
 
 case $(uname) in
     Linux)
-        BOOST_DIR="/usr/include/boost/"
+        SEARCH_DIR="/usr/include/"
         ;;
     Darwin)
-        BOOST_DIR="/usr/include/boost/"
+        SEARCH_DIR="/usr/include/"
         ;;
     CYGWIN*)
-        BOOST_DIR="C:\\ProgramData\\boost"
+        SEARCH_DIR="C:\\ProgramData\\boost"
         ;;
     *)
         echo "Unknown OS"
@@ -21,9 +21,9 @@ FSRC="$PWD/fsrc"
 
 echo
 echo "fsrc"
-(cd "$BOOST_DIR" && ($FSRC filesystem | tail -n 1))
+(cd "$SEARCH_DIR" && ($FSRC [Tt]est | tail -n 1))
 echo
 echo "rg"
-(cd "$BOOST_DIR" && (rg --stats filesystem | tail -n 3 ))
+(cd "$SEARCH_DIR" && (rg --stats [Tt]est | tail -n 3 ))
 echo
 
