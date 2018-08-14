@@ -1,5 +1,6 @@
 CONFIG -= qt
-CONFIG += c++14
+!macx: CONFIG += c++17
+macx: CONFIG += c++14
 CONFIG += console
 CONFIG -= app_bundle
 CONFIG += static
