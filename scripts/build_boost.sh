@@ -61,12 +61,12 @@ function macBuild {
     # debug
     ./b2 -j 8 --stagedir=stage_debug toolset=clang variant=debug \
         link=static threading=multi address-model=64 \
-        cxxflags="-std=c++17 -stdlib=libc++ -mmacosx-version-min=10.10" linkflags="-lc++"
+        cxxflags="-std=c++1z -stdlib=libc++ -mmacosx-version-min=10.10" linkflags="-lc++"
 
     # release
     ./b2 -j 8 --stagedir=stage_release toolset=clang variant=release \
         link=static threading=multi address-model=64 \
-        cxxflags="-std=c++17 -msse2 -oFast -stdlib=libc++ -mmacosx-version-min=10.10" linkflags="-lc++ -flto"
+        cxxflags="-std=c++1z -msse2 -oFast -stdlib=libc++ -mmacosx-version-min=10.10" linkflags="-lc++ -flto"
 }
 
 function winBuild {
