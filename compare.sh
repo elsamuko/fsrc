@@ -9,21 +9,20 @@ case $(uname) in
         SEARCH_DIR="/usr/include/"
         ;;
     CYGWIN*)
-        SEARCH_DIR="C:\\ProgramData\\boost"
+        SEARCH_DIR="$VS140COMNTOOLS..\\..\\VC\\include"
         ;;
     *)
         echo "Unknown OS"
         ;;
 esac
 
-
-FSRC="$PWD/fsrc"
+TERM="[Tt]est"
+echo "Searching in $SEARCH_DIR for $TERM" 
 
 echo
 echo "fsrc"
-(cd "$SEARCH_DIR" && ($FSRC [Tt]est | tail -n 1))
+./fsrc -t "$TERM" -d "$SEARCH_DIR" | tail -n 1
 echo
 echo "rg"
-(cd "$SEARCH_DIR" && (rg --stats [Tt]est | tail -n 3 ))
+rg --stats -e "$TERM" "$SEARCH_DIR" | tail -n 3
 echo
-
