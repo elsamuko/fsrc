@@ -9,7 +9,8 @@
 void onAllFiles( const fs::path::string_type directory, Searcher& searcher ) {
 
 #if WITH_BOOST
-    boost::asio::thread_pool pool( std::thread::hardware_concurrency() );
+    // max 8 threads, else start/stop needs longer than the actual work
+    boost::asio::thread_pool pool( std::min( std::thread::hardware_concurrency(), 8u ) );
 #else
     ThreadPool pool;
 #endif
