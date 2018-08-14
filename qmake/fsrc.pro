@@ -1,6 +1,7 @@
 CONFIG -= qt
-CONFIG += c++17
+CONFIG += c++14
 CONFIG += console
+CONFIG -= app_bundle
 CONFIG += static
 
 MAIN_DIR =..
@@ -19,5 +20,6 @@ SOURCES += $${SRC_DIR}/searcher.cpp
 include( setup.pri )
 linux: include( linux.pri )
 win32: include( win.pri )
+macx:  include( mac.pri )
 
 include( boost.pri )
