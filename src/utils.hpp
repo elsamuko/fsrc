@@ -2,6 +2,7 @@
 
 #include <list>
 #include <string>
+#include <iostream>
 #include <functional>
 
 #if WITH_BOOST
@@ -15,6 +16,7 @@ namespace fs = std::experimental::filesystem;
 namespace os = std;
 #endif
 
+#define LOG( A ) std::cout << A << std::endl;
 
 enum class Color {
     Red,
