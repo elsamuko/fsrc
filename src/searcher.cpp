@@ -10,6 +10,11 @@ void Searcher::search( const boost::filesystem::path& path, const size_t filesiz
     size_t i = 0;
     std::list<std::function<void()>> prints;
 
+    // don't pipe colors
+    Color cred   = colored ? Color::Red   : Color::Neutral;
+    Color cblue  = colored ? Color::Blue  : Color::Neutral;
+    Color cgreen = colored ? Color::Green : Color::Neutral;
+
     for( const std::string_view& line : lines.second ) {
         i++;
 
@@ -19,13 +24,13 @@ void Searcher::search( const boost::filesystem::path& path, const size_t filesiz
         auto end   = rx::cregex_iterator();
 
         if( std::distance( begin, end ) > 0 ) {
-            prints.emplace_back( utils::printFunc( Color::Blue, "\nL%4i : ", i ) );
+            prints.emplace_back( utils::printFunc( cblue, "\nL%4i : ", i ) );
         }
 
         for( rx::cregex_iterator match = begin; match != end; ++match ) {
             hits++;
             prints.emplace_back( utils::printFunc( Color::Neutral, "%s", match->prefix().str().c_str() ) );
-            prints.emplace_back( utils::printFunc( Color::Red, "%s", match->str().c_str() ) );
+            prints.emplace_back( utils::printFunc( cred, "%s", match->str().c_str() ) );
 
             if( std::distance( match, end ) == 1 ) {
                 prints.emplace_back( utils::printFunc( Color::Neutral, "%s", match->suffix().str().c_str() ) );
@@ -35,7 +40,7 @@ void Searcher::search( const boost::filesystem::path& path, const size_t filesiz
 
     if( !prints.empty() ) {
         filesMatched++;
-        prints.emplace_front( utils::printFunc( Color::Green, "%s", path.string().c_str() ) );
+        prints.emplace_front( utils::printFunc( cgreen, "%s", path.string().c_str() ) );
         prints.emplace_back( utils::printFunc( Color::Neutral, "%s", "\n\n" ) );
         m.lock();
 
