@@ -18,6 +18,7 @@ namespace rx = boost;
 
 struct SearchOptions {
     bool success = false;
+    bool noGit = false;
     std::string term;
     fs::path path;
     bool colored = isatty( fileno( stdout ) );

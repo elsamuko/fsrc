@@ -10,7 +10,9 @@ SearchOptions SearchOptions::parseArgs( int argc, char* argv[] ) {
     po::options_description desc( "Options" );
     desc.add_options()
     ( "help,h", "Help" )
-    ( "dir,d", po::value<std::string>(), "Search folder" );
+    ( "dir,d", po::value<std::string>(), "Search folder" )
+    ( "no-git", "Disable search with 'git ls-files'" )
+    ;
 
     po::options_description hidden( "Hidden options" );
     hidden.add_options()
@@ -39,6 +41,11 @@ SearchOptions SearchOptions::parseArgs( int argc, char* argv[] ) {
         if( fs::exists( dir ) ) {
             opts.path = dir;
         }
+    }
+
+    // disable ls-files
+    if( args.count( "no-git" ) ) {
+        opts.noGit = true;
     }
 
     // term
