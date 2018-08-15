@@ -42,11 +42,7 @@ struct Searcher {
 
         if( this->opts.path.empty() ) {
             this->opts.path = fs::current_path();
-        } else {
-            // set PWD for possible git search
-            fs::current_path( this->opts.path );
         }
-
     }
 
     void search( const fs::path& path, const size_t filesize = 0 );

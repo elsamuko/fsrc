@@ -52,12 +52,13 @@ int main( int argc, char* argv[] ) {
 
     Searcher searcher( opts );
 
-    if( fs::exists( ".git" ) ) {
+    if( !opts.noGit && fs::exists( opts.path / ".git" ) ) {
 #if WIN32
         std::string nullDevice = "NUL";
 #else
         std::string nullDevice = "/dev/null";
 #endif
+        fs::current_path( opts.path );
         std::list<std::string> gitFiles = utils::run( "git ls-files 2> " + nullDevice );
         LOG( "Searching for \"" << searcher.opts.term << "\" in repo:\n" );
         onGitFiles( gitFiles, searcher );
