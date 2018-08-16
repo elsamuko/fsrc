@@ -40,10 +40,6 @@ struct Searcher {
         } catch( const rx::regex_error& e ) {
             LOG( "Invalid regex: " << e.what() );
         }
-
-        if( this->opts.path.empty() ) {
-            this->opts.path = fs::current_path();
-        }
     }
 
     void search( const fs::path& path, const size_t filesize = 0 );

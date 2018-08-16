@@ -34,13 +34,15 @@ SearchOptions SearchOptions::parseArgs( int argc, char* argv[] ) {
         opts.success = false;
     }
 
-    // switch to dir
+    // search in dir
     if( args.count( "dir" ) ) {
         fs::path dir = args["dir"].as<std::string>();
 
         if( fs::exists( dir ) ) {
             opts.path = dir;
         }
+    } else {
+        opts.path = fs::current_path();
     }
 
     // disable ls-files
