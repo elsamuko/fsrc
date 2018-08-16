@@ -9,6 +9,8 @@ unix {
     LIBS += $${BOOST_LIB_DIR}/libboost_filesystem.a
     LIBS += $${BOOST_LIB_DIR}/libboost_system.a
     LIBS += $${BOOST_LIB_DIR}/libboost_program_options.a
+
+    unit_test: LIBS += $${BOOST_LIB_DIR}/libboost_unit_test_framework.a
 }
 
 win32 {

@@ -9,6 +9,13 @@ CONFIG(release, debug|release) {
     COMPILE_MODE=release
 }
 
+CONFIG -= qt
+!macx: CONFIG += c++17
+macx: CONFIG += c++14
+CONFIG += console
+CONFIG -= app_bundle
+CONFIG += static
+
 macx:       PLATFORM=mac
 win32:      PLATFORM=win
 unix:!macx: PLATFORM=linux

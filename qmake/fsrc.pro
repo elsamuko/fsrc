@@ -1,10 +1,3 @@
-CONFIG -= qt
-!macx: CONFIG += c++17
-macx: CONFIG += c++14
-CONFIG += console
-CONFIG -= app_bundle
-CONFIG += static
-
 MAIN_DIR =..
 DESTDIR=$${MAIN_DIR} # to test on itself
 SRC_DIR  =../src
