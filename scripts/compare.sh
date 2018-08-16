@@ -17,7 +17,7 @@ case $(uname) in
 esac
 
 TERM="[Tt]est"
-echo "Searching in $SEARCH_DIR for $TERM" 
+echo "Searching in $SEARCH_DIR for $TERM"
 
 echo
 echo "fsrc"
