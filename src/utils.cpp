@@ -90,10 +90,10 @@ bool utils::isTextFile( const fs::path& filename ) {
     //! \note https://en.wikipedia.org/wiki/List_of_file_signatures
 
     // PDF -> binary
-    if( boost::algorithm::starts_with( head, "%PDF" ) ) { return true; }
+    if( boost::algorithm::starts_with( head, "%PDF" ) ) { return false; }
 
     // PostScript -> binary
-    if( boost::algorithm::starts_with( head, "%!PS" ) ) { return true; }
+    if( boost::algorithm::starts_with( head, "%!PS" ) ) { return false; }
 
     bool hasDoubleZero = head.find( std::string( { 0, 0 } ) ) != std::string::npos;
     return !hasDoubleZero;
