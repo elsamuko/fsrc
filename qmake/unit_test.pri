@@ -1,3 +1,5 @@
 
 CONFIG += unit_test
 DEFINES += 'UNIT_TEST=1'
+
+DESTDIR = $${MAIN_DIR}/test/bin/$${PLATFORM}/$${COMPILE_MODE}
