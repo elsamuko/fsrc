@@ -7,6 +7,8 @@
 #include <cstdio>
 #include <cstring>
 
+#include <boost/algorithm/string.hpp>
+
 #if WIN32
 #include <Windows.h>
 #define popen _popen
@@ -84,6 +86,15 @@ std::string utils::fileHead( const fs::path& filename, const size_t count ) {
 // binary files have usually zero padding
 bool utils::isTextFile( const fs::path& filename ) {
     std::string head = fileHead( filename, 1000 );
+
+    //! \note https://en.wikipedia.org/wiki/List_of_file_signatures
+
+    // PDF -> binary
+    if( boost::algorithm::starts_with( head, "%PDF" ) ) { return true; }
+
+    // PostScript -> binary
+    if( boost::algorithm::starts_with( head, "%!PS" ) ) { return true; }
+
     bool hasDoubleZero = head.find( std::string( { 0, 0 } ) ) != std::string::npos;
     return !hasDoubleZero;
 }
