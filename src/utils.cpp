@@ -84,18 +84,16 @@ std::string utils::fileHead( const fs::path& filename, const size_t count ) {
 }
 
 // binary files have usually zero padding
-bool utils::isTextFile( const fs::path& filename ) {
-    std::string head = fileHead( filename, 1000 );
-
+bool utils::isTextFile( const std::string_view& content ) {
     //! \note https://en.wikipedia.org/wiki/List_of_file_signatures
 
     // PDF -> binary
-    if( boost::algorithm::starts_with( head, "%PDF" ) ) { return false; }
+    if( boost::algorithm::starts_with( content, "%PDF" ) ) { return false; }
 
     // PostScript -> binary
-    if( boost::algorithm::starts_with( head, "%!PS" ) ) { return false; }
+    if( boost::algorithm::starts_with( content, "%!PS" ) ) { return false; }
 
-    bool hasDoubleZero = head.find( std::string( { 0, 0 } ) ) != std::string::npos;
+    bool hasDoubleZero = content.find( std::string( { 0, 0 } ) ) != std::string::npos;
     return !hasDoubleZero;
 }
 
@@ -116,9 +114,21 @@ std::pair<std::string, std::list<std::string_view>> utils::fromFile( const fs::p
     if( !length ) { return lines;}
 
     lines.first.resize( length );
-    file.read( ( char* ) lines.first.data(), length );
-    const char* data = lines.first.data();
 
+    // check first 100 bytes for binary
+    if( length > 100 ) {
+        file.read( ( char* ) lines.first.data(), 100 );
+
+        if( !utils::isTextFile( std::string_view( lines.first.data(), 100 ) ) ) { return lines ;}
+
+        file.read( ( char* ) lines.first.data() + 100, length - 100 );
+    } else {
+        file.read( ( char* ) lines.first.data(), length );
+
+        if( !utils::isTextFile( std::string_view( lines.first.data(), length ) ) ) { return lines ;}
+    }
+
+    const char* data = lines.first.data();
     int pos = 0;
 
     for( size_t i = 0; i < length; ++i ) {

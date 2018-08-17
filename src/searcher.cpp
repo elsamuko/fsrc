@@ -71,10 +71,9 @@ SearchOptions SearchOptions::parseArgs( int argc, char* argv[] ) {
 
 void Searcher::search( const fs::path& path, const size_t filesize ) {
 
-    // search only in text files
-    if( !utils::isTextFile( path ) ) { return; }
-
     const std::pair<std::string, std::list<std::string_view>> lines = utils::fromFile( path, filesize );
+
+    if( lines.second.empty() ) { return; }
 
     size_t i = 0;
     std::list<std::function<void()>> prints;
