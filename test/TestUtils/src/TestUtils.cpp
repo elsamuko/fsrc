@@ -4,7 +4,13 @@
 #include <fstream>
 
 #include "utils.hpp"
-#include "sample_pdf.hpp"
+
+// dummy for Test_printFunc
+std::string printed;
+int fputs( const char* text, FILE* /*file*/ ) {
+    printed.assign( text );
+    return printed.size();
+}
 
 BOOST_AUTO_TEST_SUITE( Utils )
 
@@ -33,6 +39,12 @@ BOOST_AUTO_TEST_CASE( Test_run ) {
     std::list<std::string> res = utils::run( "echo test123" );
     BOOST_REQUIRE( !res.empty() );
     BOOST_CHECK_EQUAL( res.front(), "test123" );
+}
+
+BOOST_AUTO_TEST_CASE( Test_printFunc ) {
+    std::function<void()> func = utils::printFunc( Color::Neutral, "%s", "test123" );
+    func();
+    BOOST_CHECK_EQUAL( printed, "test123" );
 }
 
 BOOST_AUTO_TEST_SUITE_END()
