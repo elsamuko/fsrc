@@ -84,7 +84,7 @@ bool utils::isTextFile( const std::string_view& content ) {
 }
 
 // splits content on newline
-inline std::list<std::string_view> parseContent( const std::string& content ) {
+std::list<std::string_view> utils::parseContent( const std::string& content ) {
     std::list<std::string_view> lines;
     const char* data = content.data();
     int pos = 0;
@@ -134,7 +134,7 @@ std::pair<std::string, std::list<std::string_view>> utils::fromFileC( const sys_
     }
 
     fclose( file );
-    lines.second = parseContent( lines.first );
+    lines.second = utils::parseContent( lines.first );
     return lines;
 }
 
@@ -165,7 +165,7 @@ std::pair<std::string, std::list<std::string_view>> utils::fromFile( const sys_s
         if( !utils::isTextFile( std::string_view( lines.first.data(), length ) ) ) { return lines ;}
     }
 
-    lines.second = parseContent( lines.first );
+    lines.second = utils::parseContent( lines.first );
     return lines;
 }
 

@@ -51,6 +51,10 @@ std::pair<std::string, std::list<std::string_view>> fromFileC( const sys_string&
 //! \returns content of filename as list with C++ API
 std::pair<std::string, std::list<std::string_view>> fromFile( const sys_string& filename );
 
+//! splits content at newlines
+//! \returns lines as list of string_view
+std::list<std::string_view> parseContent( const std::string& content );
+
 //! \returns function, which prints format in color to stdout
 template <typename ... Args>
 std::function<void()> printFunc( Color color, const char* format, Args const& ... args ) {
