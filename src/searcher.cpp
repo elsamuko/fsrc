@@ -69,9 +69,9 @@ SearchOptions SearchOptions::parseArgs( int argc, char* argv[] ) {
     return opts;
 }
 
-void Searcher::search( const fs::path& path, const size_t filesize ) {
+void Searcher::search( const fs::path& path ) {
 
-    const std::pair<std::string, std::list<std::string_view>> lines = utils::fromFile( path, filesize );
+    const std::pair<std::string, std::list<std::string_view>> lines = utils::fromFile( path );
 
     if( lines.second.empty() ) { return; }
 

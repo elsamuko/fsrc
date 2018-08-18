@@ -42,5 +42,5 @@ struct Searcher {
         }
     }
 
-    void search( const fs::path& path, const size_t filesize = 0 );
+    void search(const fs::path& path);
 };

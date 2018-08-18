@@ -16,10 +16,10 @@ void onAllFiles( Searcher& searcher ) {
         } );
     } );
 #else
-    utils::recurseDirWin( searcher.opts.path.native(), [&pool, &searcher]( const std::wstring & filename, const size_t filesize ) {
-        boost::asio::post( pool, [filename, filesize, &searcher] {
+    utils::recurseDirWin( searcher.opts.path.native(), [&pool, &searcher]( const std::wstring & filename ) {
+        boost::asio::post( pool, [filename, &searcher] {
             searcher.files++;
-            searcher.search( filename, filesize );
+            searcher.search( filename );
         } );
     } );
 #endif

@@ -120,7 +120,7 @@ inline std::list<std::string_view> parseContent( const std::string& content ) {
     return lines;
 }
 
-std::pair<std::string, std::list<std::string_view>> utils::fromFileC( const fs::path& filename, const size_t filesize ) {
+std::pair<std::string, std::list<std::string_view>> utils::fromFileC( const fs::path& filename ) {
     std::pair<std::string, std::list<std::string_view>> lines;
     FILE* file = fopen( filename.c_str(), "rb" );
 
@@ -152,19 +152,15 @@ std::pair<std::string, std::list<std::string_view>> utils::fromFileC( const fs::
     return lines;
 }
 
-std::pair<std::string, std::list<std::string_view>> utils::fromFile( const fs::path& filename, const size_t filesize ) {
+std::pair<std::string, std::list<std::string_view>> utils::fromFile( const fs::path& filename ) {
     std::pair<std::string, std::list<std::string_view>> lines;
     std::ifstream file( filename.c_str(), std::ios::binary | std::ios::in );
 
     if( !file ) { return lines;}
 
-    size_t length = filesize;
-
-    if( !filesize ) {
-        file.seekg( 0, std::ios::end );
-        length = ( size_t ) file.tellg();
-        file.seekg( 0, std::ios::beg );
-    }
+    file.seekg( 0, std::ios::end );
+    size_t length = ( size_t ) file.tellg();
+    file.seekg( 0, std::ios::beg );
 
     if( !length ) { return lines;}
 
@@ -215,7 +211,7 @@ void utils::recurseDirUnix( const std::string& filename, const std::function<voi
     closedir( dir );
 }
 #else
-void utils::recurseDirWin( const std::wstring& filename, const std::function<void ( const std::wstring& filename, const size_t filesize )>& callback ) {
+void utils::recurseDirWin( const std::wstring& filename, const std::function<void ( const std::wstring& filename )>& callback ) {
     WIN32_FIND_DATAW data = {};
 
     std::wstring withGlob = filename + L"\\*";
@@ -230,7 +226,7 @@ void utils::recurseDirWin( const std::wstring& filename, const std::function<voi
         if( !wcscmp( data.cFileName, L".git" ) ) { continue; }
 
         if( data.dwFileAttributes & FILE_ATTRIBUTE_ARCHIVE ) {
-            callback( filename + L"\\" + data.cFileName, data.nFileSizeLow );
+            callback( filename + L"\\" + data.cFileName );
             continue;
         }
 
