@@ -42,9 +42,6 @@ void printColor( Color color, const std::string& text );
 //! \returns output of command as list
 std::list<std::string> run( const std::string& command );
 
-//! gets count bytes of filename
-std::string fileHead( const fs::path& filename, const size_t count );
-
 //! \returns true, if filename has no "\0\0" in the first 1000 bytes
 bool isTextFile( const std::string_view& content );
 

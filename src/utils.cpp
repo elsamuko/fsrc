@@ -69,20 +69,6 @@ std::list<std::string> utils::run( const std::string& command ) {
     return result;
 }
 
-std::string utils::fileHead( const fs::path& filename, const size_t count ) {
-    std::ifstream file( filename.c_str(), std::ios::binary | std::ios::in );
-    file.seekg( 0, std::ios::end );
-    size_t length = ( size_t ) file.tellg();
-    file.seekg( 0, std::ios::beg );
-
-    // read count bytes, or length, if file is too small
-    if( length > count ) { length = count; }
-
-    const std::string content( length, '\0' );
-    file.read( ( char* ) content.data(), length );
-    return content;
-}
-
 // binary files have usually zero padding
 bool utils::isTextFile( const std::string_view& content ) {
     //! \note https://en.wikipedia.org/wiki/List_of_file_signatures
