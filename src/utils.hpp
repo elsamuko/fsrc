@@ -7,6 +7,7 @@
 
 #include "boost/filesystem.hpp"
 namespace fs = boost::filesystem;
+using sys_string = fs::path::string_type;
 namespace os = boost::system;
 
 #define LOG( A ) std::cout << A << std::endl;
@@ -47,10 +48,11 @@ std::string fileHead( const fs::path& filename, const size_t count );
 //! \returns true, if filename has no "\0\0" in the first 1000 bytes
 bool isTextFile( const std::string_view& content );
 
-std::pair<std::string, std::list<std::string_view>> fromFileC( const fs::path& filename );
+//! \returns content of filename as list with C API
+std::pair<std::string, std::list<std::string_view>> fromFileC( const sys_string& filename );
 
-//! \returns content of filename as list
-std::pair<std::string, std::list<std::string_view>> fromFile( const fs::path& filename );
+//! \returns content of filename as list with C++ API
+std::pair<std::string, std::list<std::string_view>> fromFile( const sys_string& filename );
 
 //! \returns function, which prints format in color to stdout
 template <typename ... Args>
@@ -63,10 +65,6 @@ std::function<void()> printFunc( Color color, const char* format, Args const& ..
     return [color, text] { printColor( color, text ); };
 }
 
-#if !WIN32
-void recurseDirUnix( const std::string& filename, const std::function<void( const std::string& filename )>& callback );
-#else
-void recurseDirWin( const std::wstring& filename, const std::function<void( const std::wstring& filename, const size_t filesize )>& callback );
-#endif
+void recurseDir( const sys_string& filename, const std::function<void( const sys_string& filename )>& callback );
 
 }

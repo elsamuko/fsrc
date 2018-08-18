@@ -120,7 +120,7 @@ inline std::list<std::string_view> parseContent( const std::string& content ) {
     return lines;
 }
 
-std::pair<std::string, std::list<std::string_view>> utils::fromFileC( const fs::path& filename ) {
+std::pair<std::string, std::list<std::string_view>> utils::fromFileC( const sys_string& filename ) {
     std::pair<std::string, std::list<std::string_view>> lines;
     FILE* file = fopen( filename.c_str(), "rb" );
 
@@ -152,7 +152,7 @@ std::pair<std::string, std::list<std::string_view>> utils::fromFileC( const fs::
     return lines;
 }
 
-std::pair<std::string, std::list<std::string_view>> utils::fromFile( const fs::path& filename ) {
+std::pair<std::string, std::list<std::string_view>> utils::fromFile( const sys_string& filename ) {
     std::pair<std::string, std::list<std::string_view>> lines;
     std::ifstream file( filename.c_str(), std::ios::binary | std::ios::in );
 
@@ -184,7 +184,7 @@ std::pair<std::string, std::list<std::string_view>> utils::fromFile( const fs::p
 }
 
 #if !WIN32
-void utils::recurseDirUnix( const std::string& filename, const std::function<void( const std::string& filename )>& callback ) {
+void utils::recurseDir( const sys_string& filename, const std::function<void( const sys_string& filename )>& callback ) {
     DIR* dir = opendir( filename.c_str() );
     struct dirent* dp = nullptr;
 
@@ -201,7 +201,7 @@ void utils::recurseDirUnix( const std::string& filename, const std::function<voi
         }
 
         if( dp->d_type == DT_DIR ) {
-            utils::recurseDirUnix( filename + "/" + dp->d_name, callback );
+            utils::recurseDir( filename + "/" + dp->d_name, callback );
             continue;
         }
 
@@ -211,7 +211,7 @@ void utils::recurseDirUnix( const std::string& filename, const std::function<voi
     closedir( dir );
 }
 #else
-void utils::recurseDirWin( const std::wstring& filename, const std::function<void ( const std::wstring& filename )>& callback ) {
+void utils::recurseDir( const sys_string& filename, const std::function<void ( const sys_string& filename )>& callback ) {
     WIN32_FIND_DATAW data = {};
 
     std::wstring withGlob = filename + L"\\*";
@@ -231,7 +231,7 @@ void utils::recurseDirWin( const std::wstring& filename, const std::function<voi
         }
 
         if( data.dwFileAttributes == FILE_ATTRIBUTE_DIRECTORY ) {
-            recurseDirWin( filename + L"\\" + data.cFileName, callback );
+            recurseDir( filename + L"\\" + data.cFileName, callback );
             continue;
         }
     }

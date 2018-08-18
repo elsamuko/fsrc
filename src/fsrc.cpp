@@ -8,21 +8,12 @@ void onAllFiles( Searcher& searcher ) {
     // max 8 threads, else start/stop needs longer than the actual work
     boost::asio::thread_pool pool( std::min( std::thread::hardware_concurrency(), 8u ) );
 
-#if !WIN32
-    utils::recurseDirUnix( searcher.opts.path.native(), [&pool, &searcher]( const std::string & filename ) {
+    utils::recurseDir( searcher.opts.path.native(), [&pool, &searcher]( const sys_string & filename ) {
         boost::asio::post( pool, [filename, &searcher] {
             searcher.files++;
             searcher.search( filename );
         } );
     } );
-#else
-    utils::recurseDirWin( searcher.opts.path.native(), [&pool, &searcher]( const std::wstring & filename ) {
-        boost::asio::post( pool, [filename, &searcher] {
-            searcher.files++;
-            searcher.search( filename );
-        } );
-    } );
-#endif
 
     pool.join();
 }

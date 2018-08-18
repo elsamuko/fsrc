@@ -69,7 +69,7 @@ SearchOptions SearchOptions::parseArgs( int argc, char* argv[] ) {
     return opts;
 }
 
-void Searcher::search( const fs::path& path ) {
+void Searcher::search( const sys_string& path ) {
 
     const std::pair<std::string, std::list<std::string_view>> lines = utils::fromFile( path );
 
@@ -108,7 +108,7 @@ void Searcher::search( const fs::path& path ) {
 
     if( !prints.empty() ) {
         filesMatched++;
-        prints.emplace_front( utils::printFunc( cgreen, "%s", path.string().c_str() ) );
+        prints.emplace_front( utils::printFunc( cgreen, "%s", path.c_str() ) );
         prints.emplace_back( utils::printFunc( Color::Neutral, "%s", "\n\n" ) );
         m.lock();
 

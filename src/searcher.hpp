@@ -42,5 +42,5 @@ struct Searcher {
         }
     }
 
-    void search(const fs::path& path);
+    void search( const sys_string& path );
 };
