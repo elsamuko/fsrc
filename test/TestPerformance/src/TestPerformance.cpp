@@ -5,7 +5,7 @@
 #include "utils.hpp"
 
 using fromFileFunc = std::pair<std::string, std::list<std::string_view>>( const sys_string& filename );
-void run( fromFileFunc fromFile ) {
+size_t run( fromFileFunc fromFile ) {
     size_t sum = 0;
     fs::path include = "/usr/include";
 
@@ -20,18 +20,15 @@ void run( fromFileFunc fromFile ) {
     std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>( duration );
 
     printf( "%lu kB in %lld ms\n", sum / 1024, ms.count() );
+    return ms.count();
 }
 
 BOOST_AUTO_TEST_SUITE( Performance )
 
 BOOST_AUTO_TEST_CASE( Test_fromFile ) {
-    run( utils::fromFile );
-    BOOST_CHECK( true );
-}
-
-BOOST_AUTO_TEST_CASE( Test_fromFileC ) {
-    run( utils::fromFileC );
-    BOOST_CHECK( true );
+    size_t t1 = run( utils::fromFileC );
+    size_t t2 = run( utils::fromFile );
+    BOOST_CHECK_LT( t1, t2 ); // assume FILE* is faster than std::ifstream
 }
 
 BOOST_AUTO_TEST_SUITE_END()
