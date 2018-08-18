@@ -109,6 +109,7 @@ std::list<std::string_view> utils::parseContent( const std::string& content ) {
 std::pair<std::string, std::list<std::string_view>> utils::fromFileC( const sys_string& filename ) {
     std::pair<std::string, std::list<std::string_view>> lines;
     FILE* file = fopen( filename.c_str(), "rb" );
+    utils::ScopeGuard onExit( [file] { if( file ) { fclose( file ); } } );
 
     if( file == NULL ) { return lines; }
 
@@ -133,7 +134,6 @@ std::pair<std::string, std::list<std::string_view>> utils::fromFileC( const sys_
         if( !utils::isTextFile( std::string_view( lines.first.data(), length ) ) ) { return lines ;}
     }
 
-    fclose( file );
     lines.second = utils::parseContent( lines.first );
     return lines;
 }
