@@ -35,6 +35,12 @@ struct string_view {
 
 namespace utils {
 
+struct ScopeGuard {
+    std::function<void()> onExit;
+    ScopeGuard( const std::function<void()>& onExit ) : onExit( onExit ) {}
+    ~ScopeGuard() { onExit(); }
+};
+
 //! prints text in color to stdout
 void printColor( Color color, const std::string& text );
 
