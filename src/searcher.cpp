@@ -71,7 +71,7 @@ SearchOptions SearchOptions::parseArgs( int argc, char* argv[] ) {
 
 void Searcher::search( const sys_string& path ) {
 
-    const std::pair<std::string, std::list<std::string_view>> lines = utils::fromFileC( path );
+    const std::pair<std::string, utils::Lines> lines = utils::fromFileC( path );
 
     if( lines.second.empty() ) { return; }
 

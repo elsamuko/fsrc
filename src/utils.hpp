@@ -41,6 +41,8 @@ struct ScopeGuard {
     ~ScopeGuard() { onExit(); }
 };
 
+using Lines = std::vector<std::string_view>;
+
 //! prints text in color to stdout
 void printColor( Color color, const std::string& text );
 
@@ -52,14 +54,14 @@ std::list<std::string> run( const std::string& command );
 bool isTextFile( const std::string_view& content );
 
 //! \returns content of filename as list with C API
-std::pair<std::string, std::list<std::string_view>> fromFileC( const sys_string& filename );
+std::pair<std::string, Lines> fromFileC( const sys_string& filename );
 
 //! \returns content of filename as list with C++ API
-std::pair<std::string, std::list<std::string_view>> fromFile( const sys_string& filename );
+std::pair<std::string, Lines> fromFile( const sys_string& filename );
 
 //! splits content at newlines
 //! \returns lines as list of string_view
-std::list<std::string_view> parseContent( const std::string& content );
+Lines parseContent( const std::string& content );
 
 //! \returns function, which prints format in color to stdout
 template <typename ... Args>

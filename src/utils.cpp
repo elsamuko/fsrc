@@ -84,8 +84,8 @@ bool utils::isTextFile( const std::string_view& content ) {
 }
 
 // splits content on newline
-std::list<std::string_view> utils::parseContent( const std::string& content ) {
-    std::list<std::string_view> lines;
+utils::Lines utils::parseContent( const std::string& content ) {
+    Lines lines;
     const char* data = content.data();
     int pos = 0;
     size_t length = content.size();
@@ -106,8 +106,8 @@ std::list<std::string_view> utils::parseContent( const std::string& content ) {
     return lines;
 }
 
-std::pair<std::string, std::list<std::string_view>> utils::fromFileC( const sys_string& filename ) {
-    std::pair<std::string, std::list<std::string_view>> lines;
+std::pair<std::string, utils::Lines> utils::fromFileC( const sys_string& filename ) {
+    std::pair<std::string, Lines> lines;
     FILE* file = fopen( filename.c_str(), "rb" );
     utils::ScopeGuard onExit( [file] { if( file ) { fclose( file ); } } );
 
@@ -138,8 +138,8 @@ std::pair<std::string, std::list<std::string_view>> utils::fromFileC( const sys_
     return lines;
 }
 
-std::pair<std::string, std::list<std::string_view>> utils::fromFile( const sys_string& filename ) {
-    std::pair<std::string, std::list<std::string_view>> lines;
+std::pair<std::string, utils::Lines> utils::fromFile( const sys_string& filename ) {
+    std::pair<std::string, Lines> lines;
     std::ifstream file( filename.c_str(), std::ios::binary | std::ios::in );
 
     if( !file ) { return lines;}

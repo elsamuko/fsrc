@@ -8,8 +8,8 @@
 #include "utils.hpp"
 
 //! \returns content of filename as list with POSIX API
-std::pair<std::string, std::list<std::string_view>> fromFileP( const sys_string& filename ) {
-    std::pair<std::string, std::list<std::string_view>> lines;
+std::pair<std::string, utils::Lines> fromFileP( const sys_string& filename ) {
+    std::pair<std::string, utils::Lines> lines;
     int file = open( filename.c_str(), O_RDONLY );
     utils::ScopeGuard onExit( [file] { if( file ) { close( file ); } } );
 
@@ -40,7 +40,7 @@ std::pair<std::string, std::list<std::string_view>> fromFileP( const sys_string&
     return lines;
 }
 
-using fromFileFunc = std::pair<std::string, std::list<std::string_view>>( const sys_string& filename );
+using fromFileFunc = std::pair<std::string, utils::Lines>( const sys_string& filename );
 
 std::map<fromFileFunc*, const char*> names = {
     {fromFileP, "fromFileP"},
