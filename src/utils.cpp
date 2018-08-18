@@ -128,7 +128,7 @@ std::pair<std::string, std::list<std::string_view>> utils::fromFileC( const fs::
 
     fseek( file, 0, SEEK_END );
     size_t length = ftell( file );
-    rewind( file );
+    fseek( file, 0, SEEK_SET );
 
     if( !length ) { return lines;}
 
