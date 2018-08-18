@@ -16,23 +16,14 @@ BOOST_AUTO_TEST_SUITE( Utils )
 
 BOOST_AUTO_TEST_CASE( Test_isTextFile ) {
 
-    std::ofstream of( "sample.pdf", std::ios::out | std::ios::binary );
-    of.write( "%PDF", 4 );
-    of.close();
+    std::string_view pdf( "%PDF", 4 );
+    BOOST_CHECK( !utils::isTextFile( pdf ) );
 
-    BOOST_CHECK( !utils::isTextFile( "sample.pdf" ) );
+    std::string_view binary( "\0\0", 2 );
+    BOOST_CHECK( !utils::isTextFile( binary ) );
 
-    std::ofstream of2( "sample.bin", std::ios::out | std::ios::binary );
-    of2.write( "\0\0", 2 );
-    of2.close();
-
-    BOOST_CHECK( !utils::isTextFile( "sample.bin" ) );
-
-    std::ofstream of3( "sample.txt", std::ios::out );
-    of3 << "Text File" << std::endl;
-    of3.close();
-
-    BOOST_CHECK( utils::isTextFile( "sample.txt" ) );
+    std::string_view text( "Text File\n", 10 );
+    BOOST_CHECK( utils::isTextFile( text ) );
 }
 
 BOOST_AUTO_TEST_CASE( Test_run ) {
