@@ -47,6 +47,8 @@ std::string fileHead( const fs::path& filename, const size_t count );
 //! \returns true, if filename has no "\0\0" in the first 1000 bytes
 bool isTextFile( const std::string_view& content );
 
+std::pair<std::string, std::list<std::string_view>> fromFileC( const fs::path& filename, const size_t filesize );
+
 //! \returns content of filename as list
 std::pair<std::string, std::list<std::string_view>> fromFile( const fs::path& filename, const size_t filesize = 0 );
 

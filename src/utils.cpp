@@ -97,6 +97,61 @@ bool utils::isTextFile( const std::string_view& content ) {
     return !hasDoubleZero;
 }
 
+// splits content on newline
+inline std::list<std::string_view> parseContent( const std::string& content ) {
+    std::list<std::string_view> lines;
+    const char* data = content.data();
+    int pos = 0;
+    size_t length = content.size();
+
+    for( size_t i = 0; i < length; ++i ) {
+        // just skip windows line endings
+        if( content[i] == '\r' ) {
+            ++i;
+        }
+
+        // cut at unix line endings
+        if( content[i] == '\n' ) {
+            lines.emplace_back( data + pos, i - pos );
+            pos = i + 1;
+        }
+    }
+
+    return lines;
+}
+
+std::pair<std::string, std::list<std::string_view>> utils::fromFileC( const fs::path& filename, const size_t filesize ) {
+    std::pair<std::string, std::list<std::string_view>> lines;
+    FILE* file = fopen( filename.c_str(), "rb" );
+
+    if( file == NULL ) { return lines; }
+
+    fseek( file, 0, SEEK_END );
+    size_t length = ftell( file );
+    rewind( file );
+
+    if( !length ) { return lines;}
+
+    lines.first.resize( length );
+
+    // check first 100 bytes for binary
+    if( length > 100 ) {
+        fread( ( void* )lines.first.data(), 1, 100, file );
+
+        if( !utils::isTextFile( std::string_view( lines.first.data(), 100 ) ) ) { return lines ;}
+
+        fread( ( char* )lines.first.data() + 100, 1, length - 100, file );
+    } else {
+        fread( ( char* )lines.first.data(), 1, length, file );
+
+        if( !utils::isTextFile( std::string_view( lines.first.data(), length ) ) ) { return lines ;}
+    }
+
+    fclose( file );
+    lines.second = parseContent( lines.first );
+    return lines;
+}
+
 std::pair<std::string, std::list<std::string_view>> utils::fromFile( const fs::path& filename, const size_t filesize ) {
     std::pair<std::string, std::list<std::string_view>> lines;
     std::ifstream file( filename.c_str(), std::ios::binary | std::ios::in );
@@ -128,22 +183,7 @@ std::pair<std::string, std::list<std::string_view>> utils::fromFile( const fs::p
         if( !utils::isTextFile( std::string_view( lines.first.data(), length ) ) ) { return lines ;}
     }
 
-    const char* data = lines.first.data();
-    int pos = 0;
-
-    for( size_t i = 0; i < length; ++i ) {
-        // just skip windows line endings
-        if( lines.first[i] == '\r' ) {
-            ++i;
-        }
-
-        // cut at unix line endings
-        if( lines.first[i] == '\n' ) {
-            lines.second.emplace_back( data + pos, i - pos );
-            pos = i + 1;
-        }
-    }
-
+    lines.second = parseContent( lines.first );
     return lines;
 }
 
