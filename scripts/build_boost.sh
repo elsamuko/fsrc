@@ -87,15 +87,15 @@ function winBuild {
 function linuxBuild {
     cd "$BUILD_DIR"
     
-    ./bootstrap.sh
+    ./bootstrap.sh --without-icu
 
     # debug
-    ./b2 -j 8 --stagedir=stage_debug toolset=gcc variant=debug \
+    ./b2 -j 8 --disable-icu --stagedir=stage_debug toolset=gcc variant=debug \
         link=static threading=multi address-model=64 \
         cxxflags="-std=c++17"
 
     # release
-    ./b2 -j 8 --stagedir=stage_release toolset=gcc variant=release \
+    ./b2 -j 8 --disable-icu --stagedir=stage_release toolset=gcc variant=release \
         link=static threading=multi address-model=64 \
         cxxflags="-std=c++17 -msse2 -oFast" linkflags="-flto"
 }
