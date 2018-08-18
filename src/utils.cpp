@@ -47,9 +47,9 @@ void utils::printColor( Color color, const std::string& text ) {
     }
 }
 
-std::list<std::string> utils::run( const std::string& command ) {
+std::vector<std::string> utils::run( const std::string& command ) {
     std::string buffer( 1024, '\0' );
-    std::list<std::string> result;
+    std::vector<std::string> result;
 
     FILE* pipe = popen( command.c_str(), "r" );
 
@@ -103,6 +103,7 @@ utils::Lines utils::parseContent( const std::string& content ) {
         }
     }
 
+    lines.shrink_to_fit();
     return lines;
 }
 

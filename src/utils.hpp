@@ -1,6 +1,5 @@
 #pragma once
 
-#include <list>
 #include <string>
 #include <iostream>
 #include <functional>
@@ -48,20 +47,20 @@ using Lines = std::vector<std::string_view>;
 void printColor( Color color, const std::string& text );
 
 //! runs shell command
-//! \returns output of command as list
-std::list<std::string> run( const std::string& command );
+//! \returns output of command as vector
+std::vector<std::string> run( const std::string& command );
 
 //! \returns true, if filename has no "\0\0" in the first 1000 bytes
 bool isTextFile( const std::string_view& content );
 
-//! \returns content of filename as list with C API
+//! \returns content of filename as vector with C API
 std::pair<std::string, Lines> fromFileC( const sys_string& filename );
 
-//! \returns content of filename as list with C++ API
+//! \returns content of filename as vector with C++ API
 std::pair<std::string, Lines> fromFile( const sys_string& filename );
 
 //! splits content at newlines
-//! \returns lines as list of string_view
+//! \returns lines as vector of string_view
 Lines parseContent( const std::string& content );
 
 //! \returns function, which prints format in color to stdout

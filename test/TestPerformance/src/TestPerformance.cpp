@@ -7,7 +7,7 @@
 #include <sys/types.h>
 #include "utils.hpp"
 
-//! \returns content of filename as list with POSIX API
+//! \returns content of filename as vector with POSIX API
 std::pair<std::string, utils::Lines> fromFileP( const sys_string& filename ) {
     std::pair<std::string, utils::Lines> lines;
     int file = open( filename.c_str(), O_RDONLY );

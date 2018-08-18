@@ -75,16 +75,16 @@ void Searcher::search( const sys_string& path ) {
 
     if( lines.second.empty() ) { return; }
 
-    size_t i = 0;
-    std::list<std::function<void()>> prints;
+    size_t size = lines.second.size();
+    std::vector<std::function<void()>> prints;
 
     // don't pipe colors
     Color cred   = opts.colored ? Color::Red   : Color::Neutral;
     Color cblue  = opts.colored ? Color::Blue  : Color::Neutral;
     Color cgreen = opts.colored ? Color::Green : Color::Neutral;
 
-    for( const std::string_view& line : lines.second ) {
-        i++;
+    for( size_t i = 0; i < size; ++i ) {
+        const std::string_view& line = lines.second[i];
 
         if( line.empty() ) { continue; }
 
@@ -106,14 +106,19 @@ void Searcher::search( const sys_string& path ) {
         }
     }
 
+
     if( !prints.empty() ) {
         filesMatched++;
-        prints.emplace_front( utils::printFunc( cgreen, "%s", path.c_str() ) );
-        prints.emplace_back( utils::printFunc( Color::Neutral, "%s", "\n\n" ) );
+
+        const auto printFile     = utils::printFunc( cgreen, "%s", path.c_str() );
+        const auto printNewlines = utils::printFunc( Color::Neutral, "%s", "\n\n" )
+                                   ;
         m.lock();
+        printFile();
 
         for( std::function<void()> func : prints ) { func(); }
 
+        printNewlines();
         m.unlock();
     }
 }

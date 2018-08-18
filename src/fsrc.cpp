@@ -18,7 +18,7 @@ void onAllFiles( Searcher& searcher ) {
     pool.join();
 }
 
-void onGitFiles( const std::list<std::string>& filenames, Searcher& searcher ) {
+void onGitFiles( const std::vector<std::string>& filenames, Searcher& searcher ) {
     // max 8 threads, else start/stop needs longer than the actual work
     boost::asio::thread_pool pool( std::min( std::thread::hardware_concurrency(), 8u ) );
 
@@ -50,7 +50,7 @@ int main( int argc, char* argv[] ) {
         std::string nullDevice = "/dev/null";
 #endif
         fs::current_path( opts.path );
-        std::list<std::string> gitFiles = utils::run( "git ls-files 2> " + nullDevice );
+        std::vector<std::string> gitFiles = utils::run( "git ls-files 2> " + nullDevice );
         LOG( "Searching for \"" << searcher.opts.term << "\" in repo:\n" );
         onGitFiles( gitFiles, searcher );
     } else {
