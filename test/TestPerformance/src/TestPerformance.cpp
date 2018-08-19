@@ -37,7 +37,7 @@ std::pair<std::string, utils::Lines> fromFileP( const sys_string& filename ) {
         if( !utils::isTextFile( std::string_view( lines.first.data(), length ) ) ) { return lines ;}
     }
 
-    lines.second = utils::parseContent( lines.first );
+    lines.second = utils::parseContent( lines.first.data(), lines.first.size() );
     return lines;
 }
 
@@ -68,7 +68,7 @@ std::pair<std::string, utils::Lines> fromFileM( const sys_string& filename ) {
         if( !utils::isTextFile( std::string_view( lines.first.data(), length ) ) ) { return lines ;}
     }
 
-    lines.second = utils::parseContent( lines.first );
+    lines.second = utils::parseContent( lines.first.data(), lines.first.size() );
     return lines;
 }
 

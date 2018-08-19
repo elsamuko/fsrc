@@ -39,25 +39,25 @@ BOOST_AUTO_TEST_CASE( Test_printFunc ) {
 }
 
 BOOST_AUTO_TEST_CASE( Test_parseContent ) {
-    auto lines = utils::parseContent( "\n\n" );
+    auto lines = utils::parseContent( "\n\n", 2 );
     BOOST_CHECK_EQUAL( lines.size(), 2 );
 
-    lines = utils::parseContent( "123" );
+    lines = utils::parseContent( "123", 3 );
     BOOST_CHECK_EQUAL( lines.size(), 1 );
 
-    lines = utils::parseContent( "123\n" );
+    lines = utils::parseContent( "123\n", 4 );
     BOOST_CHECK_EQUAL( lines.size(), 1 );
 
-    lines = utils::parseContent( "123\n\n" );
+    lines = utils::parseContent( "123\n\n", 5 );
     BOOST_CHECK_EQUAL( lines.size(), 2 );
 
-    lines = utils::parseContent( "123\n\n123" );
+    lines = utils::parseContent( "123\n\n123", 8 );
     BOOST_CHECK_EQUAL( lines.size(), 3 );
 
-    lines = utils::parseContent( "123\n\n123\n" );
+    lines = utils::parseContent( "123\n\n123\n", 9 );
     BOOST_CHECK_EQUAL( lines.size(), 3 );
 
-    lines = utils::parseContent( "123\n\n123\n4" );
+    lines = utils::parseContent( "123\n\n123\n4", 10 );
     BOOST_CHECK_EQUAL( lines.size(), 4 );
 }
 

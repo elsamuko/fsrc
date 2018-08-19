@@ -85,12 +85,14 @@ bool utils::isTextFile( const std::string_view& content ) {
 }
 
 // splits content on newline
-utils::Lines utils::parseContent( const std::string& content ) {
+utils::Lines utils::parseContent( const char* data, const size_t size ) {
     Lines lines;
-    size_t length = content.size();
-    char* c_old = ( char* )content.data();
+
+    if( size == 0 ) { return lines; }
+
+    char* c_old = ( char* )data;
     char* c_new = c_old;
-    char* c_end = c_old + length;
+    char* c_end = c_old + size;
 
     for( ; *c_new; ++c_new ) {
         // just skip windows line endings
@@ -140,7 +142,7 @@ std::pair<std::string, utils::Lines> utils::fromFileC( const sys_string& filenam
         if( !utils::isTextFile( std::string_view( lines.first.data(), length ) ) ) { return lines ;}
     }
 
-    lines.second = utils::parseContent( lines.first );
+    lines.second = utils::parseContent( lines.first.data(), lines.first.size() );
     return lines;
 }
 
@@ -171,7 +173,7 @@ std::pair<std::string, utils::Lines> utils::fromFile( const sys_string& filename
         if( !utils::isTextFile( std::string_view( lines.first.data(), length ) ) ) { return lines ;}
     }
 
-    lines.second = utils::parseContent( lines.first );
+    lines.second = utils::parseContent( lines.first.data(), lines.first.size() );
     return lines;
 }
 

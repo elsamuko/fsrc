@@ -61,7 +61,7 @@ std::pair<std::string, Lines> fromFile( const sys_string& filename );
 
 //! splits content at newlines
 //! \returns lines as vector of string_view
-Lines parseContent( const std::string& content );
+Lines parseContent( const char* data, const size_t size );
 
 //! \returns function, which prints format in color to stdout
 template <typename ... Args>
