@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_CASE( Test_isTextFile ) {
 }
 
 BOOST_AUTO_TEST_CASE( Test_run ) {
-    std::list<std::string> res = utils::run( "echo test123" );
+    std::vector<std::string> res = utils::run( "echo test123" );
     BOOST_REQUIRE( !res.empty() );
     BOOST_CHECK_EQUAL( res.front(), "test123" );
 }
@@ -36,6 +36,29 @@ BOOST_AUTO_TEST_CASE( Test_printFunc ) {
     std::function<void()> func = utils::printFunc( Color::Neutral, "%s", "test123" );
     func();
     BOOST_CHECK_EQUAL( printed, "test123" );
+}
+
+BOOST_AUTO_TEST_CASE( Test_parseContent ) {
+    auto lines = utils::parseContent( "\n\n" );
+    BOOST_CHECK_EQUAL( lines.size(), 2 );
+
+    lines = utils::parseContent( "123" );
+    BOOST_CHECK_EQUAL( lines.size(), 1 );
+
+    lines = utils::parseContent( "123\n" );
+    BOOST_CHECK_EQUAL( lines.size(), 1 );
+
+    lines = utils::parseContent( "123\n\n" );
+    BOOST_CHECK_EQUAL( lines.size(), 2 );
+
+    lines = utils::parseContent( "123\n\n123" );
+    BOOST_CHECK_EQUAL( lines.size(), 3 );
+
+    lines = utils::parseContent( "123\n\n123\n" );
+    BOOST_CHECK_EQUAL( lines.size(), 3 );
+
+    lines = utils::parseContent( "123\n\n123\n4" );
+    BOOST_CHECK_EQUAL( lines.size(), 4 );
 }
 
 BOOST_AUTO_TEST_SUITE_END()

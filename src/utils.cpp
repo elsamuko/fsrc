@@ -86,21 +86,25 @@ bool utils::isTextFile( const std::string_view& content ) {
 // splits content on newline
 utils::Lines utils::parseContent( const std::string& content ) {
     Lines lines;
-    const char* data = content.data();
-    int pos = 0;
     size_t length = content.size();
+    char* c_old = ( char* )content.data();
+    char* c_new = c_old;
+    char* c_end = c_old + length;
 
-    for( size_t i = 0; i < length; ++i ) {
+    for( ; *c_new; ++c_new ) {
         // just skip windows line endings
-        if( content[i] == '\r' ) {
-            ++i;
+        if( *c_new == '\r' ) {
+            ++c_new;
         }
 
-        // cut at unix line endings
-        if( content[i] == '\n' ) {
-            lines.emplace_back( data + pos, i - pos );
-            pos = i + 1;
+        if( *c_new == '\n' ) {
+            lines.emplace_back( c_old, c_new - c_old );
+            c_old = c_new + 1;
         }
+    }
+
+    if( c_old != c_end ) {
+        lines.emplace_back( c_old, c_end - c_old );
     }
 
     lines.shrink_to_fit();
