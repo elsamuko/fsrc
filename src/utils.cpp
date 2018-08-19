@@ -129,13 +129,13 @@ std::pair<std::string, utils::Lines> utils::fromFileC( const sys_string& filenam
 
     // check first 100 bytes for binary
     if( length > 100 ) {
-        fread( ( void* )lines.first.data(), 1, 100, file );
+        if( 100 != fread( ( void* )lines.first.data(), 1, 100, file ) ) { return lines; }
 
         if( !utils::isTextFile( std::string_view( lines.first.data(), 100 ) ) ) { return lines ;}
 
-        fread( ( char* )lines.first.data() + 100, 1, length - 100, file );
+        if( length - 100 != fread( ( char* )lines.first.data() + 100, 1, length - 100, file ) ) { return lines; }
     } else {
-        fread( ( char* )lines.first.data(), 1, length, file );
+        if( length != fread( ( char* )lines.first.data(), 1, length, file ) ) { return lines; }
 
         if( !utils::isTextFile( std::string_view( lines.first.data(), length ) ) ) { return lines ;}
     }
