@@ -7,8 +7,6 @@
 #include <cstdio>
 #include <cstring>
 
-#include <boost/algorithm/string.hpp>
-
 #if WIN32
 #include <Windows.h>
 #define popen _popen
@@ -73,13 +71,16 @@ std::vector<std::string> utils::run( const std::string& command ) {
 bool utils::isTextFile( const std::string_view& content ) {
     //! \note https://en.wikipedia.org/wiki/List_of_file_signatures
 
-    // PDF -> binary
-    if( boost::algorithm::starts_with( content, "%PDF" ) ) { return false; }
+    if( content.size() >= 4 ) {
+        // PDF -> binary
+        if( 0 == memcmp( content.data(), "%PDF", 4 ) ) { return false; }
 
-    // PostScript -> binary
-    if( boost::algorithm::starts_with( content, "%!PS" ) ) { return false; }
+        // PostScript -> binary
+        if( 0 == memcmp( content.data(), "%!PS", 4 ) ) { return false; }
+    }
 
-    bool hasDoubleZero = content.find( std::string( { 0, 0 } ) ) != std::string::npos;
+    static std::string_view zerozero( "\0\0", 2 );
+    bool hasDoubleZero = content.find( zerozero ) != std::string_view::npos;
     return !hasDoubleZero;
 }
 
