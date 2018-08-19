@@ -12,6 +12,7 @@ SearchOptions SearchOptions::parseArgs( int argc, char* argv[] ) {
     ( "help,h", "Help" )
     ( "dir,d", po::value<std::string>(), "Search folder" )
     ( "no-git", "Disable search with 'git ls-files'" )
+    ( "no-colors", "Disable colorized output" )
     ;
 
     po::options_description hidden( "Hidden options" );
@@ -50,6 +51,11 @@ SearchOptions SearchOptions::parseArgs( int argc, char* argv[] ) {
         opts.noGit = true;
     }
 
+    // disable colors
+    if( args.count( "no-colors" ) ) {
+        opts.colorized = false;
+    }
+
     // term
     if( args.count( "term" ) ) {
         opts.term = args["term"].as<std::string>();
@@ -79,9 +85,9 @@ void Searcher::search( const sys_string& path ) {
     std::vector<std::function<void()>> prints;
 
     // don't pipe colors
-    Color cred   = opts.colored ? Color::Red   : Color::Neutral;
-    Color cblue  = opts.colored ? Color::Blue  : Color::Neutral;
-    Color cgreen = opts.colored ? Color::Green : Color::Neutral;
+    Color cred   = opts.colorized ? Color::Red   : Color::Neutral;
+    Color cblue  = opts.colorized ? Color::Blue  : Color::Neutral;
+    Color cgreen = opts.colorized ? Color::Green : Color::Neutral;
 
     for( size_t i = 0; i < size; ++i ) {
         const std::string_view& line = lines.second[i];

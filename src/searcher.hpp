@@ -21,7 +21,7 @@ struct SearchOptions {
     bool noGit = false;
     std::string term;
     fs::path path;
-    bool colored = isatty( fileno( stdout ) );
+    bool colorized = isatty( fileno( stdout ) );
     operator bool() const { return success; }
     static SearchOptions parseArgs( int argc, char* argv[] );
 };
