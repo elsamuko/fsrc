@@ -1,6 +1,7 @@
 #define BOOST_TEST_MODULE Performance
 
 #include <boost/test/unit_test.hpp>
+#include <boost/iostreams/device/mapped_file.hpp>
 
 #include <fcntl.h>
 #include <unistd.h>
@@ -40,10 +41,42 @@ std::pair<std::string, utils::Lines> fromFileP( const sys_string& filename ) {
     return lines;
 }
 
+//! \returns content of filename as vector with memory mapped API
+std::pair<std::string, utils::Lines> fromFileM( const sys_string& filename ) {
+    std::pair<std::string, utils::Lines> lines;
+
+    boost::iostreams::mapped_file_source file( filename );
+
+    if( !file.is_open() ) { return lines; }
+
+    size_t length = file.size();
+
+    if( !length ) { return lines;}
+
+    lines.first.resize( length );
+
+    // check first 128 bytes for binary
+    if( length > 128 ) {
+        memcpy( lines.first.data(), file.data(), 128 );
+
+        if( !utils::isTextFile( std::string_view( lines.first.data(), 128 ) ) ) { return lines ;}
+
+        memcpy( lines.first.data() + 128, file.data() + 128, length - 128 );
+    } else {
+        memcpy( lines.first.data(), file.data(), length );
+
+        if( !utils::isTextFile( std::string_view( lines.first.data(), length ) ) ) { return lines ;}
+    }
+
+    lines.second = utils::parseContent( lines.first );
+    return lines;
+}
+
 using fromFileFunc = std::pair<std::string, utils::Lines>( const sys_string& filename );
 
 std::map<fromFileFunc*, const char*> names = {
     {fromFileP, "fromFileP"},
+    {fromFileM, "fromFileM"},
     {utils::fromFileC, "fromFileC"},
     {utils::fromFile, "fromFile"},
 };
@@ -71,7 +104,8 @@ size_t run( fromFileFunc fromFile ) {
 BOOST_AUTO_TEST_SUITE( Performance )
 
 BOOST_AUTO_TEST_CASE( Test_fromFile ) {
-    size_t t0 = run( fromFileP );
+    size_t tP = run( fromFileP );
+    size_t tM = run( fromFileM );
     size_t t1 = run( utils::fromFileC );
     size_t t2 = run( utils::fromFile );
     BOOST_CHECK_LT( t1, t2 ); // assume FILE* is faster than std::ifstream
