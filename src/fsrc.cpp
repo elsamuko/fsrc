@@ -7,6 +7,7 @@ void onAllFiles( Searcher& searcher ) {
 
     // max 8 threads, else start/stop needs longer than the actual work
     boost::asio::thread_pool pool( std::min( std::thread::hardware_concurrency(), 8u ) );
+    utils::ScopeGuard onExit( [&pool] { pool.join(); } );
 
     utils::recurseDir( searcher.opts.path.native(), [&pool, &searcher]( const sys_string & filename ) {
         boost::asio::post( pool, [filename, &searcher] {
@@ -14,13 +15,12 @@ void onAllFiles( Searcher& searcher ) {
             searcher.search( filename );
         } );
     } );
-
-    pool.join();
 }
 
 void onGitFiles( const std::vector<std::string>& filenames, Searcher& searcher ) {
     // max 8 threads, else start/stop needs longer than the actual work
     boost::asio::thread_pool pool( std::min( std::thread::hardware_concurrency(), 8u ) );
+    utils::ScopeGuard onExit( [&pool] { pool.join(); } );
 
     for( const std::string& filename : filenames ) {
         boost::asio::post( pool, [filename, &searcher] {
@@ -28,8 +28,6 @@ void onGitFiles( const std::vector<std::string>& filenames, Searcher& searcher )
             searcher.search( filename );
         } );
     }
-
-    pool.join();
 }
 
 
