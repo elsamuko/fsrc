@@ -94,20 +94,40 @@ void Searcher::search( const sys_string& path ) {
 
         if( line.empty() ) { continue; }
 
-        auto begin = rx::cregex_iterator( &line.front(), 1 + &line.back(), regex );
-        auto end   = rx::cregex_iterator();
+        if( simple ) {
 
-        if( std::distance( begin, end ) > 0 ) {
-            prints.emplace_back( utils::printFunc( cblue, "\nL%4i : ", i + 1 ) );
-        }
+            size_t pos = line.find( term );
+            const char* data = line.data();
 
-        for( rx::cregex_iterator match = begin; match != end; ++match ) {
-            hits++;
-            prints.emplace_back( utils::printFunc( Color::Neutral, "%s", match->prefix().str().c_str() ) );
-            prints.emplace_back( utils::printFunc( cred, "%s", match->str().c_str() ) );
+            // highlight only first hit
+            if( pos != std::string::npos ) {
+                hits++;
+                prints.emplace_back( utils::printFunc( cblue, "\nL%4i : ", i + 1 ) );
+                prints.emplace_back( utils::printFunc( Color::Neutral, "%.*s", pos, data ) );
+                prints.emplace_back( utils::printFunc( cred, "%s", term.c_str() ) );
+                prints.emplace_back( utils::printFunc( Color::Neutral, "%.*s",
+                                                       line.size() - pos - term.size(),
+                                                       data + pos + term.size() ) );
+            }
 
-            if( std::distance( match, end ) == 1 ) {
-                prints.emplace_back( utils::printFunc( Color::Neutral, "%s", match->suffix().str().c_str() ) );
+        } else {
+            auto begin = rx::cregex_iterator( &line.front(), 1 + &line.back(), regex );
+            auto end   = rx::cregex_iterator();
+
+            if( std::distance( begin, end ) > 0 ) {
+                prints.emplace_back( utils::printFunc( cblue, "\nL%4i : ", i + 1 ) );
+            } else {
+                continue;
+            }
+
+            for( rx::cregex_iterator match = begin; match != end; ++match ) {
+                hits++;
+                prints.emplace_back( utils::printFunc( Color::Neutral, "%s", match->prefix().str().c_str() ) );
+                prints.emplace_back( utils::printFunc( cred, "%s", match->str().c_str() ) );
+
+                if( std::distance( match, end ) == 1 ) {
+                    prints.emplace_back( utils::printFunc( Color::Neutral, "%s", match->suffix().str().c_str() ) );
+                }
             }
         }
     }
