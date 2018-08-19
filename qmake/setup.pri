@@ -10,8 +10,7 @@ CONFIG(release, debug|release) {
 }
 
 CONFIG -= qt
-!macx: CONFIG += c++17
-macx: CONFIG += c++14
+CONFIG += c++1z
 CONFIG += console
 CONFIG -= app_bundle
 CONFIG += static

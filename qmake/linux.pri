@@ -1,5 +1,4 @@
 
-QMAKE_CXXFLAGS += -std=c++17
 QMAKE_CXXFLAGS_RELEASE += -msse2 -oFast
 QMAKE_LFLAGS_RELEASE += -flto
 
