@@ -92,7 +92,7 @@ void Searcher::search( const sys_string& path ) {
         auto end   = rx::cregex_iterator();
 
         if( std::distance( begin, end ) > 0 ) {
-            prints.emplace_back( utils::printFunc( cblue, "\nL%4i : ", i ) );
+            prints.emplace_back( utils::printFunc( cblue, "\nL%4i : ", i + 1 ) );
         }
 
         for( rx::cregex_iterator match = begin; match != end; ++match ) {
