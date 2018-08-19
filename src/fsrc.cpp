@@ -1,16 +1,30 @@
 #include "searcher.hpp"
 #include "utils.hpp"
 
+#define THREADED 1
+
+#if THREADED
+
 #include "boost/asio.hpp"
+using boost::asio::post;
+// max 8 threads, else start/stop needs longer than the actual work
+#define POOL boost::asio::thread_pool pool( std::min( std::thread::hardware_concurrency(), 8u ) );\
+    utils::ScopeGuard onExit( [&pool] { pool.join(); } )
+
+#else
+
+#define POOL int pool = 0
+inline void post( const int, const std::function<void()>& f ) {
+    f();
+}
+
+#endif
 
 void onAllFiles( Searcher& searcher ) {
-
-    // max 8 threads, else start/stop needs longer than the actual work
-    boost::asio::thread_pool pool( std::min( std::thread::hardware_concurrency(), 8u ) );
-    utils::ScopeGuard onExit( [&pool] { pool.join(); } );
+    POOL;
 
     utils::recurseDir( searcher.opts.path.native(), [&pool, &searcher]( const sys_string & filename ) {
-        boost::asio::post( pool, [filename, &searcher] {
+        post( pool, [filename, &searcher] {
             searcher.files++;
             searcher.search( filename );
         } );
@@ -18,12 +32,10 @@ void onAllFiles( Searcher& searcher ) {
 }
 
 void onGitFiles( const std::vector<std::string>& filenames, Searcher& searcher ) {
-    // max 8 threads, else start/stop needs longer than the actual work
-    boost::asio::thread_pool pool( std::min( std::thread::hardware_concurrency(), 8u ) );
-    utils::ScopeGuard onExit( [&pool] { pool.join(); } );
+    POOL;
 
     for( const std::string& filename : filenames ) {
-        boost::asio::post( pool, [filename, &searcher] {
+        post( pool, [filename, &searcher] {
             searcher.files++;
             searcher.search( filename );
         } );
