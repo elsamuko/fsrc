@@ -144,37 +144,6 @@ std::pair<std::string, utils::Lines> utils::fromFileC( const sys_string& filenam
         if( !utils::isTextFile( std::string_view( ptr, length ) ) ) { return lines ;}
     }
 
-    return lines;
-}
-
-std::pair<std::string, utils::Lines> utils::fromFile( const sys_string& filename ) {
-    std::pair<std::string, Lines> lines;
-    std::ifstream file( filename.c_str(), std::ios::binary | std::ios::in );
-
-    if( !file ) { return lines;}
-
-    file.seekg( 0, std::ios::end );
-    size_t length = ( size_t ) file.tellg();
-    file.seekg( 0, std::ios::beg );
-
-    if( !length ) { return lines;}
-
-    lines.first.resize( length );
-
-    // check first 100 bytes for binary
-    if( length > 100 ) {
-        file.read( ( char* ) lines.first.data(), 100 );
-
-        if( !utils::isTextFile( std::string_view( lines.first.data(), 100 ) ) ) { return lines ;}
-
-        file.read( ( char* ) lines.first.data() + 100, length - 100 );
-    } else {
-        file.read( ( char* ) lines.first.data(), length );
-
-        if( !utils::isTextFile( std::string_view( lines.first.data(), length ) ) ) { return lines ;}
-    }
-
-    lines.second = utils::parseContent( lines.first.data(), lines.first.size() );
     lines.second = utils::parseContent( ptr, length );
     return lines;
 }

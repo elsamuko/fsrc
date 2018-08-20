@@ -73,9 +73,6 @@ bool isTextFile( const std::string_view& content );
 //! \returns content of filename as vector with C API
 std::pair<std::string, Lines> fromFileC( const sys_string& filename );
 
-//! \returns content of filename as vector with C++ API
-std::pair<std::string, Lines> fromFile( const sys_string& filename );
-
 //! splits content at newlines
 //! \returns lines as vector of string_view
 Lines parseContent( const char* data, const size_t size );
