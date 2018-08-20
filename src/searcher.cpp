@@ -138,8 +138,8 @@ void Searcher::search( const sys_string& path ) {
         filesMatched++;
 
         const auto printFile     = utils::printFunc( cgreen, "%s", path.c_str() );
-        const auto printNewlines = utils::printFunc( Color::Neutral, "%s", "\n\n" )
-                                   ;
+        const auto printNewlines = utils::printFunc( Color::Neutral, "%s", "\n\n" );
+
         m.lock();
         printFile();
 
