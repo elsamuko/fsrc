@@ -142,7 +142,7 @@ void Searcher::search( const sys_string& path ) {
         m.lock();
         printFile();
 
-        for( std::function<void()> func : prints ) { func(); }
+        for( const std::function<void()>& func : prints ) { func(); }
 
         printNewlines();
         m.unlock();
