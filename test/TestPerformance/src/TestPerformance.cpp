@@ -8,7 +8,7 @@
 #include <sys/types.h>
 #include "utils.hpp"
 
-//! \returns content of filename as vector with POSIX API
+//! POSIX API with thread local storage
 std::pair<std::string, utils::Lines> fromFileP( const sys_string& filename ) {
     std::pair<std::string, utils::Lines> lines;
     int file = open( filename.c_str(), O_RDONLY );
@@ -22,26 +22,28 @@ std::pair<std::string, utils::Lines> fromFileP( const sys_string& filename ) {
 
     if( !length ) { return lines;}
 
-    lines.first.resize( length );
+    // growing buffer for each thread
+    static thread_local utils::Buffer buffer;
+    char* ptr = buffer.grow( length );
 
     // check first 128 bytes for binary
     if( length > 128 ) {
-        read( file, ( void* )lines.first.data(), 128 );
+        read( file, ptr, 128 );
 
-        if( !utils::isTextFile( std::string_view( lines.first.data(), 128 ) ) ) { return lines ;}
+        if( !utils::isTextFile( std::string_view( ptr, 128 ) ) ) { return lines ;}
 
-        read( file, ( char* )lines.first.data() + 128, length - 128 );
+        read( file, ptr + 128, length - 128 );
     } else {
-        read( file, ( char* )lines.first.data(), length );
+        read( file, ptr, length );
 
-        if( !utils::isTextFile( std::string_view( lines.first.data(), length ) ) ) { return lines ;}
+        if( !utils::isTextFile( std::string_view( ptr, length ) ) ) { return lines ;}
     }
 
-    lines.second = utils::parseContent( lines.first.data(), lines.first.size() );
+    lines.second = utils::parseContent( ptr, length );
     return lines;
 }
 
-//! \returns content of filename as vector with memory mapped API
+//! memory mapped API with thread local storage
 std::pair<std::string, utils::Lines> fromFileM( const sys_string& filename ) {
     std::pair<std::string, utils::Lines> lines;
 
@@ -53,22 +55,123 @@ std::pair<std::string, utils::Lines> fromFileM( const sys_string& filename ) {
 
     if( !length ) { return lines;}
 
-    lines.first.resize( length );
+    // growing buffer for each thread
+    static thread_local utils::Buffer buffer;
+    char* ptr = buffer.grow( length );
 
     // check first 128 bytes for binary
     if( length > 128 ) {
-        memcpy( lines.first.data(), file.data(), 128 );
-
-        if( !utils::isTextFile( std::string_view( lines.first.data(), 128 ) ) ) { return lines ;}
-
-        memcpy( lines.first.data() + 128, file.data() + 128, length - 128 );
+        if( !utils::isTextFile( std::string_view( file.data(), 128 ) ) ) { return lines ;}
     } else {
-        memcpy( lines.first.data(), file.data(), length );
-
-        if( !utils::isTextFile( std::string_view( lines.first.data(), length ) ) ) { return lines ;}
+        if( !utils::isTextFile( std::string_view( file.data(), length ) ) ) { return lines ;}
     }
 
-    lines.second = utils::parseContent( lines.first.data(), lines.first.size() );
+    memcpy( ptr, file.data(), length );
+
+    lines.second = utils::parseContent( ptr, length );
+    return lines;
+}
+
+//! C API with thread local storage
+std::pair<std::string, utils::Lines> fromFileL( const sys_string& filename ) {
+    std::pair<std::string, utils::Lines> lines;
+    FILE* file = fopen( filename.c_str(), "rb" );
+    const utils::ScopeGuard onExit( [file] { if( file ) { fclose( file ); } } );
+
+    if( file == NULL ) { return lines; }
+
+    fseek( file, 0, SEEK_END );
+    size_t length = ftell( file );
+    fseek( file, 0, SEEK_SET );
+
+    if( !length ) { return lines;}
+
+    // growing buffer for each thread
+    static thread_local utils::Buffer buffer;
+    char* ptr = buffer.grow( length );
+
+    // check first 100 bytes for binary
+    if( length > 100 ) {
+        if( 100 != fread( ptr, 1, 100, file ) ) { return lines; }
+
+        if( !utils::isTextFile( std::string_view( ptr, 100 ) ) ) { return lines ;}
+
+        if( length - 100 != fread( ptr + 100, 1, length - 100, file ) ) { return lines; }
+    } else {
+        if( length != fread( ptr, 1, length, file ) ) { return lines; }
+
+        if( !utils::isTextFile( std::string_view( ptr, length ) ) ) { return lines ;}
+    }
+
+    lines.second = utils::parseContent( ptr, length );
+    return lines;
+}
+
+//! C API with string storage
+std::pair<std::string, utils::Lines> fromFileS( const sys_string& filename ) {
+    std::pair<std::string, utils::Lines> lines;
+    FILE* file = fopen( filename.c_str(), "rb" );
+    const utils::ScopeGuard onExit( [file] { if( file ) { fclose( file ); } } );
+
+    if( file == NULL ) { return lines; }
+
+    fseek( file, 0, SEEK_END );
+    size_t length = ftell( file );
+    fseek( file, 0, SEEK_SET );
+
+    if( !length ) { return lines;}
+
+    lines.first.resize( length );
+    char* ptr = lines.first.data();
+
+    // check first 100 bytes for binary
+    if( length > 100 ) {
+        if( 100 != fread( ptr, 1, 100, file ) ) { return lines; }
+
+        if( !utils::isTextFile( std::string_view( ptr, 100 ) ) ) { return lines ;}
+
+        if( length - 100 != fread( ptr + 100, 1, length - 100, file ) ) { return lines; }
+    } else {
+        if( length != fread( ptr, 1, length, file ) ) { return lines; }
+
+        if( !utils::isTextFile( std::string_view( ptr, length ) ) ) { return lines ;}
+    }
+
+    lines.second = utils::parseContent( ptr, length );
+    return lines;
+}
+
+//! CPP API with thread local storage
+std::pair<std::string, utils::Lines> fromFileCPP( const sys_string& filename ) {
+    std::pair<std::string, utils::Lines> lines;
+    std::ifstream file( filename.c_str(), std::ios::binary | std::ios::in );
+
+    if( !file ) { return lines;}
+
+    file.seekg( 0, std::ios::end );
+    size_t length = ( size_t ) file.tellg();
+    file.seekg( 0, std::ios::beg );
+
+    if( !length ) { return lines;}
+
+    // growing buffer for each thread
+    static thread_local utils::Buffer buffer;
+    char* ptr = buffer.grow( length );
+
+    // check first 100 bytes for binary
+    if( length > 100 ) {
+        file.read( ptr, 100 );
+
+        if( !utils::isTextFile( std::string_view( ptr, 100 ) ) ) { return lines ;}
+
+        file.read( ptr + 100, length - 100 );
+    } else {
+        file.read( ptr, length );
+
+        if( !utils::isTextFile( std::string_view( ptr, length ) ) ) { return lines ;}
+    }
+
+    lines.second = utils::parseContent( ptr, length );
     return lines;
 }
 
@@ -77,8 +180,10 @@ using fromFileFunc = std::pair<std::string, utils::Lines>( const sys_string& fil
 std::map<fromFileFunc*, const char*> names = {
     {fromFileP, "fromFileP"},
     {fromFileM, "fromFileM"},
+    {fromFileL, "fromFileL"},
+    {fromFileS, "fromFileS"},
+    {fromFileCPP, "fromFileCPP"},
     {utils::fromFileC, "fromFileC"},
-    {utils::fromFile, "fromFile"},
 };
 
 size_t run( fromFileFunc fromFile ) {
@@ -97,17 +202,19 @@ size_t run( fromFileFunc fromFile ) {
     auto duration = std::chrono::system_clock::now() - tp;
     std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>( duration );
 
-    printf( "%10s : %lu kB and %lu lines in %lld ms\n", names[fromFile], sum / 1024, lineCount, ms.count() );
+    printf( "%12s : %5lu kB and %lu lines in %lld ms\n", names[fromFile], sum / 1024, lineCount, ms.count() );
     return ms.count();
 }
 
 BOOST_AUTO_TEST_SUITE( Performance )
 
 BOOST_AUTO_TEST_CASE( Test_fromFile ) {
-    size_t tP = run( fromFileP );
-    size_t tM = run( fromFileM );
+    /*size_t tP = */run( fromFileP );
+    /*size_t tM = */run( fromFileM );
+    /*size_t tL = */run( fromFileL );
+    /*size_t tS = */run( fromFileS );
     size_t t1 = run( utils::fromFileC );
-    size_t t2 = run( utils::fromFile );
+    size_t t2 = run( fromFileCPP );
     BOOST_CHECK_LT( t1, t2 ); // assume FILE* is faster than std::ifstream
 }
 
