@@ -180,14 +180,12 @@ std::pair<std::string, utils::Lines> utils::fromFile( const sys_string& filename
 #if !WIN32
 void utils::recurseDir( const sys_string& filename, const std::function<void( const sys_string& filename )>& callback ) {
     DIR* dir = opendir( filename.c_str() );
+
+    if( !dir ) { return; }
+
     struct dirent* dp = nullptr;
 
     while( ( dp = readdir( dir ) ) != NULL ) {
-        if( !strcmp( dp->d_name, "." ) ) { continue; }
-
-        if( !strcmp( dp->d_name, ".." ) ) { continue; }
-
-        if( !strcmp( dp->d_name, ".git" ) ) { continue; }
 
         if( dp->d_type == DT_REG ) {
             callback( filename + "/" + dp->d_name );
@@ -195,6 +193,12 @@ void utils::recurseDir( const sys_string& filename, const std::function<void( co
         }
 
         if( dp->d_type == DT_DIR ) {
+            if( !strcmp( dp->d_name, "." ) ) { continue; }
+
+            if( !strcmp( dp->d_name, ".." ) ) { continue; }
+
+            if( !strcmp( dp->d_name, ".git" ) ) { continue; }
+
             utils::recurseDir( filename + "/" + dp->d_name, callback );
             continue;
         }
@@ -215,16 +219,16 @@ void utils::recurseDir( const sys_string& filename, const std::function<void ( c
 
     while( FindNextFileW( file, &data ) ) {
 
-        if( !wcscmp( data.cFileName, L".." ) ) { continue; }
-
-        if( !wcscmp( data.cFileName, L".git" ) ) { continue; }
-
         if( data.dwFileAttributes & FILE_ATTRIBUTE_ARCHIVE ) {
             callback( filename + L"\\" + data.cFileName );
             continue;
         }
 
         if( data.dwFileAttributes == FILE_ATTRIBUTE_DIRECTORY ) {
+            if( !wcscmp( data.cFileName, L".." ) ) { continue; }
+
+            if( !wcscmp( data.cFileName, L".git" ) ) { continue; }
+
             recurseDir( filename + L"\\" + data.cFileName, callback );
             continue;
         }
