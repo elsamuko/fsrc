@@ -18,6 +18,7 @@ const std::map<Color, WORD> colors = {
 };
 #else
 #include <dirent.h>
+#include <sys/stat.h>
 const std::map<Color, const char*> colors = {
     {Color::Red,     "\033[1;31m"},
     {Color::Green,   "\033[1;32m"},
@@ -122,9 +123,11 @@ std::pair<std::string, utils::Lines> utils::fromFileC( const sys_string& filenam
 
     if( file == NULL ) { return lines; }
 
-    fseek( file, 0, SEEK_END );
-    size_t length = ftell( file );
-    fseek( file, 0, SEEK_SET );
+    struct stat st;
+
+    if( 0 != fstat( fileno( file ), &st ) ) { return lines; }
+
+    size_t length = st.st_size;
 
     if( !length ) { return lines;}
 
