@@ -42,9 +42,9 @@ struct ScopeGuard {
 };
 
 struct Buffer {
-    char* ptr = nullptr;
+    char* ptr = ( char* )malloc( 10 * 1024 );
     size_t size = 0;
-    size_t reserved = 0;
+    size_t reserved = 10 * 1024;
     inline char* grow( const size_t requested ) {
         // memory leak intended
         if( reserved < requested ) {
