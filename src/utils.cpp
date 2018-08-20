@@ -127,22 +127,23 @@ std::pair<std::string, utils::Lines> utils::fromFileC( const sys_string& filenam
 
     if( !length ) { return lines;}
 
-    lines.first.resize( length );
+    // growing buffer for each thread
+    static thread_local utils::Buffer buffer;
+    char* ptr = buffer.grow( length );
 
     // check first 100 bytes for binary
     if( length > 100 ) {
-        if( 100 != fread( ( void* )lines.first.data(), 1, 100, file ) ) { return lines; }
+        if( 100 != fread( ptr, 1, 100, file ) ) { return lines; }
 
-        if( !utils::isTextFile( std::string_view( lines.first.data(), 100 ) ) ) { return lines ;}
+        if( !utils::isTextFile( std::string_view( ptr, 100 ) ) ) { return lines ;}
 
-        if( length - 100 != fread( ( char* )lines.first.data() + 100, 1, length - 100, file ) ) { return lines; }
+        if( length - 100 != fread( ptr + 100, 1, length - 100, file ) ) { return lines; }
     } else {
-        if( length != fread( ( char* )lines.first.data(), 1, length, file ) ) { return lines; }
+        if( length != fread( ptr, 1, length, file ) ) { return lines; }
 
-        if( !utils::isTextFile( std::string_view( lines.first.data(), length ) ) ) { return lines ;}
+        if( !utils::isTextFile( std::string_view( ptr, length ) ) ) { return lines ;}
     }
 
-    lines.second = utils::parseContent( lines.first.data(), lines.first.size() );
     return lines;
 }
 
@@ -174,6 +175,7 @@ std::pair<std::string, utils::Lines> utils::fromFile( const sys_string& filename
     }
 
     lines.second = utils::parseContent( lines.first.data(), lines.first.size() );
+    lines.second = utils::parseContent( ptr, length );
     return lines;
 }
 
