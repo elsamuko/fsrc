@@ -83,6 +83,7 @@ void Searcher::search( const sys_string& path ) {
 
     size_t size = lines.second.size();
     std::vector<std::function<void()>> prints;
+    prints.reserve( 10 );
 
     // don't pipe colors
     Color cred   = opts.colorized ? Color::Red   : Color::Neutral;
