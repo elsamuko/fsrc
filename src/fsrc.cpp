@@ -61,10 +61,10 @@ int main( int argc, char* argv[] ) {
 #endif
         fs::current_path( opts.path );
         std::vector<std::string> gitFiles = utils::run( "git ls-files 2> " + nullDevice );
-        LOG( "Searching for \"" << searcher.opts.term << "\" in repo:\n" );
+        printf( "Searching for \"%s\" in repo:\n\n", searcher.opts.term.c_str() );
         onGitFiles( gitFiles, searcher );
     } else {
-        LOG( "Searching for \"" << searcher.opts.term << "\" in folder:\n" );
+        printf( "Searching for \"%s\" in folder:\n\n", searcher.opts.term.c_str() );
         onAllFiles( searcher );
     }
 
