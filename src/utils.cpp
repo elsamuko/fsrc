@@ -139,7 +139,7 @@ std::pair<std::string, utils::Lines> utils::fromFileC( const sys_string& filenam
     if( length != fread( ptr, 1, length, file ) ) { return lines; }
 
     // check first 100 bytes for binary
-    if( !utils::isTextFile( std::string_view( ptr, 100 ) ) ) { return lines ;}
+    if( !utils::isTextFile( std::string_view( ptr, std::min( length, 100ul ) ) ) ) { return lines ;}
 
     lines.second = utils::parseContent( ptr, length );
     return lines;
