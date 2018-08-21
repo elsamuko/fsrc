@@ -135,18 +135,11 @@ std::pair<std::string, utils::Lines> utils::fromFileC( const sys_string& filenam
     static thread_local utils::Buffer buffer;
     char* ptr = buffer.grow( length );
 
+    // read content
+    if( length != fread( ptr, 1, length, file ) ) { return lines; }
+
     // check first 100 bytes for binary
-    if( length > 100 ) {
-        if( 100 != fread( ptr, 1, 100, file ) ) { return lines; }
-
-        if( !utils::isTextFile( std::string_view( ptr, 100 ) ) ) { return lines ;}
-
-        if( length - 100 != fread( ptr + 100, 1, length - 100, file ) ) { return lines; }
-    } else {
-        if( length != fread( ptr, 1, length, file ) ) { return lines; }
-
-        if( !utils::isTextFile( std::string_view( ptr, length ) ) ) { return lines ;}
-    }
+    if( !utils::isTextFile( std::string_view( ptr, 100 ) ) ) { return lines ;}
 
     lines.second = utils::parseContent( ptr, length );
     return lines;
