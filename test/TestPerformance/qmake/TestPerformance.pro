@@ -18,3 +18,6 @@ INCLUDEPATH += $${MAIN_DIR}/src
 HEADERS += $${MAIN_DIR}/src/utils.hpp
 SOURCES += $${MAIN_DIR}/src/utils.cpp
 
+HEADERS += $${MAIN_DIR}/src/threadpool.hpp
+SOURCES += $${MAIN_DIR}/src/threadpool.cpp
+

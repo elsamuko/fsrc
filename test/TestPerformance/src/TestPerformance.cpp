@@ -9,6 +9,10 @@
 #include <sys/stat.h>
 
 #include "utils.hpp"
+#include "threadpool.hpp"
+
+#include "boost/asio.hpp"
+using boost::asio::post;
 
 //! POSIX API with thread local storage
 std::pair<std::string, utils::Lines> fromFileP( const sys_string& filename ) {
@@ -294,6 +298,44 @@ BOOST_AUTO_TEST_CASE( Test_fromFile ) {
     size_t t1 = run( utils::fromFileC );
     size_t t2 = run( fromFileCPP );
     BOOST_CHECK_LT( t1, t2 ); // assume FILE* is faster than std::ifstream
+}
+
+BOOST_AUTO_TEST_CASE( Test_ThreadPool ) {
+    size_t ms_asio;
+    size_t ms_own;
+    {
+        auto tp = std::chrono::system_clock::now();
+        {
+            boost::asio::thread_pool pool( std::min( std::thread::hardware_concurrency(), 8u ) );
+
+            for( int i = 0; i < 1000; ++i ) {
+                boost::asio::post( pool, [] {} );
+            }
+
+            pool.join();
+        }
+
+        auto duration = std::chrono::system_clock::now() - tp;
+        std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>( duration );
+        ms_asio = ms.count();
+    }
+    {
+        auto tp = std::chrono::system_clock::now();
+        {
+            ThreadPool pool( std::min( std::thread::hardware_concurrency(), 8u ) );
+
+            for( int i = 0; i < 1000; ++i ) {
+                pool.add( [] {} );
+            }
+        }
+
+        auto duration = std::chrono::system_clock::now() - tp;
+        std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>( duration );
+        ms_own = ms.count();
+    }
+
+    printf( "own %lu ms, boost %lu ms\n", ms_own, ms_asio );
+    BOOST_CHECK_GT( ms_asio, ms_own ); // assume own tp is faster than boost::asio
 }
 
 BOOST_AUTO_TEST_SUITE_END()
