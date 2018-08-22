@@ -11,6 +11,9 @@ SOURCES += $${SRC_DIR}/utils.cpp
 HEADERS += $${SRC_DIR}/searcher.hpp
 SOURCES += $${SRC_DIR}/searcher.cpp
 
+HEADERS += $${SRC_DIR}/threadpool.hpp
+SOURCES += $${SRC_DIR}/threadpool.cpp
+
 include( setup.pri )
 linux: include( linux.pri )
 win32: include( win.pri )
