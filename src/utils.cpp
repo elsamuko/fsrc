@@ -96,16 +96,9 @@ utils::Lines utils::parseContent( const char* data, const size_t size ) {
     char* c_new = c_old;
     char* c_end = c_old + size;
 
-    for( ; *c_new; ++c_new ) {
-        // just skip windows line endings
-        if( *c_new == '\r' ) {
-            ++c_new;
-        }
-
-        if( *c_new == '\n' ) {
-            lines.emplace_back( c_old, c_new - c_old );
-            c_old = c_new + 1;
-        }
+    while( ( c_new = ( char* )memchr( c_old, '\n', c_end - c_old ) ) ) {
+        lines.emplace_back( c_old, c_new - c_old );
+        c_old = c_new + 1;
     }
 
     if( c_old != c_end ) {
