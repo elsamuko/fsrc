@@ -10,7 +10,6 @@
 
 #include <boost/lockfree/queue.hpp>
 
-
 class ThreadPool {
     public:
         typedef std::function<void()> Job;
@@ -18,14 +17,9 @@ class ThreadPool {
         ~ThreadPool();
         bool add( Job job );
     private:
-        void waitForAllJobs();
         void workOff();
-        void standInLine();
 
         std::vector<std::thread> workers;
-
-        std::mutex mutex;
-        std::condition_variable wait;
 
         boost::lockfree::queue<Job*> jobs;
         std::atomic_int count = {0};

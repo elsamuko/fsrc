@@ -14,7 +14,7 @@ ThreadPool::ThreadPool( size_t threads ) {
                 if( count ) {
                     this->workOff();
                 } else {
-                    standInLine();
+                    std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
                 }
 
                 if( !( running || count ) ) {
@@ -27,7 +27,6 @@ ThreadPool::ThreadPool( size_t threads ) {
 
 ThreadPool::~ThreadPool() {
     running = false;
-    waitForAllJobs();
 
     for( std::thread& worker : workers ) {
         worker.join();
@@ -45,23 +44,8 @@ void ThreadPool::workOff() {
     }
 }
 
-void ThreadPool::standInLine() {
-    std::unique_lock<std::mutex> lock( mutex );
-    wait.wait_for( lock, std::chrono::milliseconds( 10 ) );
-}
-
 bool ThreadPool::add( Job job ) {
     jobs.push( new Job( std::move( job ) ) );
     count++;
-    wait.notify_one();
     return true;
-}
-
-void ThreadPool::waitForAllJobs() {
-    wait.notify_all();
-
-    while( count > 0 ) {
-        std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
-        wait.notify_all();
-    }
 }
