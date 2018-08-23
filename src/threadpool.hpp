@@ -17,8 +17,10 @@ class ThreadPool {
         ~ThreadPool();
         bool add( Job job );
     private:
+        void initialize();
         void workOff();
 
+        int threads = 4;
         std::vector<std::thread> workers;
 
         boost::lockfree::queue<Job*> jobs;
