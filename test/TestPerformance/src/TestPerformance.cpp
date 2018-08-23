@@ -27,7 +27,7 @@ std::pair<std::string, utils::Lines> fromFilePosix( const sys_string& filename )
 
     IF_RET( length != ( size_t )read( file, ptr, length ) );
 
-    // check first 128 bytes for binary
+    // check first 100 bytes for binary
     IF_RET( !utils::isTextFile( std::string_view( ptr, std::min( length, 100ul ) ) ) );
 
     lines.second = utils::parseContent( ptr, length );
@@ -47,7 +47,7 @@ std::pair<std::string, utils::Lines> fromFileMmap( const sys_string& filename ) 
     char* map = ( char* )mmap( 0, length, PROT_READ, MAP_PRIVATE, file, 0 );
     IF_RET( map == MAP_FAILED );
 
-    // check first 128 bytes for binary
+    // check first 100 bytes for binary
     IF_RET( !utils::isTextFile( std::string_view( map, std::min( length, 100ul ) ) ) );
 
     lines.second = utils::parseContent( map, length );
