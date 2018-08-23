@@ -11,6 +11,61 @@ using boost::asio::post;
 #include "utils.hpp"
 #include "threadpool.hpp"
 
+utils::Lines parseContentForLoop( const char* data, const size_t size ) {
+    utils::Lines lines;
+    lines.reserve( 128 );
+
+    if( size == 0 ) { return lines; }
+
+    char* c_old = ( char* )data;
+    char* c_new = c_old;
+    char* c_end = c_old + size;
+
+    for( ; *c_new; ++c_new ) {
+        // just skip windows line endings
+        if( *c_new == '\r' ) {
+            ++c_new;
+        }
+
+        if( *c_new == '\n' ) {
+            lines.emplace_back( c_old, c_new - c_old );
+            c_old = c_new + 1;
+        }
+    }
+
+    if( c_old != c_end ) {
+        lines.emplace_back( c_old, c_end - c_old );
+    }
+
+    lines.shrink_to_fit();
+    return lines;
+}
+
+using parseContentFunc = utils::Lines( const char* data, const size_t size );
+
+//! POSIX API with custom parseContent function
+std::pair<std::string, utils::Lines> fromFileParser( const sys_string& filename, parseContentFunc& parse ) {
+    std::pair<std::string, utils::Lines> lines;
+    int file = open( filename.c_str(), O_RDONLY );
+    IF_RET( !file );
+    utils::ScopeGuard onExit( [file] { close( file ); } );
+
+    size_t length = utils::fileSize( file );
+    IF_RET( !length );
+
+    // growing buffer for each thread
+    static thread_local utils::Buffer buffer;
+    char* ptr = buffer.grow( length );
+
+    IF_RET( length != ( size_t )read( file, ptr, length ) );
+
+    // check first 100 bytes for binary
+    IF_RET( !utils::isTextFile( std::string_view( ptr, std::min( length, 100ul ) ) ) );
+
+    lines.second = parse( ptr, length );
+    return lines;
+}
+
 //! POSIX API with thread local storage
 std::pair<std::string, utils::Lines> fromFilePosix( const sys_string& filename ) {
     std::pair<std::string, utils::Lines> lines;
@@ -181,6 +236,14 @@ std::pair<std::string, utils::Lines> fromFileTwoFread( const sys_string& filenam
     return lines;
 }
 
+std::pair<std::string, utils::Lines> fromFileUtils( const sys_string& filename ) {
+    return fromFileParser( filename, utils::parseContent );
+}
+
+std::pair<std::string, utils::Lines> fromFileForLoop( const sys_string& filename ) {
+    return fromFileParser( filename, parseContentForLoop );
+}
+
 using fromFileFunc = std::pair<std::string, utils::Lines>( const sys_string& filename );
 
 std::map<fromFileFunc*, const char*> names = {
@@ -190,6 +253,9 @@ std::map<fromFileFunc*, const char*> names = {
     {fromFileString, "fromFileString"},
     {fromFileLSeek, "fromFileLSeek"},
     {fromFileTwoFread, "fromFileTwoFread"},
+    {fromFileCPP, "fromFileCPP"},
+    {fromFileUtils, "fromFileUtils"},
+    {fromFileForLoop, "fromFileForLoop"},
     {fromFileCPP, "fromFileCPP"},
     {utils::fromFileC, "utils::fromFileC"},
 };
@@ -217,6 +283,7 @@ size_t run( fromFileFunc fromFile ) {
 BOOST_AUTO_TEST_SUITE( Performance )
 
 BOOST_AUTO_TEST_CASE( Test_fromFile ) {
+
     size_t t2 = run( fromFileCPP );
     /*size_t tM = */run( fromFileMmap );
     /*size_t tS = */run( fromFileString );
@@ -225,7 +292,15 @@ BOOST_AUTO_TEST_CASE( Test_fromFile ) {
     /*size_t tO = */run( fromFileTwoFread );
     /*size_t tP = */run( fromFilePosix );
     size_t t1 = run( utils::fromFileC );
+    printf( "\n" );
     BOOST_CHECK_LT( t1, t2 ); // assume FILE* is faster than std::ifstream
+}
+
+BOOST_AUTO_TEST_CASE( Test_parseContent ) {
+    size_t t2 = run( fromFileForLoop );
+    size_t t1 = run( fromFileUtils );
+    printf( "\n" );
+    BOOST_CHECK_LT( t1, t2 );
 }
 
 BOOST_AUTO_TEST_CASE( Test_ThreadPool ) {
