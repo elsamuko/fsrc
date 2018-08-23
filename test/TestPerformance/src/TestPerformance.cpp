@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/mman.h>
 
 #include "utils.hpp"
 #include "threadpool.hpp"
@@ -52,29 +53,21 @@ std::pair<std::string, utils::Lines> fromFileP( const sys_string& filename ) {
 //! memory mapped API with thread local storage
 std::pair<std::string, utils::Lines> fromFileM( const sys_string& filename ) {
     std::pair<std::string, utils::Lines> lines;
+    int file = open( filename.c_str(), O_RDONLY );
+    IF_NOT_RET( !file );
+    utils::ScopeGuard onExit( [file] { close( file ); } );
 
-    boost::iostreams::mapped_file_source file( filename );
+    size_t length = utils::fileSize( file );
+    IF_NOT_RET( !length );
 
-    if( !file.is_open() ) { return lines; }
-
-    size_t length = file.size();
-
-    if( !length ) { return lines;}
-
-    // growing buffer for each thread
-    static thread_local utils::Buffer buffer;
-    char* ptr = buffer.grow( length );
+    char* map = ( char* )mmap( 0, length, PROT_READ, MAP_PRIVATE, file, 0 );
+    IF_NOT_RET( map == MAP_FAILED );
 
     // check first 128 bytes for binary
-    if( length > 128 ) {
-        if( !utils::isTextFile( std::string_view( file.data(), 128 ) ) ) { return lines ;}
-    } else {
-        if( !utils::isTextFile( std::string_view( file.data(), length ) ) ) { return lines ;}
-    }
+    IF_NOT_RET( !utils::isTextFile( std::string_view( map, std::min( length, 100ul ) ) ) );
 
-    memcpy( ptr, file.data(), length );
-
-    lines.second = utils::parseContent( ptr, length );
+    lines.second = utils::parseContent( map, length );
+    munmap( map, length ); // if used, call munmap after parsing
     return lines;
 }
 
