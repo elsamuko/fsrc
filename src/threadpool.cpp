@@ -28,8 +28,6 @@ void ThreadPool::workOff() {
     }
 }
 
-std::once_flag initialized;
-
 bool ThreadPool::add( Job job ) {
     std::call_once( initialized, [this] { this->initialize(); } );
     jobs.push( new Job( std::move( job ) ) );

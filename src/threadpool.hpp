@@ -26,6 +26,7 @@ class ThreadPool {
         boost::lockfree::queue<Job*> jobs;
         std::atomic_int count = {0};
 
+        std::once_flag initialized;
         std::atomic_bool running = {true};
 };
 
