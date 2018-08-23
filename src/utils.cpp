@@ -18,6 +18,7 @@ const std::map<Color, WORD> colors = {
 };
 #else
 #include <dirent.h>
+#include <fcntl.h>
 #include <sys/stat.h>
 const std::map<Color, const char*> colors = {
     {Color::Red,     "\033[1;31m"},
@@ -111,11 +112,11 @@ utils::Lines utils::parseContent( const char* data, const size_t size ) {
 
 std::pair<std::string, utils::Lines> utils::fromFileC( const sys_string& filename ) {
     std::pair<std::string, Lines> lines;
-    FILE* file = fopen( filename.c_str(), "rb" );
-    IF_RET( file == nullptr );
-    utils::ScopeGuard onExit( [file] { fclose( file ); } );
+    int file = open( filename.c_str(), O_RDONLY );
+    IF_RET( !file );
+    utils::ScopeGuard onExit( [file] { close( file ); } );
 
-    size_t length = utils::fileSize( fileno( file ) );
+    size_t length = utils::fileSize( file );
     IF_RET( !length );
 
     // growing buffer for each thread
@@ -123,7 +124,7 @@ std::pair<std::string, utils::Lines> utils::fromFileC( const sys_string& filenam
     char* ptr = buffer.grow( length );
 
     // read content
-    IF_RET( length != fread( ptr, 1, length, file ) );
+    IF_RET( length != ( size_t )read( file, ptr, length ) );
 
     // check first 100 bytes for binary
     IF_RET( !utils::isTextFile( std::string_view( ptr, std::min( length, 100ul ) ) ) );
