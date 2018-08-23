@@ -1,50 +1,34 @@
 #define BOOST_TEST_MODULE Performance
 
 #include <boost/test/unit_test.hpp>
-#include <boost/iostreams/device/mapped_file.hpp>
+#include "boost/asio.hpp"
+using boost::asio::post;
 
 #include <fcntl.h>
 #include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <sys/mman.h>
 
 #include "utils.hpp"
 #include "threadpool.hpp"
 
-#include "boost/asio.hpp"
-using boost::asio::post;
-
 //! POSIX API with thread local storage
 std::pair<std::string, utils::Lines> fromFileP( const sys_string& filename ) {
     std::pair<std::string, utils::Lines> lines;
     int file = open( filename.c_str(), O_RDONLY );
-    utils::ScopeGuard onExit( [file] { if( file ) { close( file ); } } );
+    IF_NOT_RET( !file );
+    utils::ScopeGuard onExit( [file] { close( file ); } );
 
-    if( !file ) { return lines; }
-
-    lseek( file, 0, SEEK_END );
-    size_t length = lseek( file, 0, SEEK_CUR );
-    lseek( file, 0, SEEK_SET );
-
-    if( !length ) { return lines;}
+    size_t length = utils::fileSize( file );
+    IF_NOT_RET( !length );
 
     // growing buffer for each thread
     static thread_local utils::Buffer buffer;
     char* ptr = buffer.grow( length );
 
+    IF_NOT_RET( length != read( file, ptr, length ) );
+
     // check first 128 bytes for binary
-    if( length > 128 ) {
-        read( file, ptr, 128 );
-
-        if( !utils::isTextFile( std::string_view( ptr, 128 ) ) ) { return lines ;}
-
-        read( file, ptr + 128, length - 128 );
-    } else {
-        read( file, ptr, length );
-
-        if( !utils::isTextFile( std::string_view( ptr, length ) ) ) { return lines ;}
-    }
+    IF_NOT_RET( !utils::isTextFile( std::string_view( ptr, std::min( length, 100ul ) ) ) );
 
     lines.second = utils::parseContent( ptr, length );
     return lines;
@@ -75,32 +59,21 @@ std::pair<std::string, utils::Lines> fromFileM( const sys_string& filename ) {
 std::pair<std::string, utils::Lines> fromFileL( const sys_string& filename ) {
     std::pair<std::string, utils::Lines> lines;
     FILE* file = fopen( filename.c_str(), "rb" );
-    const utils::ScopeGuard onExit( [file] { if( file ) { fclose( file ); } } );
+    IF_NOT_RET( file == NULL );
+    const utils::ScopeGuard onExit( [file] { fclose( file ); } );
 
-    if( file == NULL ) { return lines; }
-
-    fseek( file, 0, SEEK_END );
-    size_t length = ftell( file );
-    fseek( file, 0, SEEK_SET );
-
-    if( !length ) { return lines;}
+    size_t length = utils::fileSize( fileno( file ) );
+    IF_NOT_RET( !length );
 
     // growing buffer for each thread
     static thread_local utils::Buffer buffer;
     char* ptr = buffer.grow( length );
 
+    // read content
+    IF_NOT_RET( length != fread( ptr, 1, length, file ) );
+
     // check first 100 bytes for binary
-    if( length > 100 ) {
-        if( 100 != fread( ptr, 1, 100, file ) ) { return lines; }
-
-        if( !utils::isTextFile( std::string_view( ptr, 100 ) ) ) { return lines ;}
-
-        if( length - 100 != fread( ptr + 100, 1, length - 100, file ) ) { return lines; }
-    } else {
-        if( length != fread( ptr, 1, length, file ) ) { return lines; }
-
-        if( !utils::isTextFile( std::string_view( ptr, length ) ) ) { return lines ;}
-    }
+    IF_NOT_RET( !utils::isTextFile( std::string_view( ptr, std::min( length, 100ul ) ) ) );
 
     lines.second = utils::parseContent( ptr, length );
     return lines;
@@ -110,31 +83,20 @@ std::pair<std::string, utils::Lines> fromFileL( const sys_string& filename ) {
 std::pair<std::string, utils::Lines> fromFileS( const sys_string& filename ) {
     std::pair<std::string, utils::Lines> lines;
     FILE* file = fopen( filename.c_str(), "rb" );
-    const utils::ScopeGuard onExit( [file] { if( file ) { fclose( file ); } } );
+    IF_NOT_RET( file == NULL );
+    const utils::ScopeGuard onExit( [file] { fclose( file ); } );
 
-    if( file == NULL ) { return lines; }
-
-    fseek( file, 0, SEEK_END );
-    size_t length = ftell( file );
-    fseek( file, 0, SEEK_SET );
-
-    if( !length ) { return lines;}
+    size_t length = utils::fileSize( fileno( file ) );
+    IF_NOT_RET( !length );
 
     lines.first.resize( length );
     char* ptr = lines.first.data();
 
+    // read content
+    IF_NOT_RET( length != fread( ptr, 1, length, file ) );
+
     // check first 100 bytes for binary
-    if( length > 100 ) {
-        if( 100 != fread( ptr, 1, 100, file ) ) { return lines; }
-
-        if( !utils::isTextFile( std::string_view( ptr, 100 ) ) ) { return lines ;}
-
-        if( length - 100 != fread( ptr + 100, 1, length - 100, file ) ) { return lines; }
-    } else {
-        if( length != fread( ptr, 1, length, file ) ) { return lines; }
-
-        if( !utils::isTextFile( std::string_view( ptr, length ) ) ) { return lines ;}
-    }
+    IF_NOT_RET( !utils::isTextFile( std::string_view( ptr, std::min( length, 100ul ) ) ) );
 
     lines.second = utils::parseContent( ptr, length );
     return lines;
@@ -145,30 +107,22 @@ std::pair<std::string, utils::Lines> fromFileCPP( const sys_string& filename ) {
     std::pair<std::string, utils::Lines> lines;
     std::ifstream file( filename.c_str(), std::ios::binary | std::ios::in );
 
-    if( !file ) { return lines;}
+    IF_NOT_RET( !file );
 
     file.seekg( 0, std::ios::end );
     size_t length = ( size_t ) file.tellg();
     file.seekg( 0, std::ios::beg );
 
-    if( !length ) { return lines;}
+    IF_NOT_RET( !length );
 
     // growing buffer for each thread
     static thread_local utils::Buffer buffer;
     char* ptr = buffer.grow( length );
 
+    file.read( ptr, length );
+
     // check first 100 bytes for binary
-    if( length > 100 ) {
-        file.read( ptr, 100 );
-
-        if( !utils::isTextFile( std::string_view( ptr, 100 ) ) ) { return lines ;}
-
-        file.read( ptr + 100, length - 100 );
-    } else {
-        file.read( ptr, length );
-
-        if( !utils::isTextFile( std::string_view( ptr, length ) ) ) { return lines ;}
-    }
+    IF_NOT_RET( !utils::isTextFile( std::string_view( ptr, std::min( length, 100ul ) ) ) );
 
     lines.second = utils::parseContent( ptr, length );
     return lines;
@@ -178,30 +132,23 @@ std::pair<std::string, utils::Lines> fromFileCPP( const sys_string& filename ) {
 std::pair<std::string, utils::Lines> fromFileF( const sys_string& filename ) {
     std::pair<std::string, utils::Lines> lines;
     FILE* file = fopen( filename.c_str(), "rb" );
-    utils::ScopeGuard onExit( [file] { if( file ) { fclose( file ); } } );
-
-    if( file == NULL ) { return lines; }
+    IF_NOT_RET( file == NULL );
+    const utils::ScopeGuard onExit( [file] { fclose( file ); } );
 
     fseek( file, 0, SEEK_END );
     size_t length = ftell( file );
     fseek( file, 0, SEEK_SET );
 
+    IF_NOT_RET( !length );
+
     // growing buffer for each thread
     static thread_local utils::Buffer buffer;
     char* ptr = buffer.grow( length );
 
+    IF_NOT_RET( length != fread( ptr, 1, length, file ) );
+
     // check first 100 bytes for binary
-    if( length > 100 ) {
-        if( 100 != fread( ptr, 1, 100, file ) ) { return lines; }
-
-        if( !utils::isTextFile( std::string_view( ptr, 100 ) ) ) { return lines ;}
-
-        if( length - 100 != fread( ptr + 100, 1, length - 100, file ) ) { return lines; }
-    } else {
-        if( length != fread( ptr, 1, length, file ) ) { return lines; }
-
-        if( !utils::isTextFile( std::string_view( ptr, length ) ) ) { return lines ;}
-    }
+    IF_NOT_RET( !utils::isTextFile( std::string_view( ptr, std::min( length, 100ul ) ) ) );
 
     lines.second = utils::parseContent( ptr, length );
     return lines;
@@ -210,17 +157,11 @@ std::pair<std::string, utils::Lines> fromFileF( const sys_string& filename ) {
 std::pair<std::string, utils::Lines> fromFileTwoFread( const sys_string& filename ) {
     std::pair<std::string, utils::Lines> lines;
     FILE* file = fopen( filename.c_str(), "rb" );
-    utils::ScopeGuard onExit( [file] { if( file ) { fclose( file ); } } );
+    IF_NOT_RET( file == NULL );
+    const utils::ScopeGuard onExit( [file] { fclose( file ); } );
 
-    if( file == NULL ) { return lines; }
-
-    struct stat st;
-
-    if( 0 != fstat( fileno( file ), &st ) ) { return lines; }
-
-    size_t length = st.st_size;
-
-    if( !length ) { return lines;}
+    size_t length = utils::fileSize( fileno( file ) );
+    IF_NOT_RET( !length );
 
     // growing buffer for each thread
     static thread_local utils::Buffer buffer;
@@ -228,19 +169,13 @@ std::pair<std::string, utils::Lines> fromFileTwoFread( const sys_string& filenam
 
     // check first 100 bytes for binary
     if( length > 100 ) {
-        if( 100 != fread( ptr, 1, 100, file ) ) { return lines; }
-
-        if( !utils::isTextFile( std::string_view( ptr, 100 ) ) ) { return lines ;}
-
-        if( length - 100 != fread( ptr + 100, 1, length - 100, file ) ) { return lines; }
+        IF_NOT_RET( 100 != fread( ptr, 1, 100, file ) );
+        IF_NOT_RET( !utils::isTextFile( std::string_view( ptr, 100 ) ) );
+        IF_NOT_RET( length - 100 != fread( ptr + 100, 1, length - 100, file ) );
     } else {
-        if( length != fread( ptr, 1, length, file ) ) { return lines; }
-
-        if( !utils::isTextFile( std::string_view( ptr, length ) ) ) { return lines ;}
+        IF_NOT_RET( length != fread( ptr, 1, length, file ) );
+        IF_NOT_RET( !utils::isTextFile( std::string_view( ptr, length ) ) );
     }
-
-    // check first 100 bytes for binary
-    if( !utils::isTextFile( std::string_view( ptr, 100 ) ) ) { return lines ;}
 
     lines.second = utils::parseContent( ptr, length );
     return lines;
