@@ -119,21 +119,21 @@ utils::Lines utils::parseContent( const char* data, const size_t size ) {
 std::pair<std::string, utils::Lines> utils::fromFileC( const sys_string& filename ) {
     std::pair<std::string, Lines> lines;
     FILE* file = fopen( filename.c_str(), "rb" );
-    IF_NOT_RET( file == nullptr );
+    IF_RET( file == nullptr );
     utils::ScopeGuard onExit( [file] { fclose( file ); } );
 
     size_t length = utils::fileSize( fileno( file ) );
-    IF_NOT_RET( !length );
+    IF_RET( !length );
 
     // growing buffer for each thread
     static thread_local utils::Buffer buffer;
     char* ptr = buffer.grow( length );
 
     // read content
-    IF_NOT_RET( length != fread( ptr, 1, length, file ) );
+    IF_RET( length != fread( ptr, 1, length, file ) );
 
     // check first 100 bytes for binary
-    IF_NOT_RET( !utils::isTextFile( std::string_view( ptr, std::min( length, 100ul ) ) ) );
+    IF_RET( !utils::isTextFile( std::string_view( ptr, std::min( length, 100ul ) ) ) );
 
     lines.second = utils::parseContent( ptr, length );
     return lines;
