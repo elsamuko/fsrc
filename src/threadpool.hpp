@@ -16,6 +16,7 @@ class ThreadPool {
         ThreadPool( size_t threads );
         ~ThreadPool();
         bool add( Job job );
+        void join();
     private:
         void initialize();
         void workOff();

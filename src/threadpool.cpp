@@ -10,11 +10,7 @@
 ThreadPool::ThreadPool( size_t threads ) : threads( threads ) {}
 
 ThreadPool::~ThreadPool() {
-    running = false;
-
-    for( std::thread& worker : workers ) {
-        worker.join();
-    }
+    join();
 }
 
 void ThreadPool::workOff() {
@@ -33,6 +29,16 @@ bool ThreadPool::add( Job job ) {
     jobs.push( new Job( std::move( job ) ) );
     count++;
     return true;
+}
+
+void ThreadPool::join() {
+    if( running ) {
+        running = false;
+
+        for( std::thread& worker : workers ) {
+            worker.join();
+        }
+    }
 }
 
 void ThreadPool::initialize() {
