@@ -119,27 +119,21 @@ utils::Lines utils::parseContent( const char* data, const size_t size ) {
 std::pair<std::string, utils::Lines> utils::fromFileC( const sys_string& filename ) {
     std::pair<std::string, Lines> lines;
     FILE* file = fopen( filename.c_str(), "rb" );
-    utils::ScopeGuard onExit( [file] { if( file ) { fclose( file ); } } );
+    IF_NOT_RET( file == nullptr );
+    utils::ScopeGuard onExit( [file] { fclose( file ); } );
 
-    if( file == NULL ) { return lines; }
-
-    struct stat st;
-
-    if( 0 != fstat( fileno( file ), &st ) ) { return lines; }
-
-    size_t length = st.st_size;
-
-    if( !length ) { return lines;}
+    size_t length = utils::fileSize( fileno( file ) );
+    IF_NOT_RET( !length );
 
     // growing buffer for each thread
     static thread_local utils::Buffer buffer;
     char* ptr = buffer.grow( length );
 
     // read content
-    if( length != fread( ptr, 1, length, file ) ) { return lines; }
+    IF_NOT_RET( length != fread( ptr, 1, length, file ) );
 
     // check first 100 bytes for binary
-    if( !utils::isTextFile( std::string_view( ptr, std::min( length, 100ul ) ) ) ) { return lines ;}
+    IF_NOT_RET( !utils::isTextFile( std::string_view( ptr, std::min( length, 100ul ) ) ) );
 
     lines.second = utils::parseContent( ptr, length );
     return lines;
@@ -205,3 +199,11 @@ void utils::recurseDir( const sys_string& filename, const std::function<void ( c
     FindClose( file );
 }
 #endif
+
+size_t utils::fileSize( const int file ) {
+    struct stat st;
+
+    if( 0 != fstat( file, &st ) ) { return 0; }
+
+    return st.st_size;
+}
