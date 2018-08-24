@@ -305,10 +305,11 @@ BOOST_AUTO_TEST_CASE( Test_parseContent ) {
 }
 
 BOOST_AUTO_TEST_CASE( Test_ThreadPool ) {
-    size_t ms_asio;
-    size_t ms_own;
+    boost::int_least64_t ns_asio;
+    boost::int_least64_t ns_own;
     {
-        auto tp = std::chrono::system_clock::now();
+        boost::timer::cpu_timer stopwatch;
+        stopwatch.start();
         {
             boost::asio::thread_pool pool( std::min( std::thread::hardware_concurrency(), 8u ) );
 
@@ -319,12 +320,12 @@ BOOST_AUTO_TEST_CASE( Test_ThreadPool ) {
             pool.join();
         }
 
-        auto duration = std::chrono::system_clock::now() - tp;
-        std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>( duration );
-        ms_asio = ms.count();
+        stopwatch.stop();
+        ns_asio = stopwatch.elapsed().wall;
     }
     {
-        auto tp = std::chrono::system_clock::now();
+        boost::timer::cpu_timer stopwatch;
+        stopwatch.start();
         {
             ThreadPool pool( std::min( std::thread::hardware_concurrency(), 8u ) );
 
@@ -333,13 +334,12 @@ BOOST_AUTO_TEST_CASE( Test_ThreadPool ) {
             }
         }
 
-        auto duration = std::chrono::system_clock::now() - tp;
-        std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>( duration );
-        ms_own = ms.count();
+        stopwatch.stop();
+        ns_own = stopwatch.elapsed().wall;
     }
 
-    printf( "own %lu ms, boost %lu ms\n\n", ms_own, ms_asio );
-    BOOST_CHECK_GT( ms_asio, ms_own ); // assume own tp is faster than boost::asio
+    printf( "own %llu us, boost %llu us\n\n", ns_own / 1000, ns_asio / 1000 );
+    BOOST_CHECK_GT( ns_asio, ns_own ); // assume own tp is faster than boost::asio
 }
 
 boost::int_least64_t timed1000( const std::string& name, const std::function<void()>& func ) {
