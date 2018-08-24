@@ -15,6 +15,8 @@ unix {
     unit_test {
         LIBS += $${BOOST_LIB_DIR}/libboost_unit_test_framework.a
         LIBS += $${BOOST_LIB_DIR}/libboost_iostreams.a
+        LIBS += $${BOOST_LIB_DIR}/libboost_chrono.a
+        LIBS += $${BOOST_LIB_DIR}/libboost_timer.a
     }
 }
 

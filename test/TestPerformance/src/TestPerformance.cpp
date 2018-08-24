@@ -1,6 +1,7 @@
 #define BOOST_TEST_MODULE Performance
 
-#include <boost/test/unit_test.hpp>
+#include "boost/test/unit_test.hpp"
+#include "boost/timer/timer.hpp"
 #include "boost/asio.hpp"
 using boost::asio::post;
 
@@ -339,6 +340,31 @@ BOOST_AUTO_TEST_CASE( Test_ThreadPool ) {
 
     printf( "own %lu ms, boost %lu ms\n", ms_own, ms_asio );
     BOOST_CHECK_GT( ms_asio, ms_own ); // assume own tp is faster than boost::asio
+}
+
+BOOST_AUTO_TEST_CASE( Test_printf ) {
+    std::string text = "text123";
+    FILE* file = fopen( "dump.txt", "w" );
+    boost::timer::cpu_timer stopwatch;
+    stopwatch.start();
+
+    for( int i = 0; i < 1000; ++i ) {
+        fprintf( file, "%s%s]\n", "[", text.c_str() );
+    }
+
+    stopwatch.stop();
+    std::cout << stopwatch.elapsed().wall << " ns" << std::endl;
+
+    stopwatch.start();
+
+    for( int i = 0; i < 1000; ++i ) {
+        fputs( ( "[" + text + "]\n" ).c_str(), file );
+    }
+
+    stopwatch.stop();
+    std::cout << stopwatch.elapsed().wall << " ns" << std::endl;
+
+    fclose( file );
 }
 
 BOOST_AUTO_TEST_SUITE_END()
