@@ -82,14 +82,19 @@ Lines parseContent( const char* data, const size_t size );
 //! \param file file descriptor
 size_t fileSize( const int file );
 
-//! \returns function, which prints format in color to stdout
+//! \returns printf style string
 template <typename ... Args>
-std::function<void()> printFunc( Color color, const char* format, Args const& ... args ) {
+std::string format( const char* format, Args const& ... args ) {
 
     int size = snprintf( nullptr, 0, format, args... );
     std::string text( size, '\0' );
     snprintf( ( char* )text.c_str(), text.size() + 1, format, args... );
 
+    return text;
+}
+
+//! \returns function, which prints format in color to stdout
+inline std::function<void()> printFunc( Color color, const std::string& text ) {
     return [color, text] { printColor( color, text ); };
 }
 

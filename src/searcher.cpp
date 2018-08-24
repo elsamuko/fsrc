@@ -103,12 +103,12 @@ void Searcher::search( const sys_string& path ) {
             // highlight only first hit
             if( pos != std::string::npos ) {
                 hits++;
-                prints.emplace_back( utils::printFunc( cblue, "\nL%4i : ", i + 1 ) );
-                prints.emplace_back( utils::printFunc( Color::Neutral, "%.*s", pos, data ) );
-                prints.emplace_back( utils::printFunc( cred, "%s", term.c_str() ) );
-                prints.emplace_back( utils::printFunc( Color::Neutral, "%.*s",
-                                                       line.size() - pos - term.size(),
-                                                       data + pos + term.size() ) );
+                std::string number = utils::format( "\nL%4i : ", i + 1 );
+                prints.emplace_back( utils::printFunc( cblue, number ) );
+                prints.emplace_back( utils::printFunc( Color::Neutral, std::string( data, pos ) ) );
+                prints.emplace_back( utils::printFunc( cred, term ) );
+                std::string rest( data + pos + term.size(), line.size() - pos - term.size() );
+                prints.emplace_back( utils::printFunc( Color::Neutral, rest ) );
             }
 
         } else {
@@ -116,18 +116,19 @@ void Searcher::search( const sys_string& path ) {
             auto end   = rx::cregex_iterator();
 
             if( std::distance( begin, end ) > 0 ) {
-                prints.emplace_back( utils::printFunc( cblue, "\nL%4i : ", i + 1 ) );
+                std::string number = utils::format( "\nL%4i : ", i + 1 );
+                prints.emplace_back( utils::printFunc( cblue, number ) );
             } else {
                 continue;
             }
 
             for( rx::cregex_iterator match = begin; match != end; ++match ) {
                 hits++;
-                prints.emplace_back( utils::printFunc( Color::Neutral, "%s", match->prefix().str().c_str() ) );
-                prints.emplace_back( utils::printFunc( cred, "%s", match->str().c_str() ) );
+                prints.emplace_back( utils::printFunc( Color::Neutral, match->prefix().str() ) );
+                prints.emplace_back( utils::printFunc( cred, match->str() ) );
 
                 if( std::distance( match, end ) == 1 ) {
-                    prints.emplace_back( utils::printFunc( Color::Neutral, "%s", match->suffix().str().c_str() ) );
+                    prints.emplace_back( utils::printFunc( Color::Neutral, match->suffix().str() ) );
                 }
             }
         }
@@ -137,8 +138,8 @@ void Searcher::search( const sys_string& path ) {
     if( !prints.empty() ) {
         filesMatched++;
 
-        const auto printFile     = utils::printFunc( cgreen, "%s", path.c_str() );
-        const auto printNewlines = utils::printFunc( Color::Neutral, "%s", "\n\n" );
+        const auto printFile     = utils::printFunc( cgreen, path.c_str() );
+        const auto printNewlines = utils::printFunc( Color::Neutral, "\n\n" );
 
         m.lock();
         printFile();
