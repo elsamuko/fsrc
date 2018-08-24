@@ -338,33 +338,56 @@ BOOST_AUTO_TEST_CASE( Test_ThreadPool ) {
         ms_own = ms.count();
     }
 
-    printf( "own %lu ms, boost %lu ms\n", ms_own, ms_asio );
+    printf( "own %lu ms, boost %lu ms\n\n", ms_own, ms_asio );
     BOOST_CHECK_GT( ms_asio, ms_own ); // assume own tp is faster than boost::asio
+}
+
+boost::int_least64_t timed1000( const std::string& name, const std::function<void()>& func ) {
+    boost::timer::cpu_timer stopwatch;
+    stopwatch.start();
+
+    for( int i = 0; i < 1000; ++i ) {
+        func();
+    }
+
+    stopwatch.stop();
+    boost::int_least64_t ns = stopwatch.elapsed().wall;
+    std::cout << name << " : " << ns / 1000 << " us" << std::endl;
+    return ns;
 }
 
 BOOST_AUTO_TEST_CASE( Test_printf ) {
     std::string text = "text123";
     FILE* file = fopen( "dump.txt", "w" );
-    boost::timer::cpu_timer stopwatch;
-    stopwatch.start();
 
-    for( int i = 0; i < 1000; ++i ) {
+    /*boost::int_least64_t t_write = */timed1000( "write", [file, text] {
+        std::string data = "[" + text + "]\n";
+        write( fileno( file ), data.c_str(), data.size() );
+    } );
+
+    fseek( file, 0, SEEK_SET );
+
+    boost::int_least64_t t_printf = timed1000( "fprintf", [file, text] {
         fprintf( file, "%s%s]\n", "[", text.c_str() );
-    }
+    } );
 
-    stopwatch.stop();
-    std::cout << stopwatch.elapsed().wall << " ns" << std::endl;
+    fseek( file, 0, SEEK_SET );
 
-    stopwatch.start();
-
-    for( int i = 0; i < 1000; ++i ) {
+    /*boost::int_least64_t t_fputs = */timed1000( "fputs", [file, text] {
         fputs( ( "[" + text + "]\n" ).c_str(), file );
-    }
+    } );
 
-    stopwatch.stop();
-    std::cout << stopwatch.elapsed().wall << " ns" << std::endl;
+    fseek( file, 0, SEEK_SET );
+
+    boost::int_least64_t t_fwrite = timed1000( "fwrite", [file, text] {
+        std::string data = "[" + text + "]\n";
+        fwrite( data.c_str(), 1, data.size(), file );
+    } );
+
+    fseek( file, 0, SEEK_SET );
 
     fclose( file );
+    BOOST_CHECK_LT( t_fwrite, t_printf ); // assume fwrite is faster than printf
 }
 
 BOOST_AUTO_TEST_SUITE_END()
