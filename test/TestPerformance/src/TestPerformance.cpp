@@ -388,6 +388,28 @@ BOOST_AUTO_TEST_CASE( Test_printf ) {
 
     fclose( file );
     BOOST_CHECK_LT( t_fwrite, t_printf ); // assume fwrite is faster than printf
+    printf( "\n" );
+}
+
+BOOST_AUTO_TEST_CASE( Test_find ) {
+    std::string text = "You can get there from here, but why on earth would you want to?";
+    std::string term = "earth";
+    size_t pos;
+    void* ptr;
+
+    boost::int_least64_t t_find = timed1000( "find", [&text, &term, &pos] {
+        pos = text.find( term );
+    } );
+
+    boost::int_least64_t t_memmem = timed1000( "memmem", [&text, &term, &ptr] {
+        ptr = memmem( text.data(), text.size(), term.data(), term.size() );
+    } );
+
+    BOOST_REQUIRE_NE( pos, std::string::npos );
+    BOOST_REQUIRE_NE( ptr, nullptr );
+
+    BOOST_CHECK_LT( t_find, t_memmem ); // assume find is faster than memmem
+    printf( "\n" );
 }
 
 BOOST_AUTO_TEST_SUITE_END()
