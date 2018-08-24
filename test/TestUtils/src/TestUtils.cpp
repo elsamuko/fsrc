@@ -7,8 +7,8 @@
 
 // dummy for Test_printFunc
 std::string printed;
-int fputs( const char* text, FILE* /*file*/ ) {
-    printed.assign( text );
+size_t fwrite( const void* ptr, size_t size, size_t count, FILE* /*file*/ ) {
+    printed.assign( ( char* ) ptr, size * count );
     return printed.size();
 }
 
@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_CASE( Test_run ) {
 }
 
 BOOST_AUTO_TEST_CASE( Test_printFunc ) {
-    std::function<void()> func = utils::printFunc( Color::Neutral, "%s", "test123" );
+    std::function<void()> func = utils::printFunc( Color::Neutral, "test123" );
     func();
     BOOST_CHECK_EQUAL( printed, "test123" );
 }
