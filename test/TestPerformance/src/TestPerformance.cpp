@@ -42,6 +42,30 @@ utils::Lines parseContentForLoop( const char* data, const size_t size ) {
     return lines;
 }
 
+utils::Lines parseContentFind( const char* data, const size_t size ) {
+    utils::Lines lines;
+    lines.reserve( 128 );
+
+    if( size == 0 ) { return lines; }
+
+    std::string_view view( data, size );
+    size_t pos_old = 0;
+    size_t pos_new = view.find( '\n' );
+
+    while( pos_new != std::string::npos ) {
+        lines.emplace_back( data + pos_old, pos_new - pos_old );
+        pos_old = pos_new + 1;
+        pos_new = view.find( '\n', pos_old );
+    }
+
+    if( pos_old != size ) {
+        lines.emplace_back( data + pos_old, size - pos_old );
+    }
+
+    lines.shrink_to_fit();
+    return lines;
+}
+
 using parseContentFunc = utils::Lines( const char* data, const size_t size );
 
 //! POSIX API with custom parseContent function
@@ -245,6 +269,10 @@ std::pair<std::string, utils::Lines> fromFileForLoop( const sys_string& filename
     return fromFileParser( filename, parseContentForLoop );
 }
 
+std::pair<std::string, utils::Lines> fromFileFind( const sys_string& filename ) {
+    return fromFileParser( filename, parseContentFind );
+}
+
 using fromFileFunc = std::pair<std::string, utils::Lines>( const sys_string& filename );
 
 std::map<fromFileFunc*, const char*> names = {
@@ -257,6 +285,7 @@ std::map<fromFileFunc*, const char*> names = {
     {fromFileCPP, "fromFileCPP"},
     {fromFileUtils, "fromFileUtils"},
     {fromFileForLoop, "fromFileForLoop"},
+    {fromFileFind, "fromFileFind"},
     {fromFileCPP, "fromFileCPP"},
     {utils::fromFileC, "utils::fromFileC"},
 };
@@ -300,6 +329,7 @@ BOOST_AUTO_TEST_CASE( Test_fromFile ) {
 BOOST_AUTO_TEST_CASE( Test_parseContent ) {
     size_t t2 = run( fromFileForLoop );
     size_t t1 = run( fromFileUtils );
+    size_t tf = run( fromFileFind );
     printf( "\n" );
     BOOST_CHECK_LT( t1, t2 );
 }
