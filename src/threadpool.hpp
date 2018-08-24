@@ -15,7 +15,7 @@ class ThreadPool {
         typedef std::function<void()> Job;
         ThreadPool( size_t threads );
         ~ThreadPool();
-        bool add( Job job );
+        bool add( const Job& job );
         void join();
     private:
         void initialize();
