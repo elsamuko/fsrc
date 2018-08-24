@@ -29,7 +29,7 @@ const std::map<Color, std::string> colors = {
 
 void utils::printColor( Color color, const std::string& text ) {
     if( color == Color::Neutral ) {
-        fputs( text.c_str(), stdout );
+        fwrite( text.c_str(), 1, text.size(), stdout );
     } else {
 #if WIN32
         const static HANDLE h = ::GetStdHandle( STD_OUTPUT_HANDLE );
@@ -39,10 +39,11 @@ void utils::printColor( Color color, const std::string& text ) {
             return csbiInfo.wAttributes;
         }( h );
         ::SetConsoleTextAttribute( h, colors.at( color ) | FOREGROUND_INTENSITY );
-        fputs( text.c_str(), stdout );
+        fwrite( text.c_str(), 1, text.size(), stdout );
         ::SetConsoleTextAttribute( h, attributes );
 #else
-        fputs( ( colors.at( color ) + text + "\033[0m" ).c_str(), stdout );
+        std::string data = colors.at( color ) + text + "\033[0m";
+        fwrite( data.c_str(), 1, data.size(), stdout );
 #endif
     }
 }
