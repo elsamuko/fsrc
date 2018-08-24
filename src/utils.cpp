@@ -20,7 +20,7 @@ const std::map<Color, WORD> colors = {
 #include <dirent.h>
 #include <fcntl.h>
 #include <sys/stat.h>
-const std::map<Color, const char*> colors = {
+const std::map<Color, std::string> colors = {
     {Color::Red,     "\033[1;31m"},
     {Color::Green,   "\033[1;32m"},
     {Color::Blue,    "\033[1;34m"},
@@ -42,7 +42,7 @@ void utils::printColor( Color color, const std::string& text ) {
         fputs( text.c_str(), stdout );
         ::SetConsoleTextAttribute( h, attributes );
 #else
-        printf( "%s%s\033[0m", colors.at( color ), text.c_str() );
+        fputs( ( colors.at( color ) + text + "\033[0m" ).c_str(), stdout );
 #endif
     }
 }
