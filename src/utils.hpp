@@ -60,6 +60,11 @@ struct Buffer {
 
 using Lines = std::vector<std::string_view>;
 
+struct FileView {
+    size_t size;
+    Lines lines;
+};
+
 //! prints text in color to stdout
 void printColor( Color color, const std::string& text );
 
@@ -70,10 +75,10 @@ std::vector<std::string> run( const std::string& command );
 //! \returns true, if filename has no "\0\0" in the first 1000 bytes
 bool isTextFile( const std::string_view& content );
 
-#define IF_RET( A ) if( A ) { return lines; }
+#define IF_RET( A ) if( A ) { return view; }
 
 //! \returns content of filename as vector with C API
-std::pair<std::string, Lines> fromFileC( const sys_string& filename );
+FileView fromFileC( const sys_string& filename );
 
 //! splits content at newlines
 //! \returns lines as vector of string_view

@@ -69,8 +69,8 @@ utils::Lines parseContentFind( const char* data, const size_t size ) {
 using parseContentFunc = utils::Lines( const char* data, const size_t size );
 
 //! POSIX API with custom parseContent function
-std::pair<std::string, utils::Lines> fromFileParser( const sys_string& filename, parseContentFunc& parse ) {
-    std::pair<std::string, utils::Lines> lines;
+utils::FileView fromFileParser( const sys_string& filename, parseContentFunc& parse ) {
+    utils::FileView view;
     int file = open( filename.c_str(), O_RDONLY );
     IF_RET( !file );
     utils::ScopeGuard onExit( [file] { close( file ); } );
@@ -87,13 +87,13 @@ std::pair<std::string, utils::Lines> fromFileParser( const sys_string& filename,
     // check first 100 bytes for binary
     IF_RET( !utils::isTextFile( std::string_view( ptr, std::min( length, 100ul ) ) ) );
 
-    lines.second = parse( ptr, length );
-    return lines;
+    view.lines = parse( ptr, length );
+    return view;
 }
 
 //! POSIX API with thread local storage
-std::pair<std::string, utils::Lines> fromFilePosix( const sys_string& filename ) {
-    std::pair<std::string, utils::Lines> lines;
+utils::FileView fromFilePosix( const sys_string& filename ) {
+    utils::FileView view;
     int file = open( filename.c_str(), O_RDONLY );
     IF_RET( !file );
     utils::ScopeGuard onExit( [file] { close( file ); } );
@@ -110,13 +110,13 @@ std::pair<std::string, utils::Lines> fromFilePosix( const sys_string& filename )
     // check first 100 bytes for binary
     IF_RET( !utils::isTextFile( std::string_view( ptr, std::min( length, 100ul ) ) ) );
 
-    lines.second = utils::parseContent( ptr, length );
-    return lines;
+    view.lines = utils::parseContent( ptr, length );
+    return view;
 }
 
 //! memory mapped API with thread local storage
-std::pair<std::string, utils::Lines> fromFileMmap( const sys_string& filename ) {
-    std::pair<std::string, utils::Lines> lines;
+utils::FileView fromFileMmap( const sys_string& filename ) {
+    utils::FileView view;
     int file = open( filename.c_str(), O_RDONLY );
     IF_RET( !file );
     utils::ScopeGuard onExit( [file] { close( file ); } );
@@ -130,14 +130,14 @@ std::pair<std::string, utils::Lines> fromFileMmap( const sys_string& filename ) 
     // check first 100 bytes for binary
     IF_RET( !utils::isTextFile( std::string_view( map, std::min( length, 100ul ) ) ) );
 
-    lines.second = utils::parseContent( map, length );
+    view.lines = utils::parseContent( map, length );
     munmap( map, length ); // if used, call munmap after parsing
-    return lines;
+    return view;
 }
 
 //! C API with thread local storage
-std::pair<std::string, utils::Lines> fromFileLocal( const sys_string& filename ) {
-    std::pair<std::string, utils::Lines> lines;
+utils::FileView fromFileLocal( const sys_string& filename ) {
+    utils::FileView view;
     FILE* file = fopen( filename.c_str(), "rb" );
     IF_RET( file == NULL );
     const utils::ScopeGuard onExit( [file] { fclose( file ); } );
@@ -155,13 +155,13 @@ std::pair<std::string, utils::Lines> fromFileLocal( const sys_string& filename )
     // check first 100 bytes for binary
     IF_RET( !utils::isTextFile( std::string_view( ptr, std::min( length, 100ul ) ) ) );
 
-    lines.second = utils::parseContent( ptr, length );
-    return lines;
+    view.lines = utils::parseContent( ptr, length );
+    return view;
 }
 
 //! C API with string storage
-std::pair<std::string, utils::Lines> fromFileString( const sys_string& filename ) {
-    std::pair<std::string, utils::Lines> lines;
+utils::FileView fromFileString( const sys_string& filename ) {
+    utils::FileView view;
     FILE* file = fopen( filename.c_str(), "rb" );
     IF_RET( file == NULL );
     const utils::ScopeGuard onExit( [file] { fclose( file ); } );
@@ -169,8 +169,9 @@ std::pair<std::string, utils::Lines> fromFileString( const sys_string& filename 
     size_t length = utils::fileSize( fileno( file ) );
     IF_RET( !length );
 
-    lines.first.resize( length );
-    char* ptr = lines.first.data();
+    std::string buffer;
+    buffer.resize( length );
+    char* ptr = buffer.data();
 
     // read content
     IF_RET( length != fread( ptr, 1, length, file ) );
@@ -178,13 +179,14 @@ std::pair<std::string, utils::Lines> fromFileString( const sys_string& filename 
     // check first 100 bytes for binary
     IF_RET( !utils::isTextFile( std::string_view( ptr, std::min( length, 100ul ) ) ) );
 
-    lines.second = utils::parseContent( ptr, length );
-    return lines;
+    view.lines = utils::parseContent( ptr, length );
+    // if used, add buffer to FileView
+    return view;
 }
 
 //! CPP API with thread local storage
-std::pair<std::string, utils::Lines> fromFileCPP( const sys_string& filename ) {
-    std::pair<std::string, utils::Lines> lines;
+utils::FileView fromFileCPP( const sys_string& filename ) {
+    utils::FileView view;
     std::ifstream file( filename.c_str(), std::ios::binary | std::ios::in );
 
     IF_RET( !file );
@@ -204,13 +206,13 @@ std::pair<std::string, utils::Lines> fromFileCPP( const sys_string& filename ) {
     // check first 100 bytes for binary
     IF_RET( !utils::isTextFile( std::string_view( ptr, std::min( length, 100ul ) ) ) );
 
-    lines.second = utils::parseContent( ptr, length );
-    return lines;
+    view.lines = utils::parseContent( ptr, length );
+    return view;
 }
 
 // C API with lseek instead fstat
-std::pair<std::string, utils::Lines> fromFileLSeek( const sys_string& filename ) {
-    std::pair<std::string, utils::Lines> lines;
+utils::FileView fromFileLSeek( const sys_string& filename ) {
+    utils::FileView view;
     FILE* file = fopen( filename.c_str(), "rb" );
     IF_RET( file == NULL );
     const utils::ScopeGuard onExit( [file] { fclose( file ); } );
@@ -230,12 +232,12 @@ std::pair<std::string, utils::Lines> fromFileLSeek( const sys_string& filename )
     // check first 100 bytes for binary
     IF_RET( !utils::isTextFile( std::string_view( ptr, std::min( length, 100ul ) ) ) );
 
-    lines.second = utils::parseContent( ptr, length );
-    return lines;
+    view.lines = utils::parseContent( ptr, length );
+    return view;
 }
 
-std::pair<std::string, utils::Lines> fromFileTwoFread( const sys_string& filename ) {
-    std::pair<std::string, utils::Lines> lines;
+utils::FileView fromFileTwoFread( const sys_string& filename ) {
+    utils::FileView view;
     FILE* file = fopen( filename.c_str(), "rb" );
     IF_RET( file == NULL );
     const utils::ScopeGuard onExit( [file] { fclose( file ); } );
@@ -257,23 +259,23 @@ std::pair<std::string, utils::Lines> fromFileTwoFread( const sys_string& filenam
         IF_RET( !utils::isTextFile( std::string_view( ptr, length ) ) );
     }
 
-    lines.second = utils::parseContent( ptr, length );
-    return lines;
+    view.lines = utils::parseContent( ptr, length );
+    return view;
 }
 
-std::pair<std::string, utils::Lines> fromFileUtils( const sys_string& filename ) {
+utils::FileView fromFileUtils( const sys_string& filename ) {
     return fromFileParser( filename, utils::parseContent );
 }
 
-std::pair<std::string, utils::Lines> fromFileForLoop( const sys_string& filename ) {
+utils::FileView fromFileForLoop( const sys_string& filename ) {
     return fromFileParser( filename, parseContentForLoop );
 }
 
-std::pair<std::string, utils::Lines> fromFileFind( const sys_string& filename ) {
+utils::FileView fromFileFind( const sys_string& filename ) {
     return fromFileParser( filename, parseContentFind );
 }
 
-using fromFileFunc = std::pair<std::string, utils::Lines>( const sys_string& filename );
+using fromFileFunc = utils::FileView( const sys_string& filename );
 
 std::map<fromFileFunc*, const char*> names = {
     {fromFilePosix, "fromFilePosix"},
@@ -298,9 +300,9 @@ size_t run( fromFileFunc fromFile ) {
     auto tp = std::chrono::system_clock::now();
 
     utils::recurseDir( include.native(), [&sum, &lineCount, fromFile]( const sys_string & filename ) {
-        auto lines = fromFile( filename );
-        sum += lines.first.size();
-        lineCount += lines.second.size();
+        auto view = fromFile( filename );
+        sum += view.size;
+        lineCount += view.lines.size();
     } );
 
     auto duration = std::chrono::system_clock::now() - tp;

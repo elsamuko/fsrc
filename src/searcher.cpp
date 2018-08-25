@@ -77,11 +77,11 @@ SearchOptions SearchOptions::parseArgs( int argc, char* argv[] ) {
 
 void Searcher::search( const sys_string& path ) {
 
-    const std::pair<std::string, utils::Lines> lines = utils::fromFileC( path );
+    const utils::FileView view = utils::fromFileC( path );
 
-    if( lines.second.empty() ) { return; }
+    if( view.lines.empty() ) { return; }
 
-    size_t size = lines.second.size();
+    size_t size = view.lines.size();
     std::vector<std::function<void()>> prints;
     prints.reserve( 10 );
 
@@ -91,7 +91,7 @@ void Searcher::search( const sys_string& path ) {
     Color cgreen = opts.colorized ? Color::Green : Color::Neutral;
 
     for( size_t i = 0; i < size; ++i ) {
-        const std::string_view& line = lines.second[i];
+        const std::string_view& line = view.lines[i];
 
         if( line.empty() ) { continue; }
 

@@ -20,6 +20,7 @@ const std::map<Color, WORD> colors = {
 #include <dirent.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+
 const std::map<Color, std::string> colors = {
     {Color::Red,     "\033[1;31m"},
     {Color::Green,   "\033[1;32m"},
@@ -111,8 +112,8 @@ utils::Lines utils::parseContent( const char* data, const size_t size ) {
     return lines;
 }
 
-std::pair<std::string, utils::Lines> utils::fromFileC( const sys_string& filename ) {
-    std::pair<std::string, Lines> lines;
+utils::FileView utils::fromFileC( const sys_string& filename ) {
+    FileView view;
     int file = open( filename.c_str(), O_RDONLY );
     IF_RET( !file );
     utils::ScopeGuard onExit( [file] { close( file ); } );
@@ -130,8 +131,8 @@ std::pair<std::string, utils::Lines> utils::fromFileC( const sys_string& filenam
     // check first 100 bytes for binary
     IF_RET( !utils::isTextFile( std::string_view( ptr, std::min( length, 100ul ) ) ) );
 
-    lines.second = utils::parseContent( ptr, length );
-    return lines;
+    view.lines = utils::parseContent( ptr, length );
+    return view;
 }
 
 #if !WIN32
