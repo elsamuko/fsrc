@@ -75,19 +75,19 @@ utils::FileView fromFileParser( const sys_string& filename, parseContentFunc& pa
     IF_RET( !file );
     utils::ScopeGuard onExit( [file] { close( file ); } );
 
-    size_t length = utils::fileSize( file );
-    IF_RET( !length );
+    view.size = utils::fileSize( file );
+    IF_RET( !view.size );
 
     // growing buffer for each thread
     static thread_local utils::Buffer buffer;
-    char* ptr = buffer.grow( length );
+    char* ptr = buffer.grow( view.size );
 
-    IF_RET( length != ( size_t )read( file, ptr, length ) );
+    IF_RET( view.size != ( size_t )read( file, ptr, view.size ) );
 
     // check first 100 bytes for binary
-    IF_RET( !utils::isTextFile( std::string_view( ptr, std::min( length, 100ul ) ) ) );
+    IF_RET( !utils::isTextFile( std::string_view( ptr, std::min( view.size, 100ul ) ) ) );
 
-    view.lines = parse( ptr, length );
+    view.lines = parse( ptr, view.size );
     return view;
 }
 
@@ -98,19 +98,19 @@ utils::FileView fromFilePosix( const sys_string& filename ) {
     IF_RET( !file );
     utils::ScopeGuard onExit( [file] { close( file ); } );
 
-    size_t length = utils::fileSize( file );
-    IF_RET( !length );
+    view.size = utils::fileSize( file );
+    IF_RET( !view.size );
 
     // growing buffer for each thread
     static thread_local utils::Buffer buffer;
-    char* ptr = buffer.grow( length );
+    char* ptr = buffer.grow( view.size );
 
-    IF_RET( length != ( size_t )read( file, ptr, length ) );
+    IF_RET( view.size != ( size_t )read( file, ptr, view.size ) );
 
     // check first 100 bytes for binary
-    IF_RET( !utils::isTextFile( std::string_view( ptr, std::min( length, 100ul ) ) ) );
+    IF_RET( !utils::isTextFile( std::string_view( ptr, std::min( view.size, 100ul ) ) ) );
 
-    view.lines = utils::parseContent( ptr, length );
+    view.lines = utils::parseContent( ptr, view.size );
     return view;
 }
 
@@ -121,17 +121,17 @@ utils::FileView fromFileMmap( const sys_string& filename ) {
     IF_RET( !file );
     utils::ScopeGuard onExit( [file] { close( file ); } );
 
-    size_t length = utils::fileSize( file );
-    IF_RET( !length );
+    view.size = utils::fileSize( file );
+    IF_RET( !view.size );
 
-    char* map = ( char* )mmap( 0, length, PROT_READ, MAP_PRIVATE, file, 0 );
+    char* map = ( char* )mmap( 0, view.size, PROT_READ, MAP_PRIVATE, file, 0 );
     IF_RET( map == MAP_FAILED );
 
     // check first 100 bytes for binary
-    IF_RET( !utils::isTextFile( std::string_view( map, std::min( length, 100ul ) ) ) );
+    IF_RET( !utils::isTextFile( std::string_view( map, std::min( view.size, 100ul ) ) ) );
 
-    view.lines = utils::parseContent( map, length );
-    munmap( map, length ); // if used, call munmap after parsing
+    view.lines = utils::parseContent( map, view.size );
+    munmap( map, view.size ); // if used, call munmap after parsing
     return view;
 }
 
@@ -142,20 +142,20 @@ utils::FileView fromFileLocal( const sys_string& filename ) {
     IF_RET( file == NULL );
     const utils::ScopeGuard onExit( [file] { fclose( file ); } );
 
-    size_t length = utils::fileSize( fileno( file ) );
-    IF_RET( !length );
+    view.size = utils::fileSize( fileno( file ) );
+    IF_RET( !view.size );
 
     // growing buffer for each thread
     static thread_local utils::Buffer buffer;
-    char* ptr = buffer.grow( length );
+    char* ptr = buffer.grow( view.size );
 
     // read content
-    IF_RET( length != fread( ptr, 1, length, file ) );
+    IF_RET( view.size != fread( ptr, 1, view.size, file ) );
 
     // check first 100 bytes for binary
-    IF_RET( !utils::isTextFile( std::string_view( ptr, std::min( length, 100ul ) ) ) );
+    IF_RET( !utils::isTextFile( std::string_view( ptr, std::min( view.size, 100ul ) ) ) );
 
-    view.lines = utils::parseContent( ptr, length );
+    view.lines = utils::parseContent( ptr, view.size );
     return view;
 }
 
@@ -166,20 +166,20 @@ utils::FileView fromFileString( const sys_string& filename ) {
     IF_RET( file == NULL );
     const utils::ScopeGuard onExit( [file] { fclose( file ); } );
 
-    size_t length = utils::fileSize( fileno( file ) );
-    IF_RET( !length );
+    view.size = utils::fileSize( fileno( file ) );
+    IF_RET( !view.size );
 
     std::string buffer;
-    buffer.resize( length );
+    buffer.resize( view.size );
     char* ptr = buffer.data();
 
     // read content
-    IF_RET( length != fread( ptr, 1, length, file ) );
+    IF_RET( view.size != fread( ptr, 1, view.size, file ) );
 
     // check first 100 bytes for binary
-    IF_RET( !utils::isTextFile( std::string_view( ptr, std::min( length, 100ul ) ) ) );
+    IF_RET( !utils::isTextFile( std::string_view( ptr, std::min( view.size, 100ul ) ) ) );
 
-    view.lines = utils::parseContent( ptr, length );
+    view.lines = utils::parseContent( ptr, view.size );
     // if used, add buffer to FileView
     return view;
 }
@@ -192,21 +192,21 @@ utils::FileView fromFileCPP( const sys_string& filename ) {
     IF_RET( !file );
 
     file.seekg( 0, std::ios::end );
-    size_t length = ( size_t ) file.tellg();
+    view.size = ( size_t ) file.tellg();
     file.seekg( 0, std::ios::beg );
 
-    IF_RET( !length );
+    IF_RET( !view.size );
 
     // growing buffer for each thread
     static thread_local utils::Buffer buffer;
-    char* ptr = buffer.grow( length );
+    char* ptr = buffer.grow( view.size );
 
-    file.read( ptr, length );
+    file.read( ptr, view.size );
 
     // check first 100 bytes for binary
-    IF_RET( !utils::isTextFile( std::string_view( ptr, std::min( length, 100ul ) ) ) );
+    IF_RET( !utils::isTextFile( std::string_view( ptr, std::min( view.size, 100ul ) ) ) );
 
-    view.lines = utils::parseContent( ptr, length );
+    view.lines = utils::parseContent( ptr, view.size );
     return view;
 }
 
@@ -218,21 +218,21 @@ utils::FileView fromFileLSeek( const sys_string& filename ) {
     const utils::ScopeGuard onExit( [file] { fclose( file ); } );
 
     fseek( file, 0, SEEK_END );
-    size_t length = ftell( file );
+    view.size = ftell( file );
     fseek( file, 0, SEEK_SET );
 
-    IF_RET( !length );
+    IF_RET( !view.size );
 
     // growing buffer for each thread
     static thread_local utils::Buffer buffer;
-    char* ptr = buffer.grow( length );
+    char* ptr = buffer.grow( view.size );
 
-    IF_RET( length != fread( ptr, 1, length, file ) );
+    IF_RET( view.size != fread( ptr, 1, view.size, file ) );
 
     // check first 100 bytes for binary
-    IF_RET( !utils::isTextFile( std::string_view( ptr, std::min( length, 100ul ) ) ) );
+    IF_RET( !utils::isTextFile( std::string_view( ptr, std::min( view.size, 100ul ) ) ) );
 
-    view.lines = utils::parseContent( ptr, length );
+    view.lines = utils::parseContent( ptr, view.size );
     return view;
 }
 
@@ -242,24 +242,24 @@ utils::FileView fromFileTwoFread( const sys_string& filename ) {
     IF_RET( file == NULL );
     const utils::ScopeGuard onExit( [file] { fclose( file ); } );
 
-    size_t length = utils::fileSize( fileno( file ) );
-    IF_RET( !length );
+    view.size = utils::fileSize( fileno( file ) );
+    IF_RET( !view.size );
 
     // growing buffer for each thread
     static thread_local utils::Buffer buffer;
-    char* ptr = buffer.grow( length );
+    char* ptr = buffer.grow( view.size );
 
     // check first 100 bytes for binary
-    if( length > 100 ) {
+    if( view.size > 100 ) {
         IF_RET( 100 != fread( ptr, 1, 100, file ) );
         IF_RET( !utils::isTextFile( std::string_view( ptr, 100 ) ) );
-        IF_RET( length - 100 != fread( ptr + 100, 1, length - 100, file ) );
+        IF_RET( view.size - 100 != fread( ptr + 100, 1, view.size - 100, file ) );
     } else {
-        IF_RET( length != fread( ptr, 1, length, file ) );
-        IF_RET( !utils::isTextFile( std::string_view( ptr, length ) ) );
+        IF_RET( view.size != fread( ptr, 1, view.size, file ) );
+        IF_RET( !utils::isTextFile( std::string_view( ptr, view.size ) ) );
     }
 
-    view.lines = utils::parseContent( ptr, length );
+    view.lines = utils::parseContent( ptr, view.size );
     return view;
 }
 

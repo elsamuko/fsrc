@@ -61,7 +61,7 @@ struct Buffer {
 using Lines = std::vector<std::string_view>;
 
 struct FileView {
-    size_t size;
+    size_t size = 0;
     Lines lines;
 };
 

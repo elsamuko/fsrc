@@ -118,20 +118,20 @@ utils::FileView utils::fromFileC( const sys_string& filename ) {
     IF_RET( !file );
     utils::ScopeGuard onExit( [file] { close( file ); } );
 
-    size_t length = utils::fileSize( file );
-    IF_RET( !length );
+    view.size = utils::fileSize( file );
+    IF_RET( !view.size );
 
     // growing buffer for each thread
     static thread_local utils::Buffer buffer;
-    char* ptr = buffer.grow( length );
+    char* ptr = buffer.grow( view.size );
 
     // read content
-    IF_RET( length != ( size_t )read( file, ptr, length ) );
+    IF_RET( view.size != ( size_t )read( file, ptr, view.size ) );
 
     // check first 100 bytes for binary
-    IF_RET( !utils::isTextFile( std::string_view( ptr, std::min( length, 100ul ) ) ) );
+    IF_RET( !utils::isTextFile( std::string_view( ptr, std::min( view.size, 100ul ) ) ) );
 
-    view.lines = utils::parseContent( ptr, length );
+    view.lines = utils::parseContent( ptr, view.size );
     return view;
 }
 
