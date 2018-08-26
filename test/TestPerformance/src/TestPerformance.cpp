@@ -295,12 +295,14 @@ std::map<fromFileFunc*, const char*> names = {
 size_t run( fromFileFunc fromFile ) {
     size_t sum = 0;
     size_t lineCount = 0;
+    size_t files = 0;
     fs::path include = "/usr/include";
 
     auto tp = std::chrono::system_clock::now();
 
-    utils::recurseDir( include.native(), [&sum, &lineCount, fromFile]( const sys_string & filename ) {
+    utils::recurseDir( include.native(), [&sum, &lineCount, &files, fromFile]( const sys_string & filename ) {
         auto view = fromFile( filename );
+        files++;
         sum += view.size;
         lineCount += view.lines.size();
     } );
@@ -308,7 +310,8 @@ size_t run( fromFileFunc fromFile ) {
     auto duration = std::chrono::system_clock::now() - tp;
     std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>( duration );
 
-    printf( "%16s : %5lu kB and %lu lines in %lld ms\n", names[fromFile], sum / 1024, lineCount, ms.count() );
+    printf( "%16s : %lu files, %5lu kB and %lu lines in %lld ms\n",
+            names[fromFile], files, sum / 1024, lineCount, ms.count() );
     return ms.count();
 }
 
