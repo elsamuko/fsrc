@@ -4,6 +4,7 @@
 #include <atomic>
 
 #include "boost/regex.hpp"
+#include "boost/algorithm/string/case_conv.hpp"
 namespace rx = boost;
 
 #if WIN32
@@ -19,6 +20,8 @@ namespace rx = boost;
 struct SearchOptions {
     bool success = false;
     bool noGit = false;
+    bool ignoreCase = false;
+    bool isRegex = false;
     std::string term;
     fs::path path;
     bool colorized = isatty( fileno( stdout ) );
@@ -26,19 +29,8 @@ struct SearchOptions {
     static SearchOptions parseArgs( int argc, char* argv[] );
 };
 
-//! \returns true, if term is only alnum or underscore
-inline bool isSimpleSearch( const std::string& term ) {
-
-    for( const char& c : term ) {
-        if( !std::isalnum( c ) && c != '_' ) { return false; }
-    }
-
-    return true;
-}
-
 struct Searcher {
     std::mutex m;
-    bool simple = false;
     std::string term;
     rx::regex regex;
     SearchOptions opts;
@@ -48,12 +40,19 @@ struct Searcher {
 
     Searcher( const SearchOptions& opts ) : opts( opts ) {
         term = opts.term;
-        simple = isSimpleSearch( term );
+
+        if( opts.ignoreCase ) {
+            boost::algorithm::to_lower( term );
+        }
 
         // use regex only for complex searches
-        if( !simple ) {
+        if( opts.isRegex ) {
+            rx::regex::flag_type flags = rx::regex::normal;
+
+            if( opts.ignoreCase ) { flags ^= boost::regex::icase; }
+
             try {
-                regex.assign( term );
+                regex.assign( term, flags );
             } catch( const rx::regex_error& e ) {
                 LOG( "Invalid regex: " << e.what() );
             }

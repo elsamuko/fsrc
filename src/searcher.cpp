@@ -11,6 +11,8 @@ SearchOptions SearchOptions::parseArgs( int argc, char* argv[] ) {
     desc.add_options()
     ( "help,h", "Help" )
     ( "dir,d", po::value<std::string>(), "Search folder" )
+    ( "ignore-case,i", "Case insensitive search" )
+    ( "regex,r", "Regex search (slower)" )
     ( "no-git", "Disable search with 'git ls-files'" )
     ( "no-colors", "Disable colorized output" )
     ;
@@ -56,6 +58,16 @@ SearchOptions SearchOptions::parseArgs( int argc, char* argv[] ) {
         opts.colorized = false;
     }
 
+    // ignore case
+    if( args.count( "ignore-case" ) ) {
+        opts.ignoreCase = true;
+    }
+
+    // enable regex search
+    if( args.count( "regex" ) ) {
+        opts.isRegex = true;
+    }
+
     // term
     if( args.count( "term" ) ) {
         opts.term = args["term"].as<std::string>();
@@ -95,9 +107,18 @@ void Searcher::search( const sys_string& path ) {
 
         if( line.empty() ) { continue; }
 
-        if( simple ) {
+        if( !opts.isRegex ) {
 
-            size_t pos = line.find( term );
+            size_t pos = std::string::npos;
+
+            if( opts.ignoreCase ) {
+                std::string lower( line.data(), line.size() );
+                boost::algorithm::to_lower( lower );
+                pos = lower.find( term );
+            } else {
+                pos = line.find( term );
+            }
+
             const char* data = line.data();
 
             // highlight only first hit
@@ -106,7 +127,7 @@ void Searcher::search( const sys_string& path ) {
                 std::string number = utils::format( "\nL%4i : ", i + 1 );
                 prints.emplace_back( utils::printFunc( cblue, number ) );
                 prints.emplace_back( utils::printFunc( Color::Neutral, std::string( data, pos ) ) );
-                prints.emplace_back( utils::printFunc( cred, term ) );
+                prints.emplace_back( utils::printFunc( cred, std::string( data + pos, term.size() ) ) );
                 std::string rest( data + pos + term.size(), line.size() - pos - term.size() );
                 prints.emplace_back( utils::printFunc( Color::Neutral, rest ) );
             }
