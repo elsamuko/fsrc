@@ -31,10 +31,10 @@ void onAllFiles( Searcher& searcher ) {
     } );
 }
 
-void onGitFiles( const std::vector<std::string>& filenames, Searcher& searcher ) {
+void onGitFiles( const std::vector<sys_string>& filenames, Searcher& searcher ) {
     POOL;
 
-    for( const std::string& filename : filenames ) {
+    for( const sys_string& filename : filenames ) {
         pool.add( [filename, &searcher] {
             searcher.files++;
             searcher.search( filename );
@@ -59,7 +59,7 @@ int main( int argc, char* argv[] ) {
         std::string nullDevice = "/dev/null";
 #endif
         fs::current_path( opts.path );
-        std::vector<std::string> gitFiles = utils::run( "git ls-files 2> " + nullDevice );
+        std::vector<sys_string> gitFiles = utils::run( "git ls-files 2> " + nullDevice );
         printf( "Searching for \"%s\" in repo:\n\n", searcher.opts.term.c_str() );
         onGitFiles( gitFiles, searcher );
     } else {

@@ -159,7 +159,11 @@ void Searcher::search( const sys_string& path ) {
     if( !prints.empty() ) {
         filesMatched++;
 
-        const auto printFile     = utils::printFunc( cgreen, path.c_str() );
+#if WIN32
+        const auto printFile     = utils::printFunc( cgreen, std::string( path.cbegin(), path.cend() ) );
+#else
+        const auto printFile     = utils::printFunc( cgreen, path );
+#endif
         const auto printNewlines = utils::printFunc( Color::Neutral, "\n\n" );
 
         m.lock();

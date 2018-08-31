@@ -24,7 +24,7 @@ struct SearchOptions {
     bool isRegex = false;
     std::string term;
     fs::path path;
-    bool colorized = isatty( fileno( stdout ) );
+    bool colorized = isatty( fileno( stdout ) ) != 0;
     operator bool() const { return success; }
     static SearchOptions parseArgs( int argc, char* argv[] );
 };

@@ -5,6 +5,14 @@
 #include <functional>
 #include <vector>
 
+#if WIN32
+#include <io.h>
+#define popen _popen
+#define pclose _pclose
+#define open _wopen
+#define O_RDONLY _O_RDONLY
+#endif
+
 #include "boost/filesystem.hpp"
 namespace fs = boost::filesystem;
 using sys_string = fs::path::string_type;
@@ -21,15 +29,7 @@ enum class Color {
 
 #if WIN32
 namespace std {
-struct string_view {
-    const char* data = nullptr;
-    size_t size = 0;
-    string_view( const char* data = nullptr, size_t size = 0 ) :
-        data( data ), size( size ) {}
-    bool empty() const { return size == 0 ; }
-    const char& front() const { return data[0]; }
-    const char& back() const { return data[size - 1]; }
-};
+using string_view = string;
 }
 #endif
 
@@ -70,7 +70,7 @@ void printColor( Color color, const std::string& text );
 
 //! runs shell command
 //! \returns output of command as vector
-std::vector<std::string> run( const std::string& command );
+std::vector<sys_string> run( const std::string& command );
 
 //! \returns true, if filename has no "\0\0" in the first 1000 bytes
 bool isTextFile( const std::string_view& content );

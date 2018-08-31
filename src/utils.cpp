@@ -7,10 +7,12 @@
 #include <cstdio>
 #include <cstring>
 
+#include <fcntl.h>
+
 #if WIN32
+#define NOMINMAX
 #include <Windows.h>
-#define popen _popen
-#define pclose _pclose
+
 const std::map<Color, WORD> colors = {
     {Color::Red,     FOREGROUND_RED},
     {Color::Green,   FOREGROUND_GREEN},
@@ -18,7 +20,6 @@ const std::map<Color, WORD> colors = {
 };
 #else
 #include <dirent.h>
-#include <fcntl.h>
 #include <sys/stat.h>
 
 const std::map<Color, std::string> colors = {
@@ -33,8 +34,8 @@ void utils::printColor( Color color, const std::string& text ) {
         fwrite( text.c_str(), 1, text.size(), stdout );
     } else {
 #if WIN32
-        const static HANDLE h = ::GetStdHandle( STD_OUTPUT_HANDLE );
-        const static WORD attributes = []( const HANDLE h ) {
+        const HANDLE h = ::GetStdHandle( STD_OUTPUT_HANDLE );
+        const WORD attributes = []( const HANDLE h ) {
             CONSOLE_SCREEN_BUFFER_INFO csbiInfo = {};
             ::GetConsoleScreenBufferInfo( h, &csbiInfo );
             return csbiInfo.wAttributes;
@@ -49,21 +50,27 @@ void utils::printColor( Color color, const std::string& text ) {
     }
 }
 
-std::vector<std::string> utils::run( const std::string& command ) {
-    std::string buffer( 1024, '\0' );
-    std::vector<std::string> result;
+std::vector<sys_string> utils::run( const std::string& command ) {
+    sys_string buffer( 1024, '\0' );
+    std::vector<sys_string> result;
 
     FILE* pipe = popen( command.c_str(), "r" );
 
     if( !pipe ) { return result; }
 
     while( !feof( pipe ) ) {
+#if WIN32
+
+        if( fgetws( ( wchar_t* )buffer.data(), 101, pipe ) != NULL ) {
+#else
+
         if( fgets( ( char* )buffer.data(), 101, pipe ) != NULL ) {
+#endif
             result.emplace_back( buffer.c_str() );
         }
     }
 
-    for( std::string& line : result ) {
+    for( sys_string& line : result ) {
         line.pop_back(); // remove newline
     }
 
@@ -84,7 +91,7 @@ bool utils::isTextFile( const std::string_view& content ) {
     }
 
     static std::string_view zerozero( "\0\0", 2 );
-    bool hasDoubleZero = content.find( zerozero ) != std::string_view::npos;
+    bool hasDoubleZero = content.find( zerozero ) != std::string::npos;
     return !hasDoubleZero;
 }
 
@@ -126,10 +133,10 @@ utils::FileView utils::fromFileC( const sys_string& filename ) {
     char* ptr = buffer.grow( view.size );
 
     // read content
-    IF_RET( view.size != ( size_t )read( file, ptr, view.size ) );
+    IF_RET( view.size != ( size_t )read( file, ptr, ( unsigned int )view.size ) );
 
     // check first 100 bytes for binary
-    IF_RET( !utils::isTextFile( std::string_view( ptr, std::min( view.size, 100ul ) ) ) );
+    IF_RET( !utils::isTextFile( std::string_view( ptr, std::min<size_t>( view.size, 100ul ) ) ) );
 
     view.lines = utils::parseContent( ptr, view.size );
     return view;

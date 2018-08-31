@@ -21,7 +21,7 @@ class ThreadPool {
         void initialize();
         void workOff();
 
-        int threads = 4;
+        size_t threads = 4;
         std::vector<std::thread> workers;
 
         boost::lockfree::queue<Job*> jobs;
