@@ -1,4 +1,6 @@
 
+LIBS += Shlwapi.lib
+
 # set 'd'
 CONFIG(debug, debug|release) {
     COMPILE_FLAG=d

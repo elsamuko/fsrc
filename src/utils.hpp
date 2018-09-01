@@ -6,7 +6,9 @@
 #include <vector>
 
 #if WIN32
+#define NOMINMAX
 #include <io.h>
+#include <shlwapi.h>
 #define popen  _popen
 #define pclose _pclose
 #define open   _wopen

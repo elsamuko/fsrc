@@ -10,7 +10,6 @@
 #include <fcntl.h>
 
 #if WIN32
-#define NOMINMAX
 #include <Windows.h>
 
 const std::map<Color, WORD> colors = {

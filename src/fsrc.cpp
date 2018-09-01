@@ -8,7 +8,7 @@
 #if THREADED
 
 // max 8 threads, else start/stop needs longer than the actual work
-#define POOL ThreadPool pool( std::min( std::thread::hardware_concurrency(), 8u ) );
+#define POOL ThreadPool pool( std::min<size_t>( std::thread::hardware_concurrency(), 8u ) );
 
 #else
 
