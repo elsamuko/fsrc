@@ -7,10 +7,17 @@
 
 #if WIN32
 #include <io.h>
-#define popen _popen
+#define popen  _popen
 #define pclose _pclose
-#define open _wopen
+#define open   _wopen
+#define fopen  _wfopen
+#define close  _close
 #define O_RDONLY _O_RDONLY
+#define O_BINARY _O_BINARY
+#define O_RB L"rb"
+#else
+#define _read   read
+#define O_RB "rb"
 #endif
 
 #include "boost/filesystem.hpp"

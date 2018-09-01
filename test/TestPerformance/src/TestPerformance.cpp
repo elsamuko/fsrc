@@ -6,8 +6,11 @@
 using boost::asio::post;
 
 #include <fcntl.h>
-#include <unistd.h>
+
+#if !WIN32
 #include <sys/mman.h>
+#include <unistd.h>
+#endif
 
 #include "utils.hpp"
 #include "threadpool.hpp"
@@ -82,10 +85,11 @@ utils::FileView fromFileParser( const sys_string& filename, parseContentFunc& pa
     static thread_local utils::Buffer buffer;
     char* ptr = buffer.grow( view.size );
 
-    IF_RET( view.size != ( size_t )read( file, ptr, view.size ) );
+    size_t read = _read( file, ptr, view.size );
+    IF_RET( view.size != read );
 
     // check first 100 bytes for binary
-    IF_RET( !utils::isTextFile( std::string_view( ptr, std::min( view.size, 100ul ) ) ) );
+    IF_RET( !utils::isTextFile( std::string_view( ptr, std::min<size_t>( view.size, 100ul ) ) ) );
 
     view.lines = parse( ptr, view.size );
     return view;
@@ -105,20 +109,22 @@ utils::FileView fromFilePosix( const sys_string& filename ) {
     static thread_local utils::Buffer buffer;
     char* ptr = buffer.grow( view.size );
 
-    IF_RET( view.size != ( size_t )read( file, ptr, view.size ) );
+    size_t read = _read( file, ptr, view.size );
+    IF_RET( view.size != read );
 
     // check first 100 bytes for binary
-    IF_RET( !utils::isTextFile( std::string_view( ptr, std::min( view.size, 100ul ) ) ) );
+    IF_RET( !utils::isTextFile( std::string_view( ptr, std::min<size_t>( view.size, 100ul ) ) ) );
 
     view.lines = utils::parseContent( ptr, view.size );
     return view;
 }
 
+#if !WIN32
 //! memory mapped API with thread local storage
 utils::FileView fromFileMmap( const sys_string& filename ) {
     utils::FileView view;
     int file = open( filename.c_str(), O_RDONLY );
-    IF_RET( !file );
+    IF_RET( file == -1 );
     utils::ScopeGuard onExit( [file] { close( file ); } );
 
     view.size = utils::fileSize( file );
@@ -128,17 +134,18 @@ utils::FileView fromFileMmap( const sys_string& filename ) {
     IF_RET( map == MAP_FAILED );
 
     // check first 100 bytes for binary
-    IF_RET( !utils::isTextFile( std::string_view( map, std::min( view.size, 100ul ) ) ) );
+    IF_RET( !utils::isTextFile( std::string_view( map, std::min<size_t>( view.size, 100ul ) ) ) );
 
     view.lines = utils::parseContent( map, view.size );
     munmap( map, view.size ); // if used, call munmap after parsing
     return view;
 }
+#endif
 
 //! C API with thread local storage
 utils::FileView fromFileLocal( const sys_string& filename ) {
     utils::FileView view;
-    FILE* file = fopen( filename.c_str(), "rb" );
+    FILE* file = fopen( filename.c_str(), O_RB );
     IF_RET( file == NULL );
     const utils::ScopeGuard onExit( [file] { fclose( file ); } );
 
@@ -153,7 +160,7 @@ utils::FileView fromFileLocal( const sys_string& filename ) {
     IF_RET( view.size != fread( ptr, 1, view.size, file ) );
 
     // check first 100 bytes for binary
-    IF_RET( !utils::isTextFile( std::string_view( ptr, std::min( view.size, 100ul ) ) ) );
+    IF_RET( !utils::isTextFile( std::string_view( ptr, std::min<size_t>( view.size, 100ul ) ) ) );
 
     view.lines = utils::parseContent( ptr, view.size );
     return view;
@@ -162,7 +169,7 @@ utils::FileView fromFileLocal( const sys_string& filename ) {
 //! C API with string storage
 utils::FileView fromFileString( const sys_string& filename ) {
     utils::FileView view;
-    FILE* file = fopen( filename.c_str(), "rb" );
+    FILE* file = fopen( filename.c_str(), O_RB );
     IF_RET( file == NULL );
     const utils::ScopeGuard onExit( [file] { fclose( file ); } );
 
@@ -171,13 +178,13 @@ utils::FileView fromFileString( const sys_string& filename ) {
 
     std::string buffer;
     buffer.resize( view.size );
-    char* ptr = buffer.data();
+    const char* ptr = buffer.data();
 
     // read content
-    IF_RET( view.size != fread( ptr, 1, view.size, file ) );
+    IF_RET( view.size != fread( ( void* )ptr, 1, view.size, file ) );
 
     // check first 100 bytes for binary
-    IF_RET( !utils::isTextFile( std::string_view( ptr, std::min( view.size, 100ul ) ) ) );
+    IF_RET( !utils::isTextFile( std::string_view( ptr, std::min<size_t>( view.size, 100ul ) ) ) );
 
     view.lines = utils::parseContent( ptr, view.size );
     // if used, add buffer to FileView
@@ -204,7 +211,7 @@ utils::FileView fromFileCPP( const sys_string& filename ) {
     file.read( ptr, view.size );
 
     // check first 100 bytes for binary
-    IF_RET( !utils::isTextFile( std::string_view( ptr, std::min( view.size, 100ul ) ) ) );
+    IF_RET( !utils::isTextFile( std::string_view( ptr, std::min<size_t>( view.size, 100ul ) ) ) );
 
     view.lines = utils::parseContent( ptr, view.size );
     return view;
@@ -213,7 +220,7 @@ utils::FileView fromFileCPP( const sys_string& filename ) {
 // C API with lseek instead fstat
 utils::FileView fromFileLSeek( const sys_string& filename ) {
     utils::FileView view;
-    FILE* file = fopen( filename.c_str(), "rb" );
+    FILE* file = fopen( filename.c_str(), O_RB );
     IF_RET( file == NULL );
     const utils::ScopeGuard onExit( [file] { fclose( file ); } );
 
@@ -230,7 +237,7 @@ utils::FileView fromFileLSeek( const sys_string& filename ) {
     IF_RET( view.size != fread( ptr, 1, view.size, file ) );
 
     // check first 100 bytes for binary
-    IF_RET( !utils::isTextFile( std::string_view( ptr, std::min( view.size, 100ul ) ) ) );
+    IF_RET( !utils::isTextFile( std::string_view( ptr, std::min<size_t>( view.size, 100ul ) ) ) );
 
     view.lines = utils::parseContent( ptr, view.size );
     return view;
@@ -238,7 +245,7 @@ utils::FileView fromFileLSeek( const sys_string& filename ) {
 
 utils::FileView fromFileTwoFread( const sys_string& filename ) {
     utils::FileView view;
-    FILE* file = fopen( filename.c_str(), "rb" );
+    FILE* file = fopen( filename.c_str(), O_RB );
     IF_RET( file == NULL );
     const utils::ScopeGuard onExit( [file] { fclose( file ); } );
 
@@ -279,7 +286,9 @@ using fromFileFunc = utils::FileView( const sys_string& filename );
 
 std::map<fromFileFunc*, const char*> names = {
     {fromFilePosix, "fromFilePosix"},
+#if !WIN32
     {fromFileMmap, "fromFileMmap"},
+#endif
     {fromFileLocal, "fromFileLocal"},
     {fromFileString, "fromFileString"},
     {fromFileLSeek, "fromFileLSeek"},
@@ -296,7 +305,12 @@ size_t run( fromFileFunc fromFile ) {
     size_t sum = 0;
     size_t lineCount = 0;
     size_t files = 0;
+
+#if !WIN32
     fs::path include = "/usr/include";
+#else
+    fs::path include = std::string( getenv( "VS140COMNTOOLS" ) ) + "..\\..\\VC\\include";
+#endif
 
     auto tp = std::chrono::system_clock::now();
 
@@ -310,7 +324,7 @@ size_t run( fromFileFunc fromFile ) {
     auto duration = std::chrono::system_clock::now() - tp;
     std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>( duration );
 
-    printf( "%16s : %lu files, %5lu kB and %lu lines in %lld ms\n",
+    printf( "%16s : %zu files, %5zu kB and %zu lines in %lld ms\n",
             names[fromFile], files, sum / 1024, lineCount, ms.count() );
     return ms.count();
 }
@@ -320,7 +334,9 @@ BOOST_AUTO_TEST_SUITE( Performance )
 BOOST_AUTO_TEST_CASE( Test_fromFile ) {
 
     size_t t2 = run( fromFileCPP );
+#if !WIN32
     /*size_t tM = */run( fromFileMmap );
+#endif
     /*size_t tS = */run( fromFileString );
     /*size_t tF = */run( fromFileLSeek );
     /*size_t tL = */run( fromFileLocal );
@@ -342,6 +358,7 @@ BOOST_AUTO_TEST_CASE( Test_parseContent ) {
 BOOST_AUTO_TEST_CASE( Test_ThreadPool ) {
     boost::int_least64_t ns_asio;
     boost::int_least64_t ns_own;
+    std::atomic_int counter = 0;
     {
         boost::timer::cpu_timer stopwatch;
         stopwatch.start();
@@ -349,7 +366,7 @@ BOOST_AUTO_TEST_CASE( Test_ThreadPool ) {
             boost::asio::thread_pool pool( std::min( std::thread::hardware_concurrency(), 8u ) );
 
             for( int i = 0; i < 1000; ++i ) {
-                boost::asio::post( pool, [] {} );
+                boost::asio::post( pool, [&counter] {counter++;} );
             }
 
             pool.join();
@@ -358,6 +375,7 @@ BOOST_AUTO_TEST_CASE( Test_ThreadPool ) {
         stopwatch.stop();
         ns_asio = stopwatch.elapsed().wall;
     }
+    BOOST_REQUIRE_EQUAL( counter, 1000 );
     {
         boost::timer::cpu_timer stopwatch;
         stopwatch.start();
@@ -365,13 +383,14 @@ BOOST_AUTO_TEST_CASE( Test_ThreadPool ) {
             ThreadPool pool( std::min( std::thread::hardware_concurrency(), 8u ) );
 
             for( int i = 0; i < 1000; ++i ) {
-                pool.add( [] {} );
+                pool.add( [&counter] {counter++;} );
             }
         }
 
         stopwatch.stop();
         ns_own = stopwatch.elapsed().wall;
     }
+    BOOST_REQUIRE_EQUAL( counter, 2000 );
 
     printf( "own %llu us, boost %llu us\n\n", ns_own / 1000, ns_asio / 1000 );
     BOOST_CHECK_GT( ns_asio, ns_own ); // assume own tp is faster than boost::asio
@@ -393,7 +412,11 @@ boost::int_least64_t timed1000( const std::string& name, const std::function<voi
 
 BOOST_AUTO_TEST_CASE( Test_printf ) {
     std::string text = "text123";
+#if WIN32
+    FILE* file = fopen( L"dump.txt", L"w" );
+#else
     FILE* file = fopen( "dump.txt", "w" );
+#endif
 
     /*boost::int_least64_t t_write = */timed1000( "write", [file, text] {
         std::string data = "[" + text + "]\n";
@@ -436,14 +459,20 @@ BOOST_AUTO_TEST_CASE( Test_find ) {
         pos = text.find( term );
     } );
 
+#if !WIN32
     boost::int_least64_t t_memmem = timed1000( "memmem", [&text, &term, &ptr] {
         ptr = memmem( text.data(), text.size(), term.data(), term.size() );
+    } );
+#endif
+
+    boost::int_least64_t t_strstr = timed1000( "strstr", [&text, &term, &ptr] {
+        ptr = ( void* )strstr( text.data(), term.data() );
     } );
 
     BOOST_REQUIRE_NE( pos, std::string::npos );
     BOOST_REQUIRE_NE( ptr, nullptr );
 
-    BOOST_CHECK_LT( t_find, t_memmem ); // assume find is faster than memmem
+    BOOST_CHECK_LT( t_find, t_strstr ); // assume find is faster than memmem
     printf( "\n" );
 }
 
