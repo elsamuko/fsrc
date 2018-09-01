@@ -4,7 +4,6 @@
 #include <atomic>
 
 #include "boost/regex.hpp"
-#include "boost/algorithm/string/case_conv.hpp"
 namespace rx = boost;
 
 #if WIN32
@@ -40,10 +39,6 @@ struct Searcher {
 
     Searcher( const SearchOptions& opts ) : opts( opts ) {
         term = opts.term;
-
-        if( opts.ignoreCase ) {
-            boost::algorithm::to_lower( term );
-        }
 
         // use regex only for complex searches
         if( opts.isRegex ) {

@@ -112,9 +112,12 @@ void Searcher::search( const sys_string& path ) {
             size_t pos = std::string::npos;
 
             if( opts.ignoreCase ) {
-                std::string lower( line.data(), line.size() );
-                boost::algorithm::to_lower( lower );
-                pos = lower.find( term );
+                // strcasestr needs \0 to stop, string_view does not have that
+                std::string copy( line.data(), line.size() );
+                const char* ptr = strcasestr( copy.data(), term.data() );
+
+                if( ptr ) { pos = ptr - copy.data(); }
+                else { pos = std::string::npos; }
             } else {
                 pos = line.find( term );
             }

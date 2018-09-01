@@ -12,6 +12,7 @@
 #define open   _wopen
 #define fopen  _wfopen
 #define close  _close
+#define strcasestr StrStrIA
 #define O_RDONLY _O_RDONLY
 #define O_BINARY _O_BINARY
 #define O_RB L"rb"
