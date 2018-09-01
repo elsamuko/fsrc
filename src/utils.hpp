@@ -16,8 +16,9 @@
 #define O_BINARY _O_BINARY
 #define O_RB L"rb"
 #else
-#define _read   read
+#define _read read
 #define O_RB "rb"
+#define O_BINARY 0
 #endif
 
 #include "boost/filesystem.hpp"
