@@ -16,7 +16,7 @@ case $(uname) in
         ;;
 esac
 
-TERM="[Tt]est"
+TERM="test"
 echo "Searching in $SEARCH_DIR for $TERM"
 
 echo
