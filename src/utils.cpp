@@ -121,8 +121,8 @@ utils::Lines utils::parseContent( const char* data, const size_t size ) {
 
 utils::FileView utils::fromFileC( const sys_string& filename ) {
     FileView view;
-    int file = open( filename.c_str(), O_RDONLY );
-    IF_RET( !file );
+    int file = open( filename.c_str(), O_RDONLY | O_BINARY );
+    IF_RET( file == -1 );
     utils::ScopeGuard onExit( [file] { close( file ); } );
 
     view.size = utils::fileSize( file );

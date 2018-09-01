@@ -71,8 +71,8 @@ using parseContentFunc = utils::Lines( const char* data, const size_t size );
 //! POSIX API with custom parseContent function
 utils::FileView fromFileParser( const sys_string& filename, parseContentFunc& parse ) {
     utils::FileView view;
-    int file = open( filename.c_str(), O_RDONLY );
-    IF_RET( !file );
+    int file = open( filename.c_str(), O_RDONLY | O_BINARY );
+    IF_RET( file == -1 );
     utils::ScopeGuard onExit( [file] { close( file ); } );
 
     view.size = utils::fileSize( file );
@@ -94,8 +94,8 @@ utils::FileView fromFileParser( const sys_string& filename, parseContentFunc& pa
 //! POSIX API with thread local storage
 utils::FileView fromFilePosix( const sys_string& filename ) {
     utils::FileView view;
-    int file = open( filename.c_str(), O_RDONLY );
-    IF_RET( !file );
+    int file = open( filename.c_str(), O_RDONLY | O_BINARY );
+    IF_RET( file == -1 );
     utils::ScopeGuard onExit( [file] { close( file ); } );
 
     view.size = utils::fileSize( file );
