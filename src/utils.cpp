@@ -184,17 +184,17 @@ void utils::recurseDir( const sys_string& filename, const std::function<void ( c
 
     while( FindNextFileW( file, &data ) ) {
 
-        if( data.dwFileAttributes & FILE_ATTRIBUTE_ARCHIVE ) {
-            callback( filename + L"\\" + data.cFileName );
-            continue;
-        }
-
-        if( data.dwFileAttributes == FILE_ATTRIBUTE_DIRECTORY ) {
+        if( data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ) {
             if( !wcscmp( data.cFileName, L".." ) ) { continue; }
 
             if( !wcscmp( data.cFileName, L".git" ) ) { continue; }
 
             recurseDir( filename + L"\\" + data.cFileName, callback );
+            continue;
+        }
+
+        if( data.dwFileAttributes & FILE_ATTRIBUTE_ARCHIVE ) {
+            callback( filename + L"\\" + data.cFileName );
             continue;
         }
     }
