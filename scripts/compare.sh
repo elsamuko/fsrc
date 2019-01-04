@@ -9,7 +9,7 @@ case $(uname) in
         SEARCH_DIR="/usr/include/"
         ;;
     CYGWIN*)
-        SEARCH_DIR="$VS140COMNTOOLS..\\..\\VC\\include"
+        SEARCH_DIR="$VS140COMNTOOLS..\\..\\VC"
         ;;
     *)
         echo "Unknown OS"
@@ -25,4 +25,8 @@ echo "fsrc"
 echo
 echo "rg"
 rg --stats -u -e "$TERM" "$SEARCH_DIR" | tail -n 3
+echo
+
+echo "find"
+find "$SEARCH_DIR" -type f | wc -l
 echo
