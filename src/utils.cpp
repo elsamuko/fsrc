@@ -60,10 +60,10 @@ std::vector<sys_string> utils::run( const std::string& command ) {
     while( !feof( pipe ) ) {
 #ifdef _WIN32
 
-        if( fgetws( ( wchar_t* )buffer.data(), 101, pipe ) != NULL ) {
+        if( fgetws( ( wchar_t* )buffer.data(), 101, pipe ) != nullptr ) {
 #else
 
-        if( fgets( ( char* )buffer.data(), 101, pipe ) != NULL ) {
+        if( fgets( const_cast<char*>( buffer.data() ), 101, pipe ) != nullptr ) {
 #endif
             result.emplace_back( buffer.c_str() );
         }
@@ -101,11 +101,11 @@ utils::Lines utils::parseContent( const char* data, const size_t size ) {
 
     if( size == 0 ) { return lines; }
 
-    char* c_old = ( char* )data;
+    char* c_old = const_cast<char*>( data );
     char* c_new = c_old;
     char* c_end = c_old + size;
 
-    while( ( c_new = ( char* )memchr( c_old, '\n', c_end - c_old ) ) ) {
+    while( ( c_new = static_cast<char*>( memchr( c_old, '\n', c_end - c_old ) ) ) ) {
         lines.emplace_back( c_old, c_new - c_old );
         c_old = c_new + 1;
     }
@@ -150,7 +150,7 @@ void utils::recurseDir( const sys_string& filename, const std::function<void( co
 
     struct dirent* dp = nullptr;
 
-    while( ( dp = readdir( dir ) ) != NULL ) {
+    while( ( dp = readdir( dir ) ) != nullptr ) {
 
         if( dp->d_type == DT_REG ) {
             callback( filename + "/" + dp->d_name );
