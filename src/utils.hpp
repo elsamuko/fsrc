@@ -5,7 +5,7 @@
 #include <functional>
 #include <vector>
 
-#if WIN32
+#ifdef _WIN32
 #define NOMINMAX
 #include <io.h>
 #include <shlwapi.h>
@@ -38,7 +38,7 @@ enum class Color {
     Neutral
 };
 
-#if WIN32
+#ifdef _WIN32
 namespace std {
 using string_view = string;
 }

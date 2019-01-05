@@ -6,7 +6,7 @@
 #include "boost/regex.hpp"
 namespace rx = boost;
 
-#if WIN32
+#ifdef _WIN32
 #include <io.h>
 #define isatty _isatty
 #define fileno _fileno

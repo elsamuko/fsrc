@@ -53,7 +53,7 @@ int main( int argc, char* argv[] ) {
     Searcher searcher( opts );
 
     if( !opts.noGit && fs::exists( opts.path / ".git" ) ) {
-#if WIN32
+#ifdef _WIN32
         std::string nullDevice = "NUL";
 #else
         std::string nullDevice = "/dev/null";

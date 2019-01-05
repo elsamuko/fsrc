@@ -9,7 +9,7 @@
 
 #include <fcntl.h>
 
-#if WIN32
+#ifdef _WIN32
 #include <Windows.h>
 
 const std::map<Color, WORD> colors = {
@@ -32,7 +32,7 @@ void utils::printColor( Color color, const std::string& text ) {
     if( color == Color::Neutral ) {
         fwrite( text.c_str(), 1, text.size(), stdout );
     } else {
-#if WIN32
+#ifdef _WIN32
         const HANDLE h = ::GetStdHandle( STD_OUTPUT_HANDLE );
         const WORD attributes = []( const HANDLE h ) {
             CONSOLE_SCREEN_BUFFER_INFO csbiInfo = {};
@@ -58,7 +58,7 @@ std::vector<sys_string> utils::run( const std::string& command ) {
     if( !pipe ) { return result; }
 
     while( !feof( pipe ) ) {
-#if WIN32
+#ifdef _WIN32
 
         if( fgetws( ( wchar_t* )buffer.data(), 101, pipe ) != NULL ) {
 #else
@@ -142,7 +142,7 @@ utils::FileView utils::fromFileC( const sys_string& filename ) {
     return view;
 }
 
-#if !WIN32
+#ifndef _WIN32
 void utils::recurseDir( const sys_string& filename, const std::function<void( const sys_string& filename )>& callback ) {
     DIR* dir = opendir( filename.c_str() );
 
