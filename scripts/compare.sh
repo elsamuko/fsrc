@@ -24,7 +24,7 @@ echo "fsrc"
 ./fsrc -t "$TERM" -d "$SEARCH_DIR" | tail -n 1
 echo
 echo "rg"
-rg --stats -u -e "$TERM" "$SEARCH_DIR" | tail -n 3
+rg --stats -u -e "$TERM" "$SEARCH_DIR" | tail -n 5
 echo
 
 echo "find"
