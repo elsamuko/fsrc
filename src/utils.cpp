@@ -60,7 +60,7 @@ std::vector<sys_string> utils::run( const std::string& command ) {
     while( !feof( pipe ) ) {
 #ifdef _WIN32
 
-        if( fgetws( ( wchar_t* )buffer.data(), 101, pipe ) != nullptr ) {
+        if( fgetws( const_cast<wchar_t*>( buffer.data() ), 101, pipe ) != nullptr ) {
 #else
 
         if( fgets( const_cast<char*>( buffer.data() ), 101, pipe ) != nullptr ) {
