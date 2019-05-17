@@ -6,6 +6,7 @@ namespace po = boost::program_options;
 SearchOptions SearchOptions::parseArgs( int argc, char* argv[] ) {
     SearchOptions opts;
     po::variables_map args;
+    bool needsHelp = false;
 
     po::options_description desc( "Options" );
     desc.add_options()
@@ -68,19 +69,23 @@ SearchOptions SearchOptions::parseArgs( int argc, char* argv[] ) {
         opts.isRegex = true;
     }
 
+    // help
+    if( args.count( "help" ) ) {
+        LOG( "Usage: fsrc [options] term" );
+        desc.print( std::cout );
+        needsHelp = true;
+        opts.success = false;
+    }
+
     // term
     if( args.count( "term" ) ) {
         opts.term = args["term"].as<std::string>();
         opts.success = true;
     } else {
-        LOG( "Error: Missing term" );
-        opts.success = false;
-    }
+        if( !needsHelp ) {
+            LOG( "Usage: fsrc [options] term" );
+        }
 
-    // help
-    if( args.count( "help" ) ) {
-        LOG( "fsrc [option] term" )
-        desc.print( std::cout );
         opts.success = false;
     }
 
