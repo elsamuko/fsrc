@@ -75,11 +75,11 @@ function winBuild {
     cmd /c bootstrap.bat
 
     # debug
-    ./b2.exe -j 8 --stagedir=stage_debug   toolset=msvc-14.1 variant=debug   \
+    ./b2.exe -j 8 --stagedir=stage_debug   toolset=msvc-14.2 variant=debug   \
         link=static runtime-link=static threading=multi address-model=64
 
     # release
-    ./b2.exe -j 8 --stagedir=stage_release toolset=msvc-14.1 variant=release \
+    ./b2.exe -j 8 --stagedir=stage_release toolset=msvc-14.2 variant=release \
         link=static runtime-link=static threading=multi address-model=64 \
         cxxflags="/Qpar /Ox /Ob2 /Oi /Ot /Oy /GT /GL" linkflags="/LTCG /OPT:REF /OPT:ICF"
 }
