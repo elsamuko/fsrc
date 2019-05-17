@@ -3,6 +3,11 @@
 #include "boost/program_options.hpp"
 namespace po = boost::program_options;
 
+void usage() {
+    LOG( "Build: " __DATE__ );
+    LOG( "Usage: fsrc [options] term" );
+}
+
 SearchOptions SearchOptions::parseArgs( int argc, char* argv[] ) {
     SearchOptions opts;
     po::variables_map args;
@@ -71,7 +76,7 @@ SearchOptions SearchOptions::parseArgs( int argc, char* argv[] ) {
 
     // help
     if( args.count( "help" ) ) {
-        LOG( "Usage: fsrc [options] term" );
+        usage();
         desc.print( std::cout );
         needsHelp = true;
         opts.success = false;
@@ -83,7 +88,7 @@ SearchOptions SearchOptions::parseArgs( int argc, char* argv[] ) {
         opts.success = true;
     } else {
         if( !needsHelp ) {
-            LOG( "Usage: fsrc [options] term" );
+            usage();
         }
 
         opts.success = false;
