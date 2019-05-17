@@ -9,7 +9,7 @@ case $(uname) in
         SEARCH_DIR="/usr/include/"
         ;;
     CYGWIN*)
-        SEARCH_DIR="$VS140COMNTOOLS..\\..\\VC"
+        SEARCH_DIR='C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC'
         ;;
     *)
         echo "Unknown OS"
