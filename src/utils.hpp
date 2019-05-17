@@ -8,7 +8,7 @@
 #ifdef _WIN32
 #define NOMINMAX
 #include <io.h>
-#include <shlwapi.h>
+#include <Shlwapi.h>
 #define popen  _popen
 #define pclose _pclose
 #define open   _wopen
