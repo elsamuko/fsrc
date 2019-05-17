@@ -20,13 +20,17 @@ TERM="test"
 echo "Searching in $SEARCH_DIR for $TERM"
 
 echo
-echo "fsrc"
+echo "===FSRC==="
+echo "./fsrc -t \"$TERM\" -d \"$SEARCH_DIR\""
 ./fsrc -t "$TERM" -d "$SEARCH_DIR" | tail -n 1
 echo
-echo "rg"
+
+echo "====RG===="
+echo "rg --stats -u -e \"$TERM\" \"$SEARCH_DIR\""
 rg --stats -u -e "$TERM" "$SEARCH_DIR" | tail -n 5
 echo
 
-echo "find"
+echo "===FIND==="
+echo "find \"$SEARCH_DIR\" -type f | wc -l"
 find "$SEARCH_DIR" -type f | wc -l
 echo
