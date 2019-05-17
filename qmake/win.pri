@@ -1,6 +1,9 @@
 
 LIBS += Shlwapi.lib
 
+# disable warnings about POSIX API calls
+DEFINES += _CRT_SECURE_NO_WARNINGS
+
 # set 'd'
 CONFIG(debug, debug|release) {
     COMPILE_FLAG=d
