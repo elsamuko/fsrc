@@ -22,13 +22,13 @@ user@home:/usr/include/boost$
 ## Building
 
 ### Windows
-You need VS2015 and cygwin with curl.
+You need VS2019 and cygwin with curl.
 
 ### Linux
-You need g++ 6 or newer.
+You need g++ 7 or newer.
 
 ### macOS
-You need XCode 8 or later.
+You need XCode 9 or later.
 
 # General
 Run `./script/build_boost.sh` to build boost deps.  
