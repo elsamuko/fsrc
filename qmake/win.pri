@@ -26,8 +26,8 @@ static {
     QMAKE_CXXFLAGS_DEBUG += -MTd
 }
 
-CONFIG(debug, debug|release) {
-# performance
+# performance flags
+CONFIG(release, debug|release) {
     QMAKE_CXXFLAGS += /Qpar              # parallel code generation
     QMAKE_CXXFLAGS += /Ox                # optimisation
     QMAKE_CXXFLAGS += /Ob2               # inline all possible
