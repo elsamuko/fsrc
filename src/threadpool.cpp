@@ -26,7 +26,7 @@ void ThreadPool::workOff() {
 
 bool ThreadPool::add( const Job& job ) {
     std::call_once( initialized, [this] { this->initialize(); } );
-    jobs.push( new Job( std::move( job ) ) );
+    jobs.push( new Job( job ) );
     count++;
     return true;
 }
