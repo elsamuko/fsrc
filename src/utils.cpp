@@ -204,7 +204,7 @@ void utils::recurseDir( const sys_string& filename, const std::function<void ( c
 #endif
 
 size_t utils::fileSize( const int file ) {
-    struct stat st;
+    struct stat st {};
 
     if( 0 != fstat( file, &st ) ) { return 0; }
 
