@@ -10,12 +10,14 @@
 #include <thread>
 #include "boost/asio.hpp"
 
-#define POOL struct { \
+#define POOL struct ThreadPool { \
     boost::asio::thread_pool mPool{ std::min<size_t>( std::thread::hardware_concurrency(), 8u ) }; \
     void add( const std::function<void()>& f ) { \
         boost::asio::post( mPool, f ); \
     } \
-    } pool;
+    ThreadPool() {} \
+    ~ThreadPool() { mPool.join(); } \
+} pool;
 
 #endif
 
