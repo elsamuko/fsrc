@@ -4,6 +4,7 @@
 #include <atomic>
 
 #include "boost/regex.hpp"
+#include "boost/algorithm/searching/boyer_moore_horspool.hpp"
 namespace rx = boost;
 
 #ifdef _WIN32
@@ -36,6 +37,7 @@ struct Searcher {
     std::atomic_int hits = {0};
     std::atomic_int files = {0};
     std::atomic_int filesMatched = {0};
+    boost::algorithm::boyer_moore_horspool<std::string::iterator>* bmh;
 
     Searcher( const SearchOptions& opts ) : opts( opts ) {
         term = opts.term;
@@ -53,6 +55,9 @@ struct Searcher {
             }
         }
 
+        if( !opts.isRegex && !opts.ignoreCase ) {
+            bmh = new boost::algorithm::boyer_moore_horspool( term.begin(), term.end() );
+        }
     }
 
     void search( const sys_string& path );

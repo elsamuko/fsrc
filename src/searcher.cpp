@@ -129,7 +129,11 @@ void Searcher::search( const sys_string& path ) {
                 if( ptr ) { pos = ptr - copy.data(); }
                 else { pos = std::string::npos; }
             } else {
-                pos = line.find( term );
+                const auto res = ( *bmh )( line.begin(), line.end() );
+
+                if( res.first != line.end() ) {
+                    pos = res.first - line.begin();
+                }
             }
 
             const char* data = line.data();
