@@ -1,5 +1,7 @@
 #define BOOST_TEST_MODULE Performance
 
+#include "boost/algorithm/searching/boyer_moore_horspool.hpp"
+#include "boost/algorithm/searching/knuth_morris_pratt.hpp"
 #include "boost/test/unit_test.hpp"
 #include "boost/timer/timer.hpp"
 #include "boost/asio.hpp"
@@ -454,6 +456,10 @@ BOOST_AUTO_TEST_CASE( Test_find ) {
     std::string term = "earth";
     size_t pos;
     void* ptr;
+    std::string::iterator it;
+    std::string::iterator it2;
+    boost::algorithm::boyer_moore_horspool bmh( term.begin(), term.end() );
+    boost::algorithm::knuth_morris_pratt kmp( term.begin(), term.end() );
 
     boost::int_least64_t t_find = timed1000( "find", [&text, &term, &pos] {
         pos = text.find( term );
@@ -469,10 +475,19 @@ BOOST_AUTO_TEST_CASE( Test_find ) {
         ptr = ( void* )strstr( text.data(), term.data() );
     } );
 
+    boost::int_least64_t t_BMH = timed1000( "boyer_moore_horspool_search", [&text, &term, &it, &bmh] {
+        it = bmh( text.begin(), text.end() ).first;
+    } );
+
+    boost::int_least64_t t_KMP = timed1000( "knuth_morris_pratt_search", [&text, &term, &it2, &kmp] {
+        it2 = kmp( text.begin(), text.end() ).first;
+    } );
+
     BOOST_REQUIRE_NE( pos, std::string::npos );
     BOOST_REQUIRE_NE( ptr, nullptr );
 
     BOOST_CHECK_LT( t_find, t_strstr ); // assume find is faster than memmem
+    BOOST_CHECK_LT( t_BMH, t_find ); // assume bmh is faster than find
     printf( "\n" );
 }
 
