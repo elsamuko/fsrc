@@ -89,13 +89,16 @@ function linuxBuild {
     
     ./bootstrap.sh --without-icu
 
+    # https://stackoverflow.com/a/5346531
+    echo "using gcc : 9.1 : /usr/bin/g++-9 ; " >> tools/build/src/user-config.jam
+
     # debug
-    ./b2 -j 8 --disable-icu --stagedir=stage_debug toolset=gcc variant=debug \
+    ./b2 -j 8 --disable-icu --stagedir=stage_debug toolset=gcc-9.1 variant=debug \
         link=static threading=multi address-model=64 \
         cxxflags="-std=c++17"
 
     # release
-    ./b2 -j 8 --disable-icu --stagedir=stage_release toolset=gcc variant=release \
+    ./b2 -j 8 --disable-icu --stagedir=stage_release toolset=gcc-9.1 variant=release \
         link=static threading=multi address-model=64 \
         cxxflags="-std=c++17 -msse2 -oFast" linkflags="-flto"
 }
