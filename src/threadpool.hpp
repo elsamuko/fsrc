@@ -10,6 +10,24 @@
 
 #include <boost/lockfree/queue.hpp>
 
+// disable pool for debugging
+#define THREADED 1
+
+#if THREADED
+
+// max 8 threads, else start/stop needs longer than the actual work
+#define POOL ThreadPool pool( std::min<size_t>( std::thread::hardware_concurrency(), 8u ) );
+
+#else
+
+#define POOL struct { \
+    void add( const std::function<void()>& f ) { \
+        f(); \
+    } \
+    } pool;
+
+#endif
+
 class ThreadPool {
     public:
         typedef std::function<void()> Job;

@@ -1,20 +1,19 @@
 #include "searcher.hpp"
 #include "utils.hpp"
 
+#define BOOST_THREADPOOL 1
+
+#if !BOOST_THREADPOOL
 #include "threadpool.hpp"
-
-#define THREADED 1
-
-#if THREADED
-
-// max 8 threads, else start/stop needs longer than the actual work
-#define POOL ThreadPool pool( std::min<size_t>( std::thread::hardware_concurrency(), 8u ) );
-
 #else
 
+#include <thread>
+#include "boost/asio.hpp"
+
 #define POOL struct { \
+    boost::asio::thread_pool mPool{ std::min<size_t>( std::thread::hardware_concurrency(), 8u ) }; \
     void add( const std::function<void()>& f ) { \
-        f(); \
+        boost::asio::post( mPool, f ); \
     } \
     } pool;
 
