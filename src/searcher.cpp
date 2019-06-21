@@ -1,82 +1,129 @@
-#include "searcher.hpp"
+#include <iterator>
 
+#include "searcher.hpp"
 
 void Searcher::search( const sys_string& path ) {
 
-    const utils::FileView view = utils::fromFileC( path );
+    utils::FileView view = utils::fromFileC( path );
+    const std::string_view& content = view.content;
 
-    if( view.lines.empty() ) { return; }
+    if( content.empty() ) { return; }
 
-    size_t size = view.lines.size();
+    std::vector<Hit> hits;
     std::vector<std::function<void()>> prints;
-    prints.reserve( 10 );
 
     // don't pipe colors
     Color cred   = opts.colorized ? Color::Red   : Color::Neutral;
     Color cblue  = opts.colorized ? Color::Blue  : Color::Neutral;
     Color cgreen = opts.colorized ? Color::Green : Color::Neutral;
 
-    for( size_t i = 0; i < size; ++i ) {
-        const std::string_view& line = view.lines[i];
+    // collect hits
+    if( !opts.isRegex ) {
 
-        if( line.empty() ) { continue; }
+        // size_t pos = std::string::npos;
+        Iter pos = content.cbegin();
+        Iter end = content.cend();
 
-        if( !opts.isRegex ) {
-
-            size_t pos = std::string::npos;
-
+        while( pos != end ) {
             if( opts.ignoreCase ) {
                 // strcasestr needs \0 to stop, string_view does not have that
-                std::string copy( line.data(), line.size() );
+                std::string copy( pos, end );
                 const char* ptr = strcasestr( copy.data(), term.data() );
 
-                if( ptr ) { pos = ptr - copy.data(); }
-                else { pos = std::string::npos; }
-            } else {
-                const auto res = ( *bmh )( line.begin(), line.end() );
-
-                if( res.first != line.end() ) {
-                    pos = res.first - line.begin();
+                if( ptr ) {
+                    Iter from = pos + ( ptr - copy.data() );
+                    Iter to = from + term.size();
+                    hits.emplace_back( from, to );
+                    pos = to;
+                } else {
+                    pos = end;
                 }
-            }
 
-            const char* data = line.data();
-
-            // highlight only first hit
-            if( pos != std::string::npos ) {
-                hits++;
-                std::string number = utils::format( "\nL%4i : ", i + 1 );
-                prints.emplace_back( utils::printFunc( cblue, number ) );
-                prints.emplace_back( utils::printFunc( Color::Neutral, std::string( data, pos ) ) );
-                prints.emplace_back( utils::printFunc( cred, std::string( data + pos, term.size() ) ) );
-                std::string rest( data + pos + term.size(), line.size() - pos - term.size() );
-                prints.emplace_back( utils::printFunc( Color::Neutral, rest ) );
-            }
-
-        } else {
-            auto begin = rx::cregex_iterator( &line.front(), 1 + &line.back(), regex );
-            auto end   = rx::cregex_iterator();
-
-            if( std::distance( begin, end ) > 0 ) {
-                std::string number = utils::format( "\nL%4i : ", i + 1 );
-                prints.emplace_back( utils::printFunc( cblue, number ) );
             } else {
-                continue;
-            }
+                const Hit hit = ( *bmh )( pos, end );
 
-            for( rx::cregex_iterator match = begin; match != end; ++match ) {
-                hits++;
-                prints.emplace_back( utils::printFunc( Color::Neutral, match->prefix().str() ) );
-                prints.emplace_back( utils::printFunc( cred, match->str() ) );
-
-                if( std::distance( match, end ) == 1 ) {
-                    prints.emplace_back( utils::printFunc( Color::Neutral, match->suffix().str() ) );
+                if( hit.first != end ) {
+                    hits.emplace_back( hit );
+                    pos = hit.second;
+                } else {
+                    pos = end;
                 }
             }
         }
+
+    } else {
+        auto begin = rx::cregex_iterator( &content.front(), 1 + &content.back(), regex );
+        auto end   = rx::cregex_iterator();
+
+        for( rx::cregex_iterator match = begin; match != end; ++match ) {
+            Iter from = content.cbegin() + match->position();
+            Iter to = from + match->length();
+            hits.emplace_back( from, to );
+        }
     }
 
+    // handle hits
+    if( !hits.empty() ) {
+        prints.reserve( 10 );
+        count += hits.size();
 
+        view.lines = utils::parseContent( content.data(), content.size() );
+        size_t size = view.lines.size();
+
+        std::vector<Hit>::const_iterator hit = hits.cbegin();
+
+        for( size_t i = 0; i < size; ++i ) {
+            Iter from = view.lines[i].cbegin();
+            Iter to   = view.lines[i].cend();
+            bool printedLine = false;
+
+            // find all hits in this line
+            while( from <= hit->first && hit->first < to ) {
+
+                // print line information in blue once per line
+                if( !printedLine ) {
+                    printedLine = true;
+                    std::string number = utils::format( "\nL%4i : ", i + 1 );
+                    prints.emplace_back( utils::printFunc( cblue, number ) );
+                }
+
+                // print code in neutral
+                prints.emplace_back( utils::printFunc( Color::Neutral, std::string( from, hit->first ) ) );
+
+                // print hit in red
+                prints.emplace_back( utils::printFunc( cred, std::string( hit->first, hit->second ) ) );
+
+                // set from to end of hit
+                from = hit->second;
+
+                // if there are no more hits in this file, print rest of line in neutral
+                // and exit search for this file
+                if( std::next( hit ) == hits.cend() ) {
+                    prints.emplace_back( utils::printFunc( Color::Neutral, std::string( from, to ) ) );
+                    goto end;
+                }
+
+                ++hit;
+
+                // if next hit is within this line, print code in neutral until next hit
+                if( from <= hit->first && hit->first < to ) {
+                    prints.emplace_back( utils::printFunc( Color::Neutral, std::string( from, hit->first ) ) );
+                    from = hit->first;
+                }
+                // else print code in neutral until end and break to next line
+                else {
+                    prints.emplace_back( utils::printFunc( Color::Neutral, std::string( from, to ) ) );
+                    break;
+                }
+            }
+        }
+
+end:
+        // do nothing
+        void();
+    }
+
+    // print hits
     if( !prints.empty() ) {
         filesMatched++;
 

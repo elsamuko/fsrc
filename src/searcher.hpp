@@ -20,6 +20,9 @@ struct Searcher {
     std::atomic_size_t filesMatched = {0};
     boost::algorithm::boyer_moore_horspool<std::string::iterator>* bmh;
 
+    using Iter = std::string_view::const_iterator;
+    using Hit = std::pair<Iter, Iter>;
+
     Searcher( const SearchOptions& opts ) : opts( opts ) {
         term = opts.term;
 
