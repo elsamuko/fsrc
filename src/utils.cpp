@@ -138,7 +138,7 @@ utils::FileView utils::fromFileC( const sys_string& filename ) {
     // check first 100 bytes for binary
     IF_RET( !utils::isTextFile( std::string_view( ptr, std::min<size_t>( view.size, 100ul ) ) ) );
 
-    view.lines = utils::parseContent( ptr, view.size );
+    view.content = std::string_view( ptr, view.size );
     return view;
 }
 
