@@ -358,8 +358,8 @@ BOOST_AUTO_TEST_CASE( Test_parseContent ) {
 }
 
 BOOST_AUTO_TEST_CASE( Test_ThreadPool ) {
-    boost::int_least64_t ns_asio;
-    boost::int_least64_t ns_own;
+    boost::int_least64_t ns_asio = 0;
+    boost::int_least64_t ns_own = 0;
     std::atomic_int counter = 0;
     {
         boost::timer::cpu_timer stopwatch;
@@ -395,7 +395,7 @@ BOOST_AUTO_TEST_CASE( Test_ThreadPool ) {
     BOOST_REQUIRE_EQUAL( counter, 2000 );
 
     printf( "own %llu us, boost %llu us\n\n", ns_own / 1000, ns_asio / 1000 );
-    BOOST_CHECK_GT( ns_asio, ns_own ); // assume own tp is faster than boost::asio
+    BOOST_CHECK_LT( ns_asio, ns_own ); // assume own tp is slower than boost::asio
 }
 
 boost::int_least64_t timed1000( const std::string& name, const std::function<void()>& func ) {
