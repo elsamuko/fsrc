@@ -27,7 +27,7 @@ echo
 
 echo "====RG===="
 echo "rg --stats -u -e \"$TERM\" \"$SEARCH_DIR\""
-rg --stats -u -e "$TERM" "$SEARCH_DIR" | tail -n 5
+rg --stats -u -e "$TERM" "$SEARCH_DIR" | tail -n 8
 echo
 
 echo "===FIND==="
