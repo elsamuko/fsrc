@@ -38,12 +38,6 @@ enum class Color {
     Neutral
 };
 
-#ifdef _WIN32
-namespace std {
-using string_view = string;
-}
-#endif
-
 namespace utils {
 
 struct ScopeGuard {

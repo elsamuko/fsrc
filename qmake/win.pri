@@ -9,6 +9,8 @@ CONFIG(debug, debug|release) {
     COMPILE_FLAG=d
 }
 
+QMAKE_CXXFLAGS += /std:c++17
+
 static {
     # change MD -> MT
     # \sa mkspecs/common/msvc-desktop.conf
