@@ -67,7 +67,8 @@ void Searcher::search( const sys_string& path ) {
         prints.reserve( 10 );
         count += hits.size();
 
-        view.lines = utils::parseContent( content.data(), content.size() );
+        size_t stop = hits.back().second - content.cbegin();
+        view.lines = utils::parseContent( content.data(), content.size(), stop );
         size_t size = view.lines.size();
 
         std::vector<Hit>::const_iterator hit = hits.cbegin();

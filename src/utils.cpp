@@ -95,7 +95,7 @@ bool utils::isTextFile( const std::string_view& content ) {
 }
 
 // splits content on newline
-utils::Lines utils::parseContent( const char* data, const size_t size ) {
+utils::Lines utils::parseContent( const char* data, const size_t size, const size_t stop ) {
     Lines lines;
     lines.reserve( 128 );
 
@@ -108,6 +108,9 @@ utils::Lines utils::parseContent( const char* data, const size_t size ) {
     while( ( c_new = static_cast<char*>( memchr( c_old, '\n', c_end - c_old ) ) ) ) {
         lines.emplace_back( c_old, c_new - c_old );
         c_old = c_new + 1;
+
+        // only parse newlines until stop bytes
+        if( ( c_old - data ) > stop ) { break; }
     }
 
     if( c_old != c_end ) {
