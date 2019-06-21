@@ -15,7 +15,7 @@ L  16 :     namespace fs = boost::filesystem;
 L 205 :         catch (const fs::filesystem_error& ex)
 L 215 :         boost::filesystem::ifstream file(p);
 
-Found 449 hits in 68/12520 files in 320 ms
+Found 449 hits in 68/12520 files in 40 ms
 user@home:/usr/include/boost$
 ```
 
