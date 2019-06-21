@@ -18,7 +18,7 @@ struct Searcher {
     std::atomic_size_t count = {0};
     std::atomic_size_t files = {0};
     std::atomic_size_t filesMatched = {0};
-    boost::algorithm::boyer_moore_horspool<std::string::iterator>* bmh;
+    boost::algorithm::boyer_moore_horspool<std::string_view::iterator>* bmh;
 
     using Iter = std::string_view::const_iterator;
     using Hit = std::pair<Iter, Iter>;
@@ -40,7 +40,7 @@ struct Searcher {
         }
 
         if( !opts.isRegex && !opts.ignoreCase ) {
-            bmh = new boost::algorithm::boyer_moore_horspool( term.begin(), term.end() );
+            bmh = new boost::algorithm::boyer_moore_horspool<std::string_view::iterator>( term.begin(), term.end() );
         }
     }
 

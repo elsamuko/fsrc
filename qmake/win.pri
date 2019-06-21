@@ -35,8 +35,8 @@ CONFIG(release, debug|release) {
     QMAKE_CXXFLAGS += /Ot                # prefer fast code
     QMAKE_CXXFLAGS += /Oy                # surpress frame pointer
     QMAKE_CXXFLAGS += /GT                # fibre safe optimisation
-    QMAKE_CXXFLAGS += /GL                # complete optimisation, needs /LTCG
-    QMAKE_LFLAGS   += /LTCG              # link time code generation
+    # QMAKE_CXXFLAGS += /GL                # complete optimisation, needs /LTCG
+    # QMAKE_LFLAGS   += /LTCG              # link time code generation
     QMAKE_LFLAGS   += /OPT:REF           # delete unused functions
     QMAKE_LFLAGS   += /OPT:ICF           # COMDAT folding
 }

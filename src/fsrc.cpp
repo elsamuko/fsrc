@@ -1,3 +1,5 @@
+#include "boost/asio.hpp"
+
 #include "searcher.hpp"
 #include "utils.hpp"
 
@@ -6,9 +8,6 @@
 #if !BOOST_THREADPOOL
 #include "threadpool.hpp"
 #else
-
-#include <thread>
-#include "boost/asio.hpp"
 
 #define POOL struct ThreadPool { \
     boost::asio::thread_pool mPool{ std::min<size_t>( std::thread::hardware_concurrency(), 8u ) }; \
