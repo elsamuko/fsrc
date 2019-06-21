@@ -74,6 +74,7 @@ using Lines = std::vector<std::string_view>;
 struct FileView {
     size_t size = 0;
     Lines lines;
+    std::string_view content;
 };
 
 //! prints text in color to stdout

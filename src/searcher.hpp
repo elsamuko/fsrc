@@ -15,10 +15,13 @@ struct Searcher {
     std::string term;
     rx::regex regex;
     SearchOptions opts;
-    std::atomic_int hits = {0};
-    std::atomic_int files = {0};
-    std::atomic_int filesMatched = {0};
+    std::atomic_size_t count = {0};
+    std::atomic_size_t files = {0};
+    std::atomic_size_t filesMatched = {0};
     boost::algorithm::boyer_moore_horspool<std::string::iterator>* bmh;
+
+    using Iter = std::string_view::const_iterator;
+    using Hit = std::pair<Iter, Iter>;
 
     Searcher( const SearchOptions& opts ) : opts( opts ) {
         term = opts.term;

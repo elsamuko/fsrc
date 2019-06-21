@@ -70,8 +70,8 @@ int main( int argc, char* argv[] ) {
 
     auto duration = std::chrono::system_clock::now() - tp;
     std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>( duration );
-    printf( "Found %i hits in %i/%i files in %lld ms\n",
-            searcher.hits.load(), searcher.filesMatched.load(),
+    printf( "Found %lu hits in %lu/%lu files in %ld ms\n",
+            searcher.count.load(), searcher.filesMatched.load(),
             searcher.files.load(), ms.count() );
 
     return 0;
