@@ -134,13 +134,13 @@ utils::FileView utils::fromFileC( const sys_string& filename ) {
     static thread_local utils::Buffer buffer;
     char* ptr = buffer.grow( view.size );
 
-    // read first 100 bytes
-    size_t offset = std::min<size_t>( view.size, 100ul );
+    // read first 16 kB
+    size_t offset = std::min<size_t>( view.size, 16384ul );
     size_t bytes = _read( file, ptr, offset );
     IF_RET( offset != bytes );
 
     // check first 100 bytes for binary
-    IF_RET( !utils::isTextFile( std::string_view( ptr, offset ) ) );
+    IF_RET( !utils::isTextFile( std::string_view( ptr, std::min<size_t>( offset, 100ul ) ) ) );
 
     // read rest
     if( view.size > offset ) {
