@@ -20,6 +20,9 @@ VERSION="1.70.0"
 VERSION_DL="${VERSION//./_}"
 DL_URL="https://dl.bintray.com/boostorg/release/${VERSION}/source/boost_${VERSION_DL}.tar.gz" 
 
+B2_OPTIONS="cxxstd=17 link=static threading=multi address-model=64"
+NEEDED_LIBS="--with-system --with-filesystem --with-chrono --with-timer --with-test --with-program_options --with-regex --with-iostreams"
+
 SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 MAIN_DIR="$SCRIPT_DIR/.."
 TARGET_DIR="$MAIN_DIR/libs/$PROJECT"
@@ -60,13 +63,15 @@ function macBuild {
 
     # debug
     ./b2 -j 8 --stagedir=stage_debug toolset=clang variant=debug \
-        link=static threading=multi address-model=64 \
-        cxxflags="-std=c++1z -stdlib=libc++ -mmacosx-version-min=10.10" linkflags="-lc++"
+        cxxflags="-std=c++1z -stdlib=libc++ -mmacosx-version-min=10.10" linkflags="-lc++" \
+        $B2_OPTIONS \
+        $NEEDED_LIBS
 
     # release
     ./b2 -j 8 --stagedir=stage_release toolset=clang variant=release \
-        link=static threading=multi address-model=64 \
-        cxxflags="-std=c++1z -msse2 -oFast -stdlib=libc++ -mmacosx-version-min=10.10" linkflags="-lc++ -flto"
+        cxxflags="-std=c++1z -msse2 -oFast -stdlib=libc++ -mmacosx-version-min=10.10" linkflags="-lc++ -flto" \
+        $B2_OPTIONS \
+        $NEEDED_LIBS
 }
 
 function winBuild {
@@ -75,13 +80,15 @@ function winBuild {
     cmd /c bootstrap.bat
 
     # debug
-    ./b2.exe -j 8 --stagedir=stage_debug   toolset=msvc-14.2 variant=debug   \
-        link=static runtime-link=static threading=multi address-model=64
+    ./b2.exe -j 8 --stagedir=stage_debug   toolset=msvc-14.2 variant=debug runtime-link=static \
+        $B2_OPTIONS \
+        $NEEDED_LIBS
 
     # release
-    ./b2.exe -j 8 --stagedir=stage_release toolset=msvc-14.2 variant=release \
-        link=static runtime-link=static threading=multi address-model=64 \
-        cxxflags="/Qpar /Ox /Ob2 /Oi /Ot /Oy /GT /GL" linkflags="/LTCG /OPT:REF /OPT:ICF"
+    ./b2.exe -j 8 --stagedir=stage_release toolset=msvc-14.2 variant=release runtime-link=static \
+        cxxflags="/Qpar /Ox /Ob2 /Oi /Ot /Oy /GT /GL" linkflags="/LTCG /OPT:REF /OPT:ICF" \
+        $B2_OPTIONS \
+        $NEEDED_LIBS
 }
 
 function linuxBuild {
@@ -94,13 +101,15 @@ function linuxBuild {
 
     # debug
     ./b2 -j 8 --disable-icu --stagedir=stage_debug toolset=gcc-9.1 variant=debug \
-        link=static threading=multi address-model=64 \
-        cxxflags="-std=c++17"
+        cxxflags="-std=c++17" \
+        $B2_OPTIONS \
+        $NEEDED_LIBS
 
     # release
     ./b2 -j 8 --disable-icu --stagedir=stage_release toolset=gcc-9.1 variant=release \
-        link=static threading=multi address-model=64 \
-        cxxflags="-std=c++17 -msse2 -oFast" linkflags="-flto"
+        cxxflags="-std=c++17 -msse2 -oFast" linkflags="-flto" \
+        $B2_OPTIONS \
+        $NEEDED_LIBS
 }
 
 function doCopy {
