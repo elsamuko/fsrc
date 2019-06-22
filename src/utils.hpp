@@ -89,6 +89,11 @@ bool isTextFile( const std::string_view& content );
 //! \returns content of filename as vector with C API
 FileView fromFileC( const sys_string& filename );
 
+#ifdef _WIN32
+//! \returns content of filename as vector with WINAPI
+FileView fromWinAPI( const sys_string& filename );
+#endif
+
 //! splits content at newlines
 //! \returns lines as vector of string_view
 Lines parseContent( const char* data, const size_t size, const long stop );

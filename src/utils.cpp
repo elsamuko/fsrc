@@ -145,6 +145,44 @@ utils::FileView utils::fromFileC( const sys_string& filename ) {
     return view;
 }
 
+#ifdef _WIN32
+utils::FileView utils::fromWinAPI( const sys_string& filename ) {
+    utils::FileView view;
+    HANDLE file = ::CreateFileW( filename.c_str(),      // file to open
+                                 GENERIC_READ,          // open for reading
+                                 FILE_SHARE_READ,       // share for reading
+                                 nullptr,               // default security
+                                 OPEN_EXISTING,         // existing file only
+                                 FILE_FLAG_SEQUENTIAL_SCAN |
+                                 FILE_FLAG_BACKUP_SEMANTICS |
+                                 FILE_ATTRIBUTE_NORMAL, // normal file
+                                 nullptr );
+    IF_RET( file == INVALID_HANDLE_VALUE );
+    utils::ScopeGuard onExit( [file] { ::CloseHandle( file ); } );
+
+    view.size = ::GetFileSize( file, nullptr );
+    IF_RET( !view.size );
+
+    // growing buffer for each thread
+    static thread_local utils::Buffer buffer;
+    char* ptr = buffer.grow( view.size );
+    DWORD read = 0;
+
+    BOOL ok = ::ReadFile( file,
+                          ptr,
+                          view.size,
+                          &read,
+                          nullptr );
+    IF_RET( !ok || view.size != read );
+
+    // check first 100 bytes for binary
+    IF_RET( !utils::isTextFile( std::string_view( ptr, std::min<size_t>( view.size, 100ul ) ) ) );
+
+    view.content = std::string_view( ptr, view.size );
+    return view;
+}
+#endif
+
 #ifndef _WIN32
 void utils::recurseDir( const sys_string& filename, const std::function<void( const sys_string& filename )>& callback ) {
     DIR* dir = opendir( filename.c_str() );
