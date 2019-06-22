@@ -148,7 +148,11 @@ void Searcher::printPrints( const std::vector<Searcher::Print>& prints ) {
 
 void Searcher::search( const sys_string& path ) {
 
+#ifndef _WIN32
     utils::FileView view = utils::fromFileC( path );
+#else
+    utils::FileView view = utils::fromWinAPI( path );
+#endif
     const std::string_view& content = view.content;
 
     if( content.empty() ) { return; }
