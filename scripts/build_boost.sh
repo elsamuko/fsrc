@@ -21,7 +21,8 @@ VERSION_DL="${VERSION//./_}"
 DL_URL="https://dl.bintray.com/boostorg/release/${VERSION}/source/boost_${VERSION_DL}.tar.gz" 
 
 B2_OPTIONS="cxxstd=17 link=static threading=multi address-model=64"
-NEEDED_LIBS="--with-system --with-filesystem --with-chrono --with-timer --with-test --with-program_options --with-regex --with-iostreams"
+# ./b2 --show-libraries
+NEEDED_LIBS="--with-system --with-filesystem --with-date_time --with-chrono --with-timer --with-test --with-program_options --with-regex --with-iostreams"
 
 SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 MAIN_DIR="$SCRIPT_DIR/.."

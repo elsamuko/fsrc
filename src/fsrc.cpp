@@ -1,6 +1,6 @@
+#include "threadpool.hpp"
 #include "searcher.hpp"
 #include "utils.hpp"
-#include "threadpool.hpp"
 
 void onAllFiles( Searcher& searcher ) {
     POOL;
