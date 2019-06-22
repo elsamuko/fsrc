@@ -40,9 +40,9 @@ CONFIG(release, debug|release) {
     QMAKE_CXXFLAGS += /GT                # fibre safe optimisation
     QMAKE_CXXFLAGS += /GL                # complete optimisation, needs /LTCG
     QMAKE_CXXFLAGS += /Gw                # causes the compiler to package global data in individual COMDAT sections
+    QMAKE_CXXFLAGS += /fp:fast           # floating-point behavior
+    # QMAKE_CXXFLAGS += /favor:AMD64       # optimizes the generated code for the AMD processors
     QMAKE_LFLAGS   += /LTCG              # link time code generation
     QMAKE_LFLAGS   += /OPT:REF           # delete unused functions
     QMAKE_LFLAGS   += /OPT:ICF           # COMDAT folding
-    # QMAKE_CXXFLAGS += /favor:AMD64       # optimizes the generated code for the AMD processors
-    QMAKE_CXXFLAGS += /fp:fast           # floating-point behavior
 }
