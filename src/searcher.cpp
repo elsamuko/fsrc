@@ -62,6 +62,82 @@ std::vector<Searcher::Hit> Searcher::regexSearch( const std::string_view& conten
     return hits;
 }
 
+std::vector<Searcher::Print> Searcher::collectPrints( const sys_string& path, const std::vector<Searcher::Hit>& hits, const std::string_view& content ) {
+    std::vector<std::function<void()>> prints;
+    prints.reserve( 3 * hits.size() );
+
+    // don't pipe colors
+    Color cred   = opts.colorized ? Color::Red   : Color::Neutral;
+    Color cblue  = opts.colorized ? Color::Blue  : Color::Neutral;
+    Color cgreen = opts.colorized ? Color::Green : Color::Neutral;
+
+    // print file path
+#ifdef _WIN32
+    prints.emplace_back( utils::printFunc( cgreen, std::string( path.cbegin(), path.cend() ) ) );
+#else
+    prints.emplace_back( utils::printFunc( cgreen, path ) );
+#endif
+
+    // parse file for newlines until last hit
+    size_t stop = hits.back().second - content.cbegin();
+    utils::Lines lines = utils::parseContent( content.data(), content.size(), stop );
+
+    std::vector<Hit>::const_iterator hit = hits.cbegin();
+    size_t size = lines.size();
+
+    for( size_t i = 0; i < size; ++i ) {
+        Iter from = lines[i].cbegin();
+        Iter to   = lines[i].cend();
+        bool printedLine = false;
+
+        // find all hits in this line
+        while( from <= hit->first && hit->first < to ) {
+
+            // print line information in blue once per line
+            if( !printedLine ) {
+                printedLine = true;
+                std::string number = utils::format( "\nL%4i : ", i + 1 );
+                prints.emplace_back( utils::printFunc( cblue, number ) );
+            }
+
+            // print code in neutral
+            prints.emplace_back( utils::printFunc( Color::Neutral, std::string( from, hit->first ) ) );
+
+            // print hit in red
+            prints.emplace_back( utils::printFunc( cred, std::string( hit->first, hit->second ) ) );
+
+            // set from to end of hit
+            from = hit->second;
+
+            // if there are no more hits in this file, print rest of line in neutral
+            // and exit search for this file
+            if( std::next( hit ) == hits.cend() ) {
+                prints.emplace_back( utils::printFunc( Color::Neutral, std::string( from, to ) ) );
+                goto end;
+            }
+
+            ++hit;
+
+            // if next hit is within this line, print code in neutral until next hit
+            if( from <= hit->first && hit->first < to ) {
+                prints.emplace_back( utils::printFunc( Color::Neutral, std::string( from, hit->first ) ) );
+                from = hit->first;
+            }
+            // else print code in neutral until end and break to next line
+            else {
+                prints.emplace_back( utils::printFunc( Color::Neutral, std::string( from, to ) ) );
+                break;
+            }
+        }
+    }
+
+end:
+    // print newlines
+    prints.emplace_back( utils::printFunc( Color::Neutral, "\n\n" ) );
+
+    return prints;
+}
+
 void Searcher::search( const sys_string& path ) {
 
     utils::FileView view = utils::fromFileC( path );
@@ -71,11 +147,6 @@ void Searcher::search( const sys_string& path ) {
 
     std::vector<Hit> hits;
     std::vector<std::function<void()>> prints;
-
-    // don't pipe colors
-    Color cred   = opts.colorized ? Color::Red   : Color::Neutral;
-    Color cblue  = opts.colorized ? Color::Blue  : Color::Neutral;
-    Color cgreen = opts.colorized ? Color::Green : Color::Neutral;
 
     // collect hits
     if( !opts.isRegex ) {
@@ -90,83 +161,18 @@ void Searcher::search( const sys_string& path ) {
 
     // handle hits
     if( !hits.empty() ) {
-        prints.reserve( 10 );
         count += hits.size();
-
-        size_t stop = hits.back().second - content.cbegin();
-        view.lines = utils::parseContent( content.data(), content.size(), stop );
-        size_t size = view.lines.size();
-
-        std::vector<Hit>::const_iterator hit = hits.cbegin();
-
-        for( size_t i = 0; i < size; ++i ) {
-            Iter from = view.lines[i].cbegin();
-            Iter to   = view.lines[i].cend();
-            bool printedLine = false;
-
-            // find all hits in this line
-            while( from <= hit->first && hit->first < to ) {
-
-                // print line information in blue once per line
-                if( !printedLine ) {
-                    printedLine = true;
-                    std::string number = utils::format( "\nL%4i : ", i + 1 );
-                    prints.emplace_back( utils::printFunc( cblue, number ) );
-                }
-
-                // print code in neutral
-                prints.emplace_back( utils::printFunc( Color::Neutral, std::string( from, hit->first ) ) );
-
-                // print hit in red
-                prints.emplace_back( utils::printFunc( cred, std::string( hit->first, hit->second ) ) );
-
-                // set from to end of hit
-                from = hit->second;
-
-                // if there are no more hits in this file, print rest of line in neutral
-                // and exit search for this file
-                if( std::next( hit ) == hits.cend() ) {
-                    prints.emplace_back( utils::printFunc( Color::Neutral, std::string( from, to ) ) );
-                    goto end;
-                }
-
-                ++hit;
-
-                // if next hit is within this line, print code in neutral until next hit
-                if( from <= hit->first && hit->first < to ) {
-                    prints.emplace_back( utils::printFunc( Color::Neutral, std::string( from, hit->first ) ) );
-                    from = hit->first;
-                }
-                // else print code in neutral until end and break to next line
-                else {
-                    prints.emplace_back( utils::printFunc( Color::Neutral, std::string( from, to ) ) );
-                    break;
-                }
-            }
-        }
-
-end:
-        // do nothing
-        void();
+        prints = collectPrints( path, hits, content );
     }
 
     // print hits
     if( !prints.empty() ) {
         filesMatched++;
 
-#ifdef _WIN32
-        const auto printFile     = utils::printFunc( cgreen, std::string( path.cbegin(), path.cend() ) );
-#else
-        const auto printFile     = utils::printFunc( cgreen, path );
-#endif
-        const auto printNewlines = utils::printFunc( Color::Neutral, "\n\n" );
-
         m.lock();
-        printFile();
 
         for( const std::function<void()>& func : prints ) { func(); }
 
-        printNewlines();
         m.unlock();
     }
 }

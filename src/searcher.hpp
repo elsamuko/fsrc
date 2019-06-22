@@ -22,6 +22,7 @@ struct Searcher {
 
     using Iter = std::string_view::const_iterator;
     using Hit = std::pair<Iter, Iter>;
+    using Print = std::function<void()>;
 
     Searcher( const SearchOptions& opts ) : opts( opts ) {
         term = opts.term;
@@ -52,4 +53,6 @@ struct Searcher {
     std::vector<Hit> caseSensitiveSearch( const std::string_view& content );
     //! search with boost::regex
     std::vector<Hit> regexSearch( const std::string_view& content );
+    //! collect what is printed
+    std::vector<Print> collectPrints( const sys_string& path, const std::vector<Hit>& hits, const std::string_view& content );
 };
