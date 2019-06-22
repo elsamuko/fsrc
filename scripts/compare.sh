@@ -31,10 +31,10 @@ echo "rg --stats -u -e \"$TERM\" \"$SEARCH_DIR\""
 rg --stats -u -e "$TERM" "$SEARCH_DIR" | tail -n 8
 echo
 
-echo "===GREP==="
-echo "grep -qnr \"$TERM\" \"$SEARCH_DIR\""
-time grep -qnr "$TERM" "$SEARCH_DIR" 2>&1 | grep real
-echo
+# echo "===GREP==="
+# echo "grep -qnr \"$TERM\" \"$SEARCH_DIR\""
+# time grep -qnr "$TERM" "$SEARCH_DIR" 2>&1 | grep real
+# echo
 
 echo "===FIND==="
 echo "find \"$SEARCH_DIR\" -type f | wc -l"
