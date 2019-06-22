@@ -138,6 +138,14 @@ end:
     return prints;
 }
 
+void Searcher::printPrints( const std::vector<Searcher::Print>& prints ) {
+    m.lock();
+
+    for( const std::function<void()>& func : prints ) { func(); }
+
+    m.unlock();
+}
+
 void Searcher::search( const sys_string& path ) {
 
     utils::FileView view = utils::fromFileC( path );
@@ -161,18 +169,9 @@ void Searcher::search( const sys_string& path ) {
 
     // handle hits
     if( !hits.empty() ) {
+        filesMatched++;
         count += hits.size();
         prints = collectPrints( path, hits, content );
-    }
-
-    // print hits
-    if( !prints.empty() ) {
-        filesMatched++;
-
-        m.lock();
-
-        for( const std::function<void()>& func : prints ) { func(); }
-
-        m.unlock();
+        printPrints( prints );
     }
 }

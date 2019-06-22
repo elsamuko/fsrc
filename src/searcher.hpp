@@ -55,4 +55,6 @@ struct Searcher {
     std::vector<Hit> regexSearch( const std::string_view& content );
     //! collect what is printed
     std::vector<Print> collectPrints( const sys_string& path, const std::vector<Hit>& hits, const std::string_view& content );
+    //! call print functions locked
+    void printPrints( const std::vector<Print>& prints );
 };
