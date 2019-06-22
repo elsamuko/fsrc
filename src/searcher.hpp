@@ -37,6 +37,7 @@ struct Searcher {
                 regex.assign( term, flags );
             } catch( const rx::regex_error& e ) {
                 LOG( "Invalid regex: " << e.what() );
+                exit( EXIT_FAILURE );
             }
         }
 
