@@ -87,7 +87,7 @@ function winBuild {
 
     # release
     ./b2.exe -j 8 --stagedir=stage_release toolset=msvc-14.2 variant=release runtime-link=static \
-        cxxflags="/Qpar /Ox /Ob2 /Oi /Ot /Oy /GT /GL" linkflags="/LTCG /OPT:REF /OPT:ICF" \
+        cxxflags="/Qpar /O2 /Og /Oi /Ot /Oy /GT /GL /Gw /fp:fast" linkflags="/LTCG /OPT:REF /OPT:ICF" \
         $B2_OPTIONS \
         $NEEDED_LIBS
 }
