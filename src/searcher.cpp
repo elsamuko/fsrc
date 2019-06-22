@@ -172,6 +172,7 @@ void Searcher::search( const sys_string& path ) {
         filesMatched++;
         count += hits.size();
         prints = collectPrints( path, hits, content );
-        printPrints( prints );
+
+        if( !opts.quiet ) { printPrints( prints );}
     }
 }

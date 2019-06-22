@@ -21,6 +21,7 @@ SearchOptions SearchOptions::parseArgs( int argc, char* argv[] ) {
     ( "regex,r", "Regex search (slower)" )
     ( "no-git", "Disable search with 'git ls-files'" )
     ( "no-colors", "Disable colorized output" )
+    ( "quiet,q", "only print status" )
     ;
 
     po::options_description hidden( "Hidden options" );
@@ -62,6 +63,11 @@ SearchOptions SearchOptions::parseArgs( int argc, char* argv[] ) {
     // disable colors
     if( args.count( "no-colors" ) ) {
         opts.colorized = false;
+    }
+
+    // don't print findings
+    if( args.count( "quiet" ) ) {
+        opts.quiet = true;
     }
 
     // ignore case

@@ -15,6 +15,7 @@ struct SearchOptions {
     bool noGit = false;
     bool ignoreCase = false;
     bool isRegex = false;
+    bool quiet = false;
     std::string term;
     fs::path path;
     bool colorized = isatty( fileno( stdout ) ) != 0;
