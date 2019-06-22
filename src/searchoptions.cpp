@@ -4,14 +4,13 @@
 namespace po = boost::program_options;
 
 void usage() {
-    LOG( "Build: " __DATE__ );
-    LOG( "Usage: fsrc [options] term" );
+    LOG( "Usage  : fsrc [options] term" );
+    LOG( "Build  : " __DATE__ );
 }
 
 SearchOptions SearchOptions::parseArgs( int argc, char* argv[] ) {
     SearchOptions opts;
     po::variables_map args;
-    bool needsHelp = false;
 
     po::options_description desc( "Options" );
     desc.add_options()
@@ -40,8 +39,11 @@ SearchOptions SearchOptions::parseArgs( int argc, char* argv[] ) {
                    positional( last ).
                    run(), args );
     } catch( const po::error& ex ) {
-        LOG( "Error: " << ex.what() );
+        LOG( "Error  : " << ex.what() );
         opts.success = false;
+        usage();
+        desc.print( std::cout );
+        return opts;
     }
 
     // search in dir
@@ -80,24 +82,22 @@ SearchOptions SearchOptions::parseArgs( int argc, char* argv[] ) {
         opts.isRegex = true;
     }
 
-    // help
-    if( args.count( "help" ) ) {
-        usage();
-        desc.print( std::cout );
-        needsHelp = true;
-        opts.success = false;
-    }
-
     // term
     if( args.count( "term" ) ) {
         opts.term = args["term"].as<std::string>();
-        opts.success = true;
+        opts.success = !opts.term.empty();
     } else {
-        if( !needsHelp ) {
-            usage();
-        }
-
         opts.success = false;
+    }
+
+    // help
+    if( args.count( "help" ) ) {
+        opts.success = false;
+    }
+
+    if( !opts.success ) {
+        usage();
+        desc.print( std::cout );
     }
 
     return opts;
