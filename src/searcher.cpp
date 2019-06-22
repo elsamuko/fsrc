@@ -2,6 +2,66 @@
 
 #include "searcher.hpp"
 
+std::vector<Searcher::Hit> Searcher::caseInsensitiveSearch( const std::string_view& content ) {
+    std::vector<Hit> hits;
+
+    Iter pos = content.cbegin();
+    Iter end = content.cend();
+
+    while( pos != end ) {
+        // strcasestr needs \0 to stop, string_view does not have that
+        std::string copy( pos, end );
+        const char* ptr = strcasestr( copy.data(), term.data() );
+
+        if( ptr ) {
+            Iter from = pos + ( ptr - copy.data() );
+            Iter to = from + term.size();
+            hits.emplace_back( from, to );
+            pos = to;
+        } else {
+            pos = end;
+        }
+
+    }
+
+    return hits;
+}
+
+std::vector<Searcher::Hit> Searcher::caseSensitiveSearch( const std::string_view& content ) {
+    std::vector<Hit> hits;
+
+    Iter pos = content.cbegin();
+    Iter end = content.cend();
+
+    while( pos != end ) {
+        const Hit hit = ( *bmh )( pos, end );
+
+        if( hit.first != end ) {
+            hits.emplace_back( hit );
+            pos = hit.second;
+        } else {
+            pos = end;
+        }
+    }
+
+    return hits;
+}
+
+std::vector<Searcher::Hit> Searcher::regexSearch( const std::string_view& content ) {
+    std::vector<Hit> hits;
+
+    auto begin = rx::cregex_iterator( &content.front(), 1 + &content.back(), regex );
+    auto end   = rx::cregex_iterator();
+
+    for( rx::cregex_iterator match = begin; match != end; ++match ) {
+        Iter from = content.cbegin() + match->position();
+        Iter to = from + match->length();
+        hits.emplace_back( from, to );
+    }
+
+    return hits;
+}
+
 void Searcher::search( const sys_string& path ) {
 
     utils::FileView view = utils::fromFileC( path );
@@ -19,47 +79,13 @@ void Searcher::search( const sys_string& path ) {
 
     // collect hits
     if( !opts.isRegex ) {
-
-        // size_t pos = std::string::npos;
-        Iter pos = content.cbegin();
-        Iter end = content.cend();
-
-        while( pos != end ) {
-            if( opts.ignoreCase ) {
-                // strcasestr needs \0 to stop, string_view does not have that
-                std::string copy( pos, end );
-                const char* ptr = strcasestr( copy.data(), term.data() );
-
-                if( ptr ) {
-                    Iter from = pos + ( ptr - copy.data() );
-                    Iter to = from + term.size();
-                    hits.emplace_back( from, to );
-                    pos = to;
-                } else {
-                    pos = end;
-                }
-
-            } else {
-                const Hit hit = ( *bmh )( pos, end );
-
-                if( hit.first != end ) {
-                    hits.emplace_back( hit );
-                    pos = hit.second;
-                } else {
-                    pos = end;
-                }
-            }
+        if( opts.ignoreCase ) {
+            hits = caseInsensitiveSearch( content );
+        } else {
+            hits = caseSensitiveSearch( content );
         }
-
     } else {
-        auto begin = rx::cregex_iterator( &content.front(), 1 + &content.back(), regex );
-        auto end   = rx::cregex_iterator();
-
-        for( rx::cregex_iterator match = begin; match != end; ++match ) {
-            Iter from = content.cbegin() + match->position();
-            Iter to = from + match->length();
-            hits.emplace_back( from, to );
-        }
+        hits = regexSearch( content );
     }
 
     // handle hits

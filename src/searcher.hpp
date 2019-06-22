@@ -45,4 +45,11 @@ struct Searcher {
     }
 
     void search( const sys_string& path );
+
+    //! search with strcasestr
+    std::vector<Hit> caseInsensitiveSearch( const std::string_view& content );
+    //! search with boyer_moore_horspool
+    std::vector<Hit> caseSensitiveSearch( const std::string_view& content );
+    //! search with boost::regex
+    std::vector<Hit> regexSearch( const std::string_view& content );
 };
