@@ -29,16 +29,20 @@ static {
 }
 
 # performance flags
+# https://docs.microsoft.com/en-us/cpp/build/reference/qpar-auto-parallelizer?view=vs-2019
 CONFIG(release, debug|release) {
-    QMAKE_CXXFLAGS += /Qpar              # parallel code generation
-    QMAKE_CXXFLAGS += /Ox                # optimisation
-    QMAKE_CXXFLAGS += /Ob2               # inline all possible
-    QMAKE_CXXFLAGS += /Oi                # activate system internal functions
+    QMAKE_CXXFLAGS += /Qpar              # Enables the Auto-Parallelizer feature
+    QMAKE_CXXFLAGS += /O2                # sets a combination of optimizations that optimizes code for maximum speed.
+    QMAKE_CXXFLAGS += /Og                # enables global optimizations.
+    QMAKE_CXXFLAGS += /Oi                # generates intrinsic functions for appropriate function calls
     QMAKE_CXXFLAGS += /Ot                # prefer fast code
     QMAKE_CXXFLAGS += /Oy                # surpress frame pointer
     QMAKE_CXXFLAGS += /GT                # fibre safe optimisation
     QMAKE_CXXFLAGS += /GL                # complete optimisation, needs /LTCG
+    QMAKE_CXXFLAGS += /Gw                # causes the compiler to package global data in individual COMDAT sections
     QMAKE_LFLAGS   += /LTCG              # link time code generation
     QMAKE_LFLAGS   += /OPT:REF           # delete unused functions
     QMAKE_LFLAGS   += /OPT:ICF           # COMDAT folding
+    # QMAKE_CXXFLAGS += /favor:AMD64       # optimizes the generated code for the AMD processors
+    QMAKE_CXXFLAGS += /fp:fast           # floating-point behavior
 }
