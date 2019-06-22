@@ -88,7 +88,7 @@ FileView fromFileC( const sys_string& filename );
 
 //! splits content at newlines
 //! \returns lines as vector of string_view
-Lines parseContent( const char* data, const size_t size, const size_t stop );
+Lines parseContent( const char* data, const size_t size, const long stop );
 
 //! \param file file descriptor
 size_t fileSize( const int file );
