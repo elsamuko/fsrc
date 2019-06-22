@@ -51,7 +51,6 @@ struct Buffer {
     size_t size = 0;
     size_t reserved = 10 * 1024;
     inline char* grow( const size_t requested ) {
-        // memory leak intended
         if( reserved < requested ) {
             reserved = requested;
             ptr = ( char* )realloc( ptr, reserved + 1 );
@@ -60,6 +59,10 @@ struct Buffer {
         size = requested;
         ptr[size] = '\0';
         return ptr;
+    }
+
+    ~Buffer() {
+        free( ptr );
     }
 };
 
