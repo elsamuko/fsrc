@@ -1,22 +1,32 @@
 #pragma once
 
 #include <vector>
-#include <queue>
 #include <thread>
 #include <atomic>
-#include <mutex>
 #include <functional>
-#include <condition_variable>
 
-#include <boost/lockfree/queue.hpp>
+#include "boost/asio.hpp"
+#include "boost/lockfree/queue.hpp"
 
-// disable pool for debugging
-#define THREADED 1
+#if THREADED_THREADPOOL
 
-#if THREADED
+#if BOOST_THREADPOOL
+
+#define POOL struct ThreadPool { \
+    boost::asio::thread_pool mPool{ std::min<size_t>( std::thread::hardware_concurrency(), 8u ) }; \
+    void add( const std::function<void()>& f ) { \
+        boost::asio::post( mPool, f ); \
+    } \
+    ThreadPool() {} \
+    ~ThreadPool() { mPool.join(); } \
+} pool;
+
+#else
 
 // max 8 threads, else start/stop needs longer than the actual work
 #define POOL ThreadPool pool( std::min<size_t>( std::thread::hardware_concurrency(), 8u ) );
+
+#endif // BOOST_THREADPOOL
 
 #else
 
@@ -26,7 +36,7 @@
     } \
     } pool;
 
-#endif
+#endif // THREADED_THREADPOOL
 
 class ThreadPool {
     public:

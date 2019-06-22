@@ -1,24 +1,6 @@
-#include "boost/asio.hpp"
-
 #include "searcher.hpp"
 #include "utils.hpp"
-
-#define BOOST_THREADPOOL 1
-
-#if !BOOST_THREADPOOL
 #include "threadpool.hpp"
-#else
-
-#define POOL struct ThreadPool { \
-    boost::asio::thread_pool mPool{ std::min<size_t>( std::thread::hardware_concurrency(), 8u ) }; \
-    void add( const std::function<void()>& f ) { \
-        boost::asio::post( mPool, f ); \
-    } \
-    ThreadPool() {} \
-    ~ThreadPool() { mPool.join(); } \
-} pool;
-
-#endif
 
 void onAllFiles( Searcher& searcher ) {
     POOL;
