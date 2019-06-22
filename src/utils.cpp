@@ -110,7 +110,7 @@ utils::Lines utils::parseContent( const char* data, const size_t size, const lon
         c_old = c_new + 1;
 
         // only parse newlines until stop bytes
-        if( ( c_old - data ) > stop ) { break; }
+        if( ( c_old - data ) > stop ) { c_old = c_end; break; }
     }
 
     if( c_old != c_end ) {
