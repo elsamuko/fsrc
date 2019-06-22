@@ -93,6 +93,7 @@ utils::FileView fromFileParser( const sys_string& filename, parseContentFunc par
     // check first 100 bytes for binary
     IF_RET( !utils::isTextFile( std::string_view( ptr, std::min<size_t>( view.size, 100ul ) ) ) );
 
+    view.content = std::string_view( ptr, view.size );
     view.lines = parse( ptr, view.size );
     return view;
 }
@@ -117,7 +118,7 @@ utils::FileView fromFilePosix( const sys_string& filename ) {
     // check first 100 bytes for binary
     IF_RET( !utils::isTextFile( std::string_view( ptr, std::min<size_t>( view.size, 100ul ) ) ) );
 
-    view.lines = utils::parseContent( ptr, view.size, view.size );
+    view.content = std::string_view( ptr, view.size );
     return view;
 }
 
@@ -138,7 +139,7 @@ utils::FileView fromFileMmap( const sys_string& filename ) {
     // check first 100 bytes for binary
     IF_RET( !utils::isTextFile( std::string_view( map, std::min<size_t>( view.size, 100ul ) ) ) );
 
-    view.lines = utils::parseContent( map, view.size, view.size );
+    view.content = std::string_view( map, view.size );
     munmap( map, view.size ); // if used, call munmap after parsing
     return view;
 }
@@ -164,7 +165,7 @@ utils::FileView fromFileLocal( const sys_string& filename ) {
     // check first 100 bytes for binary
     IF_RET( !utils::isTextFile( std::string_view( ptr, std::min<size_t>( view.size, 100ul ) ) ) );
 
-    view.lines = utils::parseContent( ptr, view.size, view.size );
+    view.content = std::string_view( ptr, view.size );
     return view;
 }
 
@@ -188,7 +189,7 @@ utils::FileView fromFileString( const sys_string& filename ) {
     // check first 100 bytes for binary
     IF_RET( !utils::isTextFile( std::string_view( ptr, std::min<size_t>( view.size, 100ul ) ) ) );
 
-    view.lines = utils::parseContent( ptr, view.size, view.size );
+    view.content = std::string_view( ptr, view.size );
     // if used, add buffer to FileView
     return view;
 }
@@ -215,7 +216,7 @@ utils::FileView fromFileCPP( const sys_string& filename ) {
     // check first 100 bytes for binary
     IF_RET( !utils::isTextFile( std::string_view( ptr, std::min<size_t>( view.size, 100ul ) ) ) );
 
-    view.lines = utils::parseContent( ptr, view.size, view.size );
+    view.content = std::string_view( ptr, view.size );
     return view;
 }
 
@@ -241,7 +242,7 @@ utils::FileView fromFileLSeek( const sys_string& filename ) {
     // check first 100 bytes for binary
     IF_RET( !utils::isTextFile( std::string_view( ptr, std::min<size_t>( view.size, 100ul ) ) ) );
 
-    view.lines = utils::parseContent( ptr, view.size, view.size );
+    view.content = std::string_view( ptr, view.size );
     return view;
 }
 
@@ -268,7 +269,7 @@ utils::FileView fromFileTwoFread( const sys_string& filename ) {
         IF_RET( !utils::isTextFile( std::string_view( ptr, view.size ) ) );
     }
 
-    view.lines = utils::parseContent( ptr, view.size, view.size );
+    view.content = std::string_view( ptr, view.size );
     return view;
 }
 
