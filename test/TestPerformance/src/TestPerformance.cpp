@@ -2,6 +2,7 @@
 
 #include "boost/algorithm/searching/boyer_moore_horspool.hpp"
 #include "boost/algorithm/searching/knuth_morris_pratt.hpp"
+#include "boost/iostreams/device/mapped_file.hpp"
 #include "boost/test/unit_test.hpp"
 #include "boost/timer/timer.hpp"
 #include "boost/asio.hpp"
@@ -141,6 +142,17 @@ utils::FileView fromFileMmap( const sys_string& filename ) {
 
     view.content = std::string_view( map, view.size );
     munmap( map, view.size ); // if used, call munmap after parsing
+    return view;
+}
+#else
+utils::FileView fromFileMmap( const sys_string& filename ) {
+    utils::FileView view;
+    boost::iostreams::mapped_file file( std::string( filename.cbegin(), filename.cend() ), boost::iostreams::mapped_file::readonly );
+    IF_RET( !file );
+
+    view.size = file.size();
+    view.content = std::string_view( file.const_data(), view.size );
+    // if used, view needs a mapped_file member
     return view;
 }
 #endif
@@ -289,9 +301,7 @@ using fromFileFunc = utils::FileView( const sys_string& filename );
 
 std::map<fromFileFunc*, const char*> names = {
     {fromFilePosix, "fromFilePosix"},
-#if !BOOST_OS_WINDOWS
     {fromFileMmap, "fromFileMmap"},
-#endif
     {fromFileLocal, "fromFileLocal"},
     {fromFileString, "fromFileString"},
     {fromFileLSeek, "fromFileLSeek"},
@@ -337,9 +347,7 @@ BOOST_AUTO_TEST_SUITE( Performance )
 BOOST_AUTO_TEST_CASE( Test_fromFile ) {
 
     size_t t2 = run( fromFileCPP );
-#if !BOOST_OS_WINDOWS
     /*size_t tM = */run( fromFileMmap );
-#endif
     /*size_t tS = */run( fromFileString );
     /*size_t tF = */run( fromFileLSeek );
     /*size_t tL = */run( fromFileLocal );
