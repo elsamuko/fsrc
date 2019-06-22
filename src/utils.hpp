@@ -84,7 +84,7 @@ std::vector<sys_string> run( const std::string& command );
 //! \returns true, if filename has no "\0\0" in the first 1000 bytes
 bool isTextFile( const std::string_view& content );
 
-#define IF_RET( A ) if( A ) { return view; }
+#define IF_RET( A ) if( A ) { view.size = 0; return view; }
 
 //! \returns content of filename as vector with C API
 FileView fromFileC( const sys_string& filename );
