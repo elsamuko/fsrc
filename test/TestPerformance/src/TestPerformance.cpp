@@ -312,6 +312,9 @@ std::map<fromFileFunc*, const char*> names = {
     {fromFileFind, "fromFileFind"},
     {fromFileCPP, "fromFileCPP"},
     {utils::fromFileC, "utils::fromFileC"},
+#if BOOST_OS_WINDOWS
+    {utils::fromWinAPI, "utils::fromWinAPI"},
+#endif
 };
 
 size_t run( fromFileFunc fromFile ) {
@@ -337,7 +340,7 @@ size_t run( fromFileFunc fromFile ) {
     auto duration = std::chrono::system_clock::now() - tp;
     std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>( duration );
 
-    printf( "%16s : %zu files, %5zu kB and %zu lines in %lld ms\n",
+    printf( "%17s : %zu files, %5zu kB and %zu lines in %lld ms\n",
             names[fromFile], files, sum / 1024, lineCount, ms.count() );
     return ms.count();
 }
@@ -353,6 +356,9 @@ BOOST_AUTO_TEST_CASE( Test_fromFile ) {
     /*size_t tL = */run( fromFileLocal );
     /*size_t tO = */run( fromFileTwoFread );
     /*size_t tP = */run( fromFilePosix );
+#if BOOST_OS_WINDOWS
+    /*size_t tW = */run( utils::fromWinAPI );
+#endif
     size_t t1 = run( utils::fromFileC );
     printf( "\n" );
     BOOST_CHECK_LT( t1, t2 ); // assume FILE* is faster than std::ifstream
