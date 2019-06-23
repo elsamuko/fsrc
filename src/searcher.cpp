@@ -7,17 +7,17 @@ std::vector<Searcher::Hit> Searcher::caseInsensitiveSearch( const std::string_vi
 
     Iter pos = content.cbegin();
     Iter end = content.cend();
+    char* start = const_cast<char*>( content.data() );
+    char* ptr = start;
 
     while( pos != end ) {
-        // strcasestr needs \0 to stop, string_view does not have that
-        std::string copy( pos, end );
-        const char* ptr = strcasestr( copy.data(), term.data() );
+        ptr = strcasestr( ptr, term.data() );
 
         if( ptr ) {
-            Iter from = pos + ( ptr - copy.data() );
+            Iter from = pos + ( ptr - start );
             Iter to = from + term.size();
             hits.emplace_back( from, to );
-            pos = to;
+            ptr += term.size();
         } else {
             pos = end;
         }
