@@ -176,8 +176,8 @@ utils::FileView utils::fromWinAPI( const sys_string& filename ) {
     char* ptr = buffer.grow( view.size );
     DWORD read = 0;
 
-    // read first 100 bytes
-    size_t offset = std::min<size_t>( view.size, 100ul );
+    // read first 16 kB
+    size_t offset = std::min<size_t>( view.size, 16384ul );
     BOOL ok = ::ReadFile( file,
                           ptr,
                           offset,
@@ -186,7 +186,7 @@ utils::FileView utils::fromWinAPI( const sys_string& filename ) {
     IF_RET( !ok );
 
     // check first 100 bytes for binary
-    IF_RET( !utils::isTextFile( std::string_view( ptr, offset ) ) );
+    IF_RET( !utils::isTextFile( std::string_view( ptr, std::min<size_t>( offset, 100ul ) ) ) );
 
     // read rest
     if( view.size > offset ) {
