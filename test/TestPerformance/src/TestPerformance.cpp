@@ -17,6 +17,7 @@ using boost::asio::post;
 
 #include "utils.hpp"
 #include "threadpool.hpp"
+#include "licence.hpp"
 
 utils::Lines parseContentForLoop( const char* data, const size_t size ) {
     utils::Lines lines;
@@ -467,8 +468,8 @@ BOOST_AUTO_TEST_CASE( Test_printf ) {
 }
 
 BOOST_AUTO_TEST_CASE( Test_find ) {
-    std::string text = "You can get there from here, but why on earth would you want to?";
-    std::string term = "earth";
+    std::string text( ( const char* )licence, sizeof( licence ) );
+    std::string term = "Termination";
     size_t pos;
     void* ptr;
     std::string::iterator it;
