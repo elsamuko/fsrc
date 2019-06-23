@@ -34,7 +34,7 @@ void utils::printColor( Color color, const std::string& text ) {
     } else {
 #ifdef _WIN32
         const HANDLE h = ::GetStdHandle( STD_OUTPUT_HANDLE );
-        const WORD attributes = []( const HANDLE h ) {
+        const static WORD attributes = []( const HANDLE h ) {
             CONSOLE_SCREEN_BUFFER_INFO csbiInfo = {};
             ::GetConsoleScreenBufferInfo( h, &csbiInfo );
             return csbiInfo.wAttributes;
