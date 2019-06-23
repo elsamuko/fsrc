@@ -41,9 +41,13 @@ struct Searcher {
             }
         }
 
+#if !BOOST_OS_WINDOWS
+
         if( !opts.isRegex && !opts.ignoreCase ) {
             bmh = new boost::algorithm::boyer_moore_horspool<std::string::iterator>( term.begin(), term.end() );
         }
+
+#endif
     }
 
     ~Searcher() {

@@ -27,6 +27,32 @@ std::vector<Searcher::Hit> Searcher::caseInsensitiveSearch( const std::string_vi
     return hits;
 }
 
+#if BOOST_OS_WINDOWS
+std::vector<Searcher::Hit> Searcher::caseSensitiveSearch( const std::string_view& content ) {
+    std::vector<Hit> hits;
+
+    Iter pos = content.cbegin();
+    Iter end = content.cend();
+    char* start = const_cast<char*>( content.data() );
+    char* ptr = start;
+
+    while( pos != end ) {
+        ptr = strstr( ptr, term.data() );
+
+        if( ptr ) {
+            Iter from = pos + ( ptr - start );
+            Iter to = from + term.size();
+            hits.emplace_back( from, to );
+            ptr += term.size();
+        } else {
+            pos = end;
+        }
+
+    }
+
+    return hits;
+}
+#else
 std::vector<Searcher::Hit> Searcher::caseSensitiveSearch( const std::string_view& content ) {
     std::vector<Hit> hits;
 
@@ -46,6 +72,7 @@ std::vector<Searcher::Hit> Searcher::caseSensitiveSearch( const std::string_view
 
     return hits;
 }
+#endif
 
 std::vector<Searcher::Hit> Searcher::regexSearch( const std::string_view& content ) {
     std::vector<Hit> hits;
