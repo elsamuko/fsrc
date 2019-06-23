@@ -33,7 +33,6 @@ static {
 CONFIG(release, debug|release) {
     QMAKE_CXXFLAGS += /Qpar              # Enables the Auto-Parallelizer feature
     QMAKE_CXXFLAGS += /O2                # sets a combination of optimizations that optimizes code for maximum speed.
-    QMAKE_CXXFLAGS += /Og                # enables global optimizations.
     QMAKE_CXXFLAGS += /Oi                # generates intrinsic functions for appropriate function calls
     QMAKE_CXXFLAGS += /Ot                # prefer fast code
     QMAKE_CXXFLAGS += /Oy                # surpress frame pointer
