@@ -26,11 +26,11 @@ void onGitFiles( const std::vector<sys_string>& filenames, Searcher& searcher ) 
 
 int main( int argc, char* argv[] ) {
 
+    auto tp = std::chrono::system_clock::now();
+
     SearchOptions opts = SearchOptions::parseArgs( argc, argv );
 
-    if( !opts ) { return -1; }
-
-    auto tp = std::chrono::system_clock::now();
+    if( !opts ) { return EXIT_FAILURE; }
 
     Searcher searcher( opts );
 
