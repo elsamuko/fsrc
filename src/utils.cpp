@@ -39,7 +39,8 @@ void utils::printColor( Color color, const std::string& text ) {
             ::GetConsoleScreenBufferInfo( h, &csbiInfo );
             return csbiInfo.wAttributes;
         }( h );
-        ::SetConsoleTextAttribute( h, colors.at( color ) | FOREGROUND_INTENSITY );
+        const static WORD background = attributes & ( 0x00F0 );
+        ::SetConsoleTextAttribute( h, background | colors.at( color ) | FOREGROUND_INTENSITY );
         fwrite( text.c_str(), 1, text.size(), stdout );
         ::SetConsoleTextAttribute( h, attributes );
 #else
