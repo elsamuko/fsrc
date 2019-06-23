@@ -13,7 +13,12 @@ include( $${PRI_DIR}/boost.pri )
 
 # testsuite
 SOURCES += ../src/TestPerformance.cpp
+SOURCES += ../src/TestStringSearch.cpp
+SOURCES += ../src/TestThreadpool.cpp
 HEADERS += ../src/licence.hpp
+HEADERS += ../src/PerformanceUtils.hpp
+HEADERS += ../src/FileReaders.hpp
+HEADERS += ../src/NewlineParser.hpp
 
 INCLUDEPATH += $${MAIN_DIR}/src
 HEADERS += $${MAIN_DIR}/src/utils.hpp
