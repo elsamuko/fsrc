@@ -163,7 +163,6 @@ utils::FileView utils::fromWinAPI( const sys_string& filename ) {
                                  nullptr,               // default security
                                  OPEN_EXISTING,         // existing file only
                                  FILE_FLAG_SEQUENTIAL_SCAN |
-                                 FILE_FLAG_BACKUP_SEMANTICS |
                                  FILE_ATTRIBUTE_NORMAL, // normal file
                                  nullptr );
     IF_RET( file == INVALID_HANDLE_VALUE );
