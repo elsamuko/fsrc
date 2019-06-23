@@ -4,7 +4,6 @@
 #include <atomic>
 
 #include "boost/regex.hpp"
-#include "boost/algorithm/searching/boyer_moore_horspool.hpp"
 
 namespace rx = boost;
 #include "utils.hpp"
@@ -18,7 +17,6 @@ struct Searcher {
     std::atomic_size_t count = {0};
     std::atomic_size_t files = {0};
     std::atomic_size_t filesMatched = {0};
-    boost::algorithm::boyer_moore_horspool<std::string::iterator>* bmh = nullptr;
 
     using Iter = std::string_view::const_iterator;
     using Hit = std::pair<Iter, Iter>;
@@ -40,25 +38,15 @@ struct Searcher {
                 exit( EXIT_FAILURE );
             }
         }
-
-#if !BOOST_OS_WINDOWS
-
-        if( !opts.isRegex && !opts.ignoreCase ) {
-            bmh = new boost::algorithm::boyer_moore_horspool<std::string::iterator>( term.begin(), term.end() );
-        }
-
-#endif
     }
 
-    ~Searcher() {
-        if( bmh ) { delete bmh; }
-    }
+    ~Searcher() {}
 
     void search( const sys_string& path );
 
     //! search with strcasestr
     std::vector<Hit> caseInsensitiveSearch( const std::string_view& content );
-    //! search with boyer_moore_horspool
+    //! search with strstr or string_view::find
     std::vector<Hit> caseSensitiveSearch( const std::string_view& content );
     //! search with boost::regex
     std::vector<Hit> regexSearch( const std::string_view& content );

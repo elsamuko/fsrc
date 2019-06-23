@@ -58,16 +58,20 @@ std::vector<Searcher::Hit> Searcher::caseSensitiveSearch( const std::string_view
 
     Iter pos = content.cbegin();
     Iter end = content.cend();
+    size_t ptr = 0;
 
     while( pos != end ) {
-        const Hit hit = ( *bmh )( pos, end );
+        ptr = content.find( term, ptr );
 
-        if( hit.first != end ) {
-            hits.emplace_back( hit );
-            pos = hit.second;
+        if( ptr != std::string_view::npos ) {
+            Iter from = pos + ptr;
+            Iter to = from + term.size();
+            hits.emplace_back( from, to );
+            ptr += term.size();
         } else {
             pos = end;
         }
+
     }
 
     return hits;
