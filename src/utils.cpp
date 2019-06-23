@@ -15,7 +15,7 @@
 const std::map<Color, WORD> colors = {
     {Color::Red,     FOREGROUND_RED},
     {Color::Green,   FOREGROUND_GREEN},
-    {Color::Blue,    FOREGROUND_BLUE},
+    {Color::Blue,    FOREGROUND_BLUE | FOREGROUND_GREEN},
 };
 #else
 #include <dirent.h>
