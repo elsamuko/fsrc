@@ -3,7 +3,19 @@
 This tool is meant to search large codebases for text snippets. It uses a threadpool to open and search in all text files in the current folder.
 
 ## Usage
-```
+```console
+user@home:/usr/include/boost$ fsrc
+Usage  : fsrc [options] term
+Build  : Jun 23 2019
+Options:
+  -h [ --help ]         Help
+  -d [ --dir ] arg      Search folder
+  -i [ --ignore-case ]  Case insensitive search
+  -r [ --regex ]        Regex search (slower)
+  --no-git              Disable search with 'git ls-files'
+  --no-colors           Disable colorized output
+  -q [ --quiet ]        only print status
+
 user@home:/usr/include/boost$ fsrc filesystem
 Searching for "filesystem" in folder:
 
@@ -22,7 +34,7 @@ user@home:/usr/include/boost$
 ## Building
 
 ### Windows
-You need VS2019 and cygwin with curl.
+You need VS2019 and cygwin.
 
 ### Linux
 You need g++ 7 or newer.
@@ -32,4 +44,5 @@ You need XCode 9 or later.
 
 # General
 Run `./script/build_boost.sh` to build boost deps.  
+You need a shell and curl.  
 You need Qt/qmake to open the fscr.pro build file.
