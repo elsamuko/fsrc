@@ -171,6 +171,15 @@ BOOST_AUTO_TEST_CASE( Test_printf ) {
 
     fseek( file, 0, SEEK_SET );
 
+#ifdef __linux__
+    boost::int_least64_t t_fwrite_unlocked = timed1000( "fwrite_unlocked", [file, text] {
+        std::string data = "[" + text + "]\n";
+        fwrite_unlocked( data.c_str(), 1, data.size(), file );
+    } );
+
+    fseek( file, 0, SEEK_SET );
+#endif
+
     fclose( file );
     BOOST_CHECK_LT( t_fwrite, t_printf ); // assume fwrite is faster than printf
     printf( "\n" );
