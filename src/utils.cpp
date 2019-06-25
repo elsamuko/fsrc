@@ -23,6 +23,11 @@ const std::map<Color, WORD> colors = {
 
 #ifdef __linux__
 #define fwrite fwrite_unlocked
+#define open open64
+#define readdir readdir64
+#define dirent dirent64
+#define stat stat64
+#define fstat fstat64
 #endif
 
 const std::map<Color, std::string> colors = {
@@ -128,7 +133,7 @@ utils::Lines utils::parseContent( const char* data, const size_t size, const lon
 
 utils::FileView utils::fromFileC( const sys_string& filename ) {
     FileView view;
-    int file = open64( filename.c_str(), O_RDONLY | O_BINARY );
+    int file = open( filename.c_str(), O_RDONLY | O_BINARY );
     IF_RET( file == -1 );
     utils::ScopeGuard onExit( [file] { close( file ); } );
 
@@ -213,9 +218,9 @@ void utils::recurseDir( const sys_string& filename, const std::function<void( co
 
     if( !dir ) { return; }
 
-    struct dirent64* dp = nullptr;
+    struct dirent* dp = nullptr;
 
-    while( ( dp = readdir64( dir ) ) != nullptr ) {
+    while( ( dp = readdir( dir ) ) != nullptr ) {
 
         if( dp->d_type == DT_REG ) {
             callback( filename + "/" + dp->d_name );
@@ -269,9 +274,9 @@ void utils::recurseDir( const sys_string& filename, const std::function<void ( c
 #endif
 
 size_t utils::fileSize( const int file ) {
-    struct stat64 st {};
+    struct stat st {};
 
-    if( 0 != fstat64( file, &st ) ) { return 0; }
+    if( 0 != fstat( file, &st ) ) { return 0; }
 
     return st.st_size;
 }
