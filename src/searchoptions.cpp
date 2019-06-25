@@ -49,10 +49,7 @@ SearchOptions SearchOptions::parseArgs( int argc, char* argv[] ) {
     // search in dir
     if( args.count( "dir" ) ) {
         fs::path dir = args["dir"].as<std::string>();
-
-        if( fs::exists( dir ) ) {
-            opts.path = dir;
-        }
+        opts.path = dir;
     } else {
         opts.path = fs::current_path();
     }

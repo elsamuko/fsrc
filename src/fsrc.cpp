@@ -32,6 +32,11 @@ int main( int argc, char* argv[] ) {
 
     if( !opts ) { return EXIT_FAILURE; }
 
+    if( !fs::exists( opts.path ) ) {
+        printf( "Dir \"%s\" does not exist.\n", opts.path.string().c_str() );
+        exit( -1 );
+    }
+
     Searcher searcher( opts );
 
     if( !opts.noGit && fs::exists( opts.path / ".git" ) ) {
