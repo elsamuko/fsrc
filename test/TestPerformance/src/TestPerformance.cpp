@@ -162,6 +162,14 @@ BOOST_AUTO_TEST_CASE( Test_printf ) {
         fputs( ( "[" + text + "]\n" ).c_str(), file );
     } );
 
+#ifdef __linux__
+    /* boost::int_least64_t t_fputs_unlocked = */timed1000( "fputs_unlocked", [file, text] {
+        fputs_unlocked( ( "[" + text + "]\n" ).c_str(), file );
+    } );
+
+    fseek( file, 0, SEEK_SET );
+#endif
+
     fseek( file, 0, SEEK_SET );
 
     boost::int_least64_t t_fwrite = timed1000( "fwrite", [file, text] {
