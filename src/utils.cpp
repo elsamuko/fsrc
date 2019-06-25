@@ -21,6 +21,10 @@ const std::map<Color, WORD> colors = {
 #include <dirent.h>
 #include <sys/stat.h>
 
+#ifdef __linux__
+#define fwrite fwrite_unlocked
+#endif
+
 const std::map<Color, std::string> colors = {
     {Color::Red,     "\033[1;31m"},
     {Color::Green,   "\033[1;32m"},
