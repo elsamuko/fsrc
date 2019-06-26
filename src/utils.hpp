@@ -54,9 +54,9 @@ constexpr unsigned long long int operator "" _kB( unsigned long long int in ) {
 }
 
 struct Buffer {
-    char* ptr = static_cast<char*>( malloc( 10 * 1024 ) );
+    char* ptr = static_cast<char*>( malloc( 1_MB ) );
     size_t size = 0;
-    size_t reserved = 10 * 1024;
+    size_t reserved = 1_MB;
     inline char* grow( const size_t requested ) {
         if( reserved < requested ) {
             reserved = requested;
