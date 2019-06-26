@@ -45,6 +45,14 @@ struct ScopeGuard {
     ~ScopeGuard() { onExit(); }
 };
 
+constexpr unsigned long long int operator "" _MB( unsigned long long int in ) {
+    return in * 1024 * 1024;
+}
+
+constexpr unsigned long long int operator "" _kB( unsigned long long int in ) {
+    return in * 1024;
+}
+
 struct Buffer {
     char* ptr = static_cast<char*>( malloc( 10 * 1024 ) );
     size_t size = 0;
