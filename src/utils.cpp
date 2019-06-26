@@ -60,7 +60,7 @@ void utils::printColor( Color color, const std::string& text ) {
 }
 
 std::vector<sys_string> utils::run( const std::string& command ) {
-    sys_string buffer( 1024, '\0' );
+    sys_string buffer( 1_kB, '\0' );
     std::vector<sys_string> result;
 
     FILE* pipe = popen( command.c_str(), "r" );
