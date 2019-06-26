@@ -6,7 +6,6 @@
 #include <vector>
 
 #ifdef _WIN32
-#define NOMINMAX
 #include <io.h>
 #include <Shlwapi.h>
 #define popen  _popen
@@ -47,13 +46,13 @@ struct ScopeGuard {
 };
 
 struct Buffer {
-    char* ptr = ( char* )malloc( 10 * 1024 );
+    char* ptr = static_cast<char*>( malloc( 10 * 1024 ) );
     size_t size = 0;
     size_t reserved = 10 * 1024;
     inline char* grow( const size_t requested ) {
         if( reserved < requested ) {
             reserved = requested;
-            ptr = ( char* )realloc( ptr, reserved + 1 );
+            ptr = static_cast<char*>( realloc( ptr, reserved + 1 ) );
         }
 
         size = requested;
@@ -96,7 +95,7 @@ FileView fromWinAPI( const sys_string& filename );
 
 //! splits content at newlines
 //! \returns lines as vector of string_view
-Lines parseContent( const char* data, const size_t size, const long stop );
+Lines parseContent( const char* data, const size_t size, const long long stop );
 
 //! \param file file descriptor
 size_t fileSize( const int file );
@@ -105,9 +104,9 @@ size_t fileSize( const int file );
 template <typename ... Args>
 std::string format( const char* format, Args const& ... args ) {
 
-    int size = snprintf( nullptr, 0, format, args... );
+    size_t size = snprintf( nullptr, 0, format, args... );
     std::string text( size, '\0' );
-    snprintf( ( char* )text.c_str(), text.size() + 1, format, args... );
+    snprintf( text.data(), text.size() + 1, format, args... );
 
     return text;
 }

@@ -110,7 +110,7 @@ std::vector<Searcher::Print> Searcher::collectPrints( const sys_string& path, co
 #endif
 
     // parse file for newlines until last hit
-    long stop = hits.back().second - content.cbegin();
+    long long stop = hits.back().second - content.cbegin();
     utils::Lines lines = utils::parseContent( content.data(), content.size(), stop );
 
     std::vector<Hit>::const_iterator hit = hits.cbegin();
