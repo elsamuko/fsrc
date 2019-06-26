@@ -145,7 +145,7 @@ utils::FileView utils::fromFileC( const sys_string& filename ) {
     char* ptr = buffer.grow( view.size );
 
     // read first 16 kB
-    size_t offset = std::min<size_t>( view.size, 16384ul );
+    size_t offset = std::min<size_t>( view.size, 4_kB );
     size_t bytes = _read( file, ptr, offset );
     IF_RET( offset != bytes );
 
@@ -186,7 +186,7 @@ utils::FileView utils::fromWinAPI( const sys_string& filename ) {
     DWORD read = 0;
 
     // read first 16 kB
-    size_t offset = std::min<size_t>( view.size, 16384ul );
+    size_t offset = std::min<size_t>( view.size, 4_kB );
     BOOL ok = ::ReadFile( file,
                           ptr,
                           offset,
