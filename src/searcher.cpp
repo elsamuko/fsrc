@@ -170,11 +170,9 @@ end:
 }
 
 void Searcher::printPrints( const std::vector<Searcher::Print>& prints ) {
-    m.lock();
+    std::unique_lock<std::mutex> lock( m );
 
     for( const std::function<void()>& func : prints ) { func(); }
-
-    m.unlock();
 }
 
 void Searcher::search( const sys_string& path ) {
