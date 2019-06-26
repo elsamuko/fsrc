@@ -111,11 +111,11 @@ utils::Lines utils::parseContent( const char* data, const size_t size, const lon
 
     if( size == 0 ) { return lines; }
 
-    char* c_old = const_cast<char*>( data );
-    char* c_new = c_old;
-    char* c_end = c_old + size;
+    const char* c_old = data;
+    const char* c_new = c_old;
+    const char* c_end = c_old + size;
 
-    while( ( c_new = static_cast<char*>( memchr( c_old, '\n', c_end - c_old ) ) ) ) {
+    while( ( c_new = static_cast<const char*>( memchr( c_old, '\n', c_end - c_old ) ) ) ) {
         lines.emplace_back( c_old, c_new - c_old );
         c_old = c_new + 1;
 
