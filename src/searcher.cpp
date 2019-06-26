@@ -7,8 +7,8 @@ std::vector<Searcher::Hit> Searcher::caseInsensitiveSearch( const std::string_vi
 
     Iter pos = content.cbegin();
     Iter end = content.cend();
-    char* start = const_cast<char*>( content.data() );
-    char* ptr = start;
+    const char* start = content.data();
+    const char* ptr = start;
 
     while( pos != end ) {
         ptr = strcasestr( ptr, term.data() );
@@ -33,8 +33,8 @@ std::vector<Searcher::Hit> Searcher::caseSensitiveSearch( const std::string_view
 
     Iter pos = content.cbegin();
     Iter end = content.cend();
-    char* start = const_cast<char*>( content.data() );
-    char* ptr = start;
+    const char* start = content.data();
+    const char* ptr = start;
 
     while( pos != end ) {
         ptr = strstr( ptr, term.data() );
