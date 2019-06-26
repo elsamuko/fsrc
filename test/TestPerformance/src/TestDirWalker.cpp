@@ -9,7 +9,8 @@
 
 #define SPARE_FDS 5
 
-static size_t nftwCount = 0;
+static std::atomic_size_t nftwFiles = 0;
+static std::atomic_size_t nftwBytes = 0;
 
 // https://github.com/perusio/linux-programming-by-example/blob/master/book/ch08/ch08-nftw.c
 size_t withNftw( const sys_string& filename, const std::function<void( const sys_string& filename )>& callback ) {
@@ -20,10 +21,16 @@ size_t withNftw( const sys_string& filename, const std::function<void( const sys
     auto process = []( const char* file,
                        const struct stat64 * sb,
                        int flag,
-                       struct FTW * ftw
+                       struct FTW*  /*ftw*/
     ) -> int {
         if( flag == FTW_F ) {
-            ++nftwCount;
+            int fd = open( file, O_RDONLY | O_BINARY );
+
+            if( fd != -1 ) {
+                ++nftwFiles;
+                nftwBytes += sb->st_size;
+                close( fd );
+            }
         }
 
         return 0;
@@ -33,7 +40,7 @@ size_t withNftw( const sys_string& filename, const std::function<void( const sys
         printf( "nftw returned an error\n" );
     }
 
-    return nftwCount;
+    return nftwFiles;
 }
 
 BOOST_AUTO_TEST_CASE( Test_DirWalker ) {
@@ -49,33 +56,36 @@ BOOST_AUTO_TEST_CASE( Test_DirWalker ) {
 #endif
 
     {
-        size_t files = 0;
-        int fd = open( "/usr/include/zlib.h", O_RDONLY | O_BINARY );
-
+        std::atomic_size_t files = 0;
+        std::atomic_size_t bytes = 0;
         auto tp = std::chrono::system_clock::now();
 
-        utils::recurseDir( include.native(), [&files, &fd]( const sys_string& ) {
-            // call fstat on zlib.h to be fair to nftw64, which provides a stat64 for the current file
-            struct stat64 st {};
-            fstat64( fd, &st );
-            files++;
+        utils::recurseDir( include.native(), [&bytes, &files]( const sys_string & filename ) {
+            int fd = open( filename.c_str(), O_RDONLY | O_BINARY );
+
+            if( fd != -1 ) {
+                files++;
+                bytes += utils::fileSize( fd );
+                close( fd );
+            }
+
         } );
 
         auto duration = std::chrono::system_clock::now() - tp;
         msUtils = std::chrono::duration_cast<std::chrono::milliseconds>( duration );
 
-        printf( "   utils::recurseDir : %zu files in %ld ms\n", files, msUtils.count() );
+        printf( "   utils::recurseDir : %zu files with %zu kB in %ld ms\n", files.load(), bytes.load() / 1024, msUtils.count() );
     }
 
     {
         auto tp = std::chrono::system_clock::now();
 
-        size_t files = withNftw( include.native(), [&files]( const sys_string& ) {} );
+        withNftw( include.native(), []( const sys_string& ) {} );
 
         auto duration = std::chrono::system_clock::now() - tp;
         msNftw = std::chrono::duration_cast<std::chrono::milliseconds>( duration );
 
-        printf( "            withNftw : %zu files in %ld ms\n", files, msNftw.count() );
+        printf( "            withNftw : %zu files with %zu kB in %ld ms\n", nftwFiles.load(), nftwBytes.load() / 1024, msNftw.count() );
     }
 
     // assume, that readdir + fstat64 is still faster than nftw64
