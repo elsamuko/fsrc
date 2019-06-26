@@ -9,6 +9,7 @@ using boost::asio::post;
 BOOST_AUTO_TEST_CASE( Test_ThreadPool ) {
     boost::int_least64_t ns_asio = 0;
     boost::int_least64_t ns_own = 0;
+    boost::int_least64_t ns_async = 0;
     std::atomic_int counter = 0;
     {
         boost::timer::cpu_timer stopwatch;
@@ -42,9 +43,26 @@ BOOST_AUTO_TEST_CASE( Test_ThreadPool ) {
         ns_own = stopwatch.elapsed().wall;
     }
     BOOST_REQUIRE_EQUAL( counter, 2000 );
+    {
+        boost::timer::cpu_timer stopwatch;
+        stopwatch.start();
+        {
+            std::vector<std::future<void>> results;
+            results.reserve( 1000 );
+
+            for( int i = 0; i < 1000; ++i ) {
+                results.emplace_back( std::async( std::launch::async, [&counter] {counter++;} ) );
+            }
+        }
+
+        stopwatch.stop();
+        ns_async = stopwatch.elapsed().wall;
+    }
+    BOOST_REQUIRE_EQUAL( counter, 3000 );
 
     printf( "Threadpool\n" );
     printf( "              own : %5llu us\n", ns_own / 1000 );
-    printf( "            boost : %5llu us\n\n", ns_asio / 1000 );
+    printf( "            boost : %5llu us\n", ns_asio / 1000 );
+    printf( "            async : %5llu us\n\n", ns_async / 1000 );
     BOOST_CHECK_LT( ns_asio, ns_own ); // assume own tp is slower than boost::asio
 }
