@@ -82,6 +82,7 @@ function winBuild {
 
     # debug
     ./b2.exe -j 8 --stagedir=stage_debug   toolset=msvc-14.2 variant=debug runtime-link=static \
+        define='_HAS_ITERATOR_DEBUGGING=0' \
         define='BOOST_REGEX_NO_W32' \
         $B2_OPTIONS \
         $NEEDED_LIBS
@@ -89,6 +90,7 @@ function winBuild {
     # release
     ./b2.exe -j 8 --stagedir=stage_release toolset=msvc-14.2 variant=release runtime-link=static \
         cxxflags="/Qpar /O2 /Oi /Ot /Oy /GT /GL /Gw /fp:fast" linkflags="/LTCG /OPT:REF /OPT:ICF" \
+        define='_HAS_ITERATOR_DEBUGGING=0' \
         define='BOOST_REGEX_NO_W32' \
         $B2_OPTIONS \
         $NEEDED_LIBS
