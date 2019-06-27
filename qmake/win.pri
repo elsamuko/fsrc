@@ -4,6 +4,10 @@ LIBS += Shlwapi.lib
 # disable warnings about POSIX API calls
 DEFINES += _CRT_SECURE_NO_WARNINGS
 
+# disable LoadStringA import from user32
+# https://www.boost.org/doc/libs/1_70_0/libs/regex/doc/html/boost_regex/configuration/locale.html
+DEFINES += BOOST_REGEX_NO_W32
+
 # set 'd'
 CONFIG(debug, debug|release) {
     COMPILE_FLAG=d
