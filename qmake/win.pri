@@ -16,6 +16,11 @@ CONFIG(debug, debug|release) {
     COMPILE_FLAG=d
 }
 
+# delay load rare used deps
+LIBS += delayimp.lib
+QMAKE_LFLAGS += /DELAYLOAD:shlwapi.dll # StrStrIA
+QMAKE_LFLAGS += /DELAYLOAD:ws2_32.dll  # boost::asio
+
 QMAKE_CXXFLAGS += /std:c++17
 
 static {
