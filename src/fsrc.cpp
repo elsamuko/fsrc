@@ -76,9 +76,11 @@ int main( int argc, char* argv[] ) {
 #endif
 
     printf( "Found %lu matches in %lu/%lu files (%lu kB) in %ld ms\n",
-            searcher.stats.matches.load(), searcher.stats.filesMatched.load(),
+            searcher.stats.matches.load(),
+            searcher.stats.filesMatched.load(),
+            searcher.stats.filesSearched.load(),
             searcher.stats.bytesRead.load() / 1024,
-            searcher.stats.filesSearched.load(), ms );
+            ms );
 
     return 0;
 }
