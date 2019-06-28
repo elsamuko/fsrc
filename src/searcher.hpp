@@ -9,14 +9,18 @@ namespace rx = boost;
 #include "utils.hpp"
 #include "searchoptions.hpp"
 
+struct Stats {
+    std::atomic_size_t count = {0};
+    std::atomic_size_t files = {0};
+    std::atomic_size_t filesMatched = {0};
+};
+
 struct Searcher {
     std::mutex m;
     std::string term;
     rx::regex regex;
     SearchOptions opts;
-    std::atomic_size_t count = {0};
-    std::atomic_size_t files = {0};
-    std::atomic_size_t filesMatched = {0};
+    Stats stats;
 
     using Iter = std::string_view::const_iterator;
     using Hit = std::pair<Iter, Iter>;

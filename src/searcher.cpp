@@ -202,8 +202,8 @@ void Searcher::search( const sys_string& path ) {
 
     // handle hits
     if( !hits.empty() ) {
-        filesMatched++;
-        count += hits.size();
+        stats.filesMatched++;
+        stats.count += hits.size();
         prints = collectPrints( path, hits, content );
 
         if( !opts.quiet ) { printPrints( prints );}

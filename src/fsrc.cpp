@@ -7,7 +7,7 @@ void onAllFiles( Searcher& searcher ) {
 
     utils::recurseDir( searcher.opts.path.native(), [&pool, &searcher]( const sys_string & filename ) {
         pool.add( [filename, &searcher] {
-            searcher.files++;
+            searcher.stats.files++;
             searcher.search( filename );
         } );
     } );
@@ -18,7 +18,7 @@ void onGitFiles( const std::vector<sys_string>& filenames, Searcher& searcher ) 
 
     for( const sys_string& filename : filenames ) {
         pool.add( [filename, &searcher] {
-            searcher.files++;
+            searcher.stats.files++;
             searcher.search( filename );
         } );
     }
@@ -57,8 +57,8 @@ int main( int argc, char* argv[] ) {
     auto duration = std::chrono::system_clock::now() - tp;
     std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>( duration );
     printf( "Found %lu hits in %lu/%lu files in %ld ms\n",
-            searcher.count.load(), searcher.filesMatched.load(),
-            searcher.files.load(), ms.count() );
+            searcher.stats.count.load(), searcher.stats.filesMatched.load(),
+            searcher.stats.files.load(), ms.count() );
 
     return 0;
 }
