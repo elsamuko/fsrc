@@ -33,25 +33,25 @@ material under section 10.
         boost::algorithm::boyer_moore_horspool bmh( term.begin(), term.end() );
         boost::algorithm::knuth_morris_pratt kmp( term.begin(), term.end() );
 
-        boost::int_least64_t t_find = timed1000( "find", [&text, &term, &pos] {
+        long t_find = timed1000( "find", [&text, &term, &pos] {
             pos = text.find( term );
         } );
 
 #if !BOOST_OS_WINDOWS
-        boost::int_least64_t t_memmem = timed1000( "memmem", [&text, &term, &ptr] {
+        long t_memmem = timed1000( "memmem", [&text, &term, &ptr] {
             ptr = ( char* )memmem( text.data(), text.size(), term.data(), term.size() );
         } );
 #endif
 
-        boost::int_least64_t t_strstr = timed1000( "strstr", [&text, &term, &ptr] {
+        long t_strstr = timed1000( "strstr", [&text, &term, &ptr] {
             ptr = strstr( text.data(), term.data() );
         } );
 
-        boost::int_least64_t t_BMH = timed1000( "BMH search", [&text, &it, &bmh] {
+        long t_BMH = timed1000( "BMH search", [&text, &it, &bmh] {
             it = bmh( text.cbegin(), text.cend() ).first;
         } );
 
-        boost::int_least64_t t_KMP = timed1000( "KMP search", [&text, &it2, &kmp] {
+        long t_KMP = timed1000( "KMP search", [&text, &it2, &kmp] {
             it2 = kmp( text.cbegin(), text.cend() ).first;
         } );
 
@@ -59,7 +59,11 @@ material under section 10.
         BOOST_REQUIRE_NE( ptr, nullptr );
         BOOST_REQUIRE_EQUAL( ptr - text.data(), it - text.cbegin() );
 
-        BOOST_CHECK_LT( t_find, t_strstr ); // assume find is faster than memmem
+#if BOOST_OS_WINDOWS
+        BOOST_CHECK_GT( t_find, t_strstr ); // assume find is slower than strstr on Windows
+#else
+        BOOST_CHECK_LT( t_find, t_strstr ); // assume find is faster than strstr
+#endif
         BOOST_CHECK_GT( t_BMH, t_find ); // assume bmh is slower than find
         printf( "\n" );
     }

@@ -50,11 +50,11 @@ BOOST_FORCEINLINE utils::FileView fromFileMmap( const sys_string& filename ) {
 #else
 BOOST_FORCEINLINE utils::FileView fromFileMmap( const sys_string& filename ) {
     utils::FileView view;
-    boost::iostreams::mapped_file file( std::string( filename.cbegin(), filename.cend() ), boost::iostreams::mapped_file::readonly );
+    boost::iostreams::mapped_file_source file( std::string( filename.cbegin(), filename.cend() ) );
     IF_RET( !file );
 
     view.size = file.size();
-    view.content = std::string_view( file.const_data(), view.size );
+    view.content = std::string_view( file.data(), view.size );
     // if used, view needs a mapped_file member
     return view;
 }

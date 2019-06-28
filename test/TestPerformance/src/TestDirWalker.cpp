@@ -1,7 +1,7 @@
 #include <chrono>
 
 #include "boost/test/unit_test.hpp"
-
+#include "boost/timer/timer.hpp"
 #include "utils.hpp"
 
 #include <ftw.h>
@@ -46,19 +46,15 @@ size_t withNftw( const sys_string& filename, const std::function<void( const sys
 BOOST_AUTO_TEST_CASE( Test_DirWalker ) {
     printf( "DirWalker\n" );
 
-    std::chrono::milliseconds msNftw;
-    std::chrono::milliseconds msUtils;
-
-#if !BOOST_OS_WINDOWS
-    fs::path include = "/usr/include";
-#else
-    fs::path include = std::string( getenv( "VS140COMNTOOLS" ) ) + "..\\..\\VC\\include";
-#endif
+    long usUtils = 0;
+    long usNftw = 0;
+    fs::path include = "../../../../libs/boost/include/boost/asio";
 
     {
         std::atomic_size_t files = 0;
         std::atomic_size_t bytes = 0;
-        auto tp = std::chrono::system_clock::now();
+        boost::timer::cpu_timer stopwatch;
+        stopwatch.start();
 
         utils::recurseDir( include.native(), [&bytes, &files]( const sys_string & filename ) {
             int fd = open( filename.c_str(), O_RDONLY | O_BINARY );
@@ -71,23 +67,24 @@ BOOST_AUTO_TEST_CASE( Test_DirWalker ) {
 
         } );
 
-        auto duration = std::chrono::system_clock::now() - tp;
-        msUtils = std::chrono::duration_cast<std::chrono::milliseconds>( duration );
+        stopwatch.stop();
+        usUtils = stopwatch.elapsed().wall / 1000;
 
-        printf( "   utils::recurseDir : %zu files with %zu kB in %ld ms\n", files.load(), bytes.load() / 1024, msUtils.count() );
+        printf( "   utils::recurseDir : %zu files with %zu kB in %ld us\n", files.load(), bytes.load() / 1024, usUtils );
     }
 
     {
-        auto tp = std::chrono::system_clock::now();
+        boost::timer::cpu_timer stopwatch;
+        stopwatch.start();
 
         withNftw( include.native(), []( const sys_string& ) {} );
 
-        auto duration = std::chrono::system_clock::now() - tp;
-        msNftw = std::chrono::duration_cast<std::chrono::milliseconds>( duration );
+        stopwatch.stop();
+        usNftw = stopwatch.elapsed().wall / 1000;
 
-        printf( "            withNftw : %zu files with %zu kB in %ld ms\n", nftwFiles.load(), nftwBytes.load() / 1024, msNftw.count() );
+        printf( "            withNftw : %zu files with %zu kB in %ld us\n", nftwFiles.load(), nftwBytes.load() / 1024, usNftw );
     }
 
     // assume, that readdir + fstat64 is still faster than nftw64
-    BOOST_CHECK_LT( msUtils.count(), msNftw.count() );
+    BOOST_CHECK_LT( usUtils, usNftw );
 }
