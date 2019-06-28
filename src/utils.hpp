@@ -34,6 +34,7 @@ enum class Color {
     Red,
     Green,
     Blue,
+    Gray,
     Neutral
 };
 

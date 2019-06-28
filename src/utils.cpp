@@ -16,6 +16,7 @@ const std::map<Color, WORD> colors = {
     {Color::Red,     FOREGROUND_RED},
     {Color::Green,   FOREGROUND_GREEN},
     {Color::Blue,    FOREGROUND_BLUE | FOREGROUND_GREEN},
+    {Color::Gray,    FOREGROUND_INTENSITY},
 };
 #else
 #include <dirent.h>
@@ -34,6 +35,7 @@ const std::map<Color, std::string> colors = {
     {Color::Red,     "\033[1;31m"},
     {Color::Green,   "\033[1;32m"},
     {Color::Blue,    "\033[1;34m"},
+    {Color::Gray,    "\033[38;5;245m"},
 };
 #endif
 

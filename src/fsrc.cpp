@@ -56,10 +56,10 @@ int main( int argc, char* argv[] ) {
         std::vector<sys_string> gitFiles = utils::run( "git ls-files 2> " + nullDevice );
         STOP( searcher.stats.t_recurse );
 
-        printf( "Searching for \"%s\" in repo:\n\n", searcher.opts.term.c_str() );
+        utils::printColor( Color::Gray, utils::format( "Searching for \"%s\" in repo:\n\n", searcher.opts.term.c_str() ) );
         onGitFiles( gitFiles, searcher );
     } else {
-        printf( "Searching for \"%s\" in folder:\n\n", searcher.opts.term.c_str() );
+        utils::printColor( Color::Gray, utils::format( "Searching for \"%s\" in folder:\n\n", searcher.opts.term.c_str() ) );
         onAllFiles( searcher );
     }
 
@@ -67,20 +67,22 @@ int main( int argc, char* argv[] ) {
     long ms = total.elapsed().wall / 1000000;
 
 #if DETAILED_STATS
-    printf( "Times: Recurse %ld ms, Read %ld ms, Search %ld ms, Collect %ld ms, Print %ld ms \n",
-            searcher.stats.t_recurse / 1000000,
-            searcher.stats.t_read / 1000000,
-            searcher.stats.t_search / 1000000,
-            searcher.stats.t_collect / 1000000,
-            searcher.stats.t_print / 1000000 );
+    utils::printColor( Color::Gray, utils::format(
+                           "Times: Recurse %ld ms, Read %ld ms, Search %ld ms, Collect %ld ms, Print %ld ms \n",
+                           searcher.stats.t_recurse / 1000000,
+                           searcher.stats.t_read / 1000000,
+                           searcher.stats.t_search / 1000000,
+                           searcher.stats.t_collect / 1000000,
+                           searcher.stats.t_print / 1000000 ) );
 #endif
 
-    printf( "Found %lu matches in %lu/%lu files (%lu kB) in %ld ms\n",
-            searcher.stats.matches.load(),
-            searcher.stats.filesMatched.load(),
-            searcher.stats.filesSearched.load(),
-            searcher.stats.bytesRead.load() / 1024,
-            ms );
+    utils::printColor( Color::Gray, utils::format(
+                           "Found %lu matches in %lu/%lu files (%lu kB) in %ld ms\n",
+                           searcher.stats.matches.load(),
+                           searcher.stats.filesMatched.load(),
+                           searcher.stats.filesSearched.load(),
+                           searcher.stats.bytesRead.load() / 1024,
+                           ms ) );
 
     return 0;
 }
