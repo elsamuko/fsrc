@@ -2,8 +2,8 @@
 
 #include "searcher.hpp"
 
-std::vector<Searcher::Hit> Searcher::caseInsensitiveSearch( const std::string_view& content ) {
-    std::vector<Hit> hits;
+std::vector<Searcher::Match> Searcher::caseInsensitiveSearch( const std::string_view& content ) {
+    std::vector<Match> matches;
 
     Iter pos = content.cbegin();
     Iter end = content.cend();
@@ -16,7 +16,7 @@ std::vector<Searcher::Hit> Searcher::caseInsensitiveSearch( const std::string_vi
         if( ptr ) {
             Iter from = pos + ( ptr - start );
             Iter to = from + term.size();
-            hits.emplace_back( from, to );
+            matches.emplace_back( from, to );
             ptr += term.size();
         } else {
             pos = end;
@@ -24,12 +24,12 @@ std::vector<Searcher::Hit> Searcher::caseInsensitiveSearch( const std::string_vi
 
     }
 
-    return hits;
+    return matches;
 }
 
 #if BOOST_OS_WINDOWS
-std::vector<Searcher::Hit> Searcher::caseSensitiveSearch( const std::string_view& content ) {
-    std::vector<Hit> hits;
+std::vector<Searcher::Match> Searcher::caseSensitiveSearch( const std::string_view& content ) {
+    std::vector<Match> matches;
 
     Iter pos = content.cbegin();
     Iter end = content.cend();
@@ -42,7 +42,7 @@ std::vector<Searcher::Hit> Searcher::caseSensitiveSearch( const std::string_view
         if( ptr ) {
             Iter from = pos + ( ptr - start );
             Iter to = from + term.size();
-            hits.emplace_back( from, to );
+            matches.emplace_back( from, to );
             ptr += term.size();
         } else {
             pos = end;
@@ -50,11 +50,11 @@ std::vector<Searcher::Hit> Searcher::caseSensitiveSearch( const std::string_view
 
     }
 
-    return hits;
+    return matches;
 }
 #else
-std::vector<Searcher::Hit> Searcher::caseSensitiveSearch( const std::string_view& content ) {
-    std::vector<Hit> hits;
+std::vector<Searcher::Match> Searcher::caseSensitiveSearch( const std::string_view& content ) {
+    std::vector<Match> matches;
 
     Iter pos = content.cbegin();
     Iter end = content.cend();
@@ -66,7 +66,7 @@ std::vector<Searcher::Hit> Searcher::caseSensitiveSearch( const std::string_view
         if( ptr != std::string_view::npos ) {
             Iter from = pos + ptr;
             Iter to = from + term.size();
-            hits.emplace_back( from, to );
+            matches.emplace_back( from, to );
             ptr += term.size();
         } else {
             pos = end;
@@ -74,12 +74,12 @@ std::vector<Searcher::Hit> Searcher::caseSensitiveSearch( const std::string_view
 
     }
 
-    return hits;
+    return matches;
 }
 #endif
 
-std::vector<Searcher::Hit> Searcher::regexSearch( const std::string_view& content ) {
-    std::vector<Hit> hits;
+std::vector<Searcher::Match> Searcher::regexSearch( const std::string_view& content ) {
+    std::vector<Match> matches;
 
     auto begin = rx::cregex_iterator( &content.front(), 1 + &content.back(), regex );
     auto end   = rx::cregex_iterator();
@@ -87,15 +87,15 @@ std::vector<Searcher::Hit> Searcher::regexSearch( const std::string_view& conten
     for( rx::cregex_iterator match = begin; match != end; ++match ) {
         Iter from = content.cbegin() + match->position();
         Iter to = from + match->length();
-        hits.emplace_back( from, to );
+        matches.emplace_back( from, to );
     }
 
-    return hits;
+    return matches;
 }
 
-std::vector<Searcher::Print> Searcher::collectPrints( const sys_string& path, const std::vector<Searcher::Hit>& hits, const std::string_view& content ) {
+std::vector<Searcher::Print> Searcher::collectPrints( const sys_string& path, const std::vector<Searcher::Match>& matches, const std::string_view& content ) {
     std::vector<std::function<void()>> prints;
-    prints.reserve( 3 * hits.size() );
+    prints.reserve( 3 * matches.size() );
 
     // don't pipe colors
     Color cred   = opts.colorized ? Color::Red   : Color::Neutral;
@@ -109,11 +109,11 @@ std::vector<Searcher::Print> Searcher::collectPrints( const sys_string& path, co
     prints.emplace_back( utils::printFunc( cgreen, path ) );
 #endif
 
-    // parse file for newlines until last hit
-    long long stop = hits.back().second - content.cbegin();
+    // parse file for newlines until last match
+    long long stop = matches.back().second - content.cbegin();
     utils::Lines lines = utils::parseContent( content.data(), content.size(), stop );
 
-    std::vector<Hit>::const_iterator hit = hits.cbegin();
+    std::vector<Match>::const_iterator match = matches.cbegin();
     size_t size = lines.size();
 
     for( size_t i = 0; i < size; ++i ) {
@@ -121,8 +121,8 @@ std::vector<Searcher::Print> Searcher::collectPrints( const sys_string& path, co
         Iter to   = lines[i].cend();
         bool printedLine = false;
 
-        // find all hits in this line
-        while( from <= hit->first && hit->first < to ) {
+        // find all matches in this line
+        while( from <= match->first && match->first < to ) {
 
             // print line information in blue once per line
             if( !printedLine ) {
@@ -132,27 +132,27 @@ std::vector<Searcher::Print> Searcher::collectPrints( const sys_string& path, co
             }
 
             // print code in neutral
-            prints.emplace_back( utils::printFunc( Color::Neutral, std::string( from, hit->first ) ) );
+            prints.emplace_back( utils::printFunc( Color::Neutral, std::string( from, match->first ) ) );
 
-            // print hit in red
-            prints.emplace_back( utils::printFunc( cred, std::string( hit->first, hit->second ) ) );
+            // print match in red
+            prints.emplace_back( utils::printFunc( cred, std::string( match->first, match->second ) ) );
 
-            // set from to end of hit
-            from = hit->second;
+            // set from to end of match
+            from = match->second;
 
-            // if there are no more hits in this file, print rest of line in neutral
+            // if there are no more matches in this file, print rest of line in neutral
             // and exit search for this file
-            if( std::next( hit ) == hits.cend() ) {
+            if( std::next( match ) == matches.cend() ) {
                 prints.emplace_back( utils::printFunc( Color::Neutral, std::string( from, to ) ) );
                 goto end;
             }
 
-            ++hit;
+            ++match;
 
-            // if next hit is within this line, print code in neutral until next hit
-            if( from <= hit->first && hit->first < to ) {
-                prints.emplace_back( utils::printFunc( Color::Neutral, std::string( from, hit->first ) ) );
-                from = hit->first;
+            // if next match is within this line, print code in neutral until next match
+            if( from <= match->first && match->first < to ) {
+                prints.emplace_back( utils::printFunc( Color::Neutral, std::string( from, match->first ) ) );
+                from = match->first;
             }
             // else print code in neutral until end and break to next line
             else {
@@ -182,29 +182,30 @@ void Searcher::search( const sys_string& path ) {
 #else
     utils::FileView view = utils::fromWinAPI( path );
 #endif
+
     const std::string_view& content = view.content;
 
     if( content.empty() ) { return; }
 
-    std::vector<Hit> hits;
+    std::vector<Match> matches;
     std::vector<std::function<void()>> prints;
 
-    // collect hits
+    // collect matches
     if( !opts.isRegex ) {
         if( opts.ignoreCase ) {
-            hits = caseInsensitiveSearch( content );
+            matches = caseInsensitiveSearch( content );
         } else {
-            hits = caseSensitiveSearch( content );
+            matches = caseSensitiveSearch( content );
         }
     } else {
-        hits = regexSearch( content );
+        matches = regexSearch( content );
     }
 
-    // handle hits
-    if( !hits.empty() ) {
+    // handle matches
+    if( !matches.empty() ) {
         stats.filesMatched++;
-        stats.count += hits.size();
-        prints = collectPrints( path, hits, content );
+        stats.matches += matches.size();
+        prints = collectPrints( path, matches, content );
 
         if( !opts.quiet ) { printPrints( prints );}
     }

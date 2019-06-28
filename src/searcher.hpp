@@ -10,8 +10,8 @@ namespace rx = boost;
 #include "searchoptions.hpp"
 
 struct Stats {
-    std::atomic_size_t count = {0};
-    std::atomic_size_t files = {0};
+    std::atomic_size_t matches = {0};
+    std::atomic_size_t filesSearched = {0};
     std::atomic_size_t filesMatched = {0};
 };
 
@@ -23,7 +23,7 @@ struct Searcher {
     Stats stats;
 
     using Iter = std::string_view::const_iterator;
-    using Hit = std::pair<Iter, Iter>;
+    using Match = std::pair<Iter, Iter>;
     using Print = std::function<void()>;
 
     Searcher( const SearchOptions& opts ) : opts( opts ) {
@@ -49,13 +49,13 @@ struct Searcher {
     void search( const sys_string& path );
 
     //! search with strcasestr
-    std::vector<Hit> caseInsensitiveSearch( const std::string_view& content );
+    std::vector<Match> caseInsensitiveSearch( const std::string_view& content );
     //! search with strstr or string_view::find
-    std::vector<Hit> caseSensitiveSearch( const std::string_view& content );
+    std::vector<Match> caseSensitiveSearch( const std::string_view& content );
     //! search with boost::regex
-    std::vector<Hit> regexSearch( const std::string_view& content );
+    std::vector<Match> regexSearch( const std::string_view& content );
     //! collect what is printed
-    std::vector<Print> collectPrints( const sys_string& path, const std::vector<Hit>& hits, const std::string_view& content );
+    std::vector<Print> collectPrints( const sys_string& path, const std::vector<Match>& matches, const std::string_view& content );
     //! call print functions locked
     void printPrints( const std::vector<Print>& prints );
 };
