@@ -4,6 +4,8 @@
 
 void onAllFiles( Searcher& searcher ) {
     POOL;
+    STOPWATCH
+    START
 
     utils::recurseDir( searcher.opts.path.native(), [&pool, &searcher]( const sys_string & filename ) {
         pool.add( [filename, &searcher] {
@@ -11,6 +13,8 @@ void onAllFiles( Searcher& searcher ) {
             searcher.search( filename );
         } );
     } );
+
+    STOP( searcher.stats.t_recurse )
 }
 
 void onGitFiles( const std::vector<sys_string>& filenames, Searcher& searcher ) {
@@ -26,7 +30,8 @@ void onGitFiles( const std::vector<sys_string>& filenames, Searcher& searcher ) 
 
 int main( int argc, char* argv[] ) {
 
-    auto tp = std::chrono::system_clock::now();
+    boost::timer::cpu_timer total;
+    total.start();
 
     SearchOptions opts = SearchOptions::parseArgs( argc, argv );
 
@@ -46,7 +51,11 @@ int main( int argc, char* argv[] ) {
         std::string nullDevice = "/dev/null";
 #endif
         fs::current_path( opts.path );
+        STOPWATCH
+        START
         std::vector<sys_string> gitFiles = utils::run( "git ls-files 2> " + nullDevice );
+        STOP( searcher.stats.t_recurse );
+
         printf( "Searching for \"%s\" in repo:\n\n", searcher.opts.term.c_str() );
         onGitFiles( gitFiles, searcher );
     } else {
@@ -54,11 +63,22 @@ int main( int argc, char* argv[] ) {
         onAllFiles( searcher );
     }
 
-    auto duration = std::chrono::system_clock::now() - tp;
-    std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>( duration );
-    printf( "Found %lu matches in %lu/%lu files in %ld ms\n",
+    total.stop();
+    long ms = total.elapsed().wall / 1000000;
+
+#if DETAILED_STATS
+    printf( "Times: Recurse %ld ms, Read %ld ms, Search %ld ms, Collect %ld ms, Print %ld ms \n",
+            searcher.stats.t_recurse / 1000000,
+            searcher.stats.t_read / 1000000,
+            searcher.stats.t_search / 1000000,
+            searcher.stats.t_collect / 1000000,
+            searcher.stats.t_print / 1000000 );
+#endif
+
+    printf( "Found %lu matches in %lu/%lu files (%lu kB) in %ld ms\n",
             searcher.stats.matches.load(), searcher.stats.filesMatched.load(),
-            searcher.stats.filesSearched.load(), ms.count() );
+            searcher.stats.bytesRead.load() / 1024,
+            searcher.stats.filesSearched.load(), ms );
 
     return 0;
 }

@@ -14,10 +14,14 @@ SOURCES += $${SRC_DIR}/searcher.cpp
 HEADERS += $${SRC_DIR}/searchoptions.hpp
 SOURCES += $${SRC_DIR}/searchoptions.cpp
 
-DEFINES += 'BOOST_THREADPOOL=1'
-DEFINES += 'THREADED_THREADPOOL=1'
 HEADERS += $${SRC_DIR}/threadpool.hpp
 SOURCES += $${SRC_DIR}/threadpool.cpp
+
+# options
+DEFINES += 'BOOST_THREADPOOL=1'     # if 1, use boost::asio instead own threadpool
+DEFINES += 'THREADED_THREADPOOL=1'  # if 0, use no threadpool
+DEFINES += 'DETAILED_STATS=0'       # if 1, print detailed times
+                                    # default is 0, because it costs ca 10 ms to measure
 
 include( setup.pri )
 linux: include( linux.pri )

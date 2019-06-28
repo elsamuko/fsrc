@@ -177,20 +177,25 @@ void Searcher::printPrints( const std::vector<Searcher::Print>& prints ) {
 
 void Searcher::search( const sys_string& path ) {
 
+    STOPWATCH
+    START
+
 #ifndef _WIN32
     utils::FileView view = utils::fromFileC( path );
 #else
     utils::FileView view = utils::fromWinAPI( path );
 #endif
 
-    const std::string_view& content = view.content;
+    stats.bytesRead += view.size;
+    STOP( stats.t_read )
 
-    if( content.empty() ) { return; }
-
-    std::vector<Match> matches;
-    std::vector<std::function<void()>> prints;
+    if( !view.size ) { return; }
 
     // collect matches
+    START
+    const std::string_view& content = view.content;
+    std::vector<Match> matches;
+
     if( !opts.isRegex ) {
         if( opts.ignoreCase ) {
             matches = caseInsensitiveSearch( content );
@@ -201,12 +206,21 @@ void Searcher::search( const sys_string& path ) {
         matches = regexSearch( content );
     }
 
+    STOP( stats.t_search );
+
     // handle matches
     if( !matches.empty() ) {
         stats.filesMatched++;
         stats.matches += matches.size();
-        prints = collectPrints( path, matches, content );
 
-        if( !opts.quiet ) { printPrints( prints );}
+        START
+        std::vector<std::function<void()>> prints = collectPrints( path, matches, content );
+        STOP( stats.t_collect );
+
+        if( !opts.quiet ) {
+            START
+            printPrints( prints );
+            STOP( stats.t_print );
+        }
     }
 }

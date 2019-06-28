@@ -4,15 +4,34 @@
 #include <atomic>
 
 #include "boost/regex.hpp"
+#include "boost/timer/timer.hpp"
 
 namespace rx = boost;
 #include "utils.hpp"
 #include "searchoptions.hpp"
 
+#if DETAILED_STATS
+#define STOPWATCH static thread_local boost::timer::cpu_timer stopwatch;
+#define START stopwatch.start();
+#define STOP( T ) stopwatch.stop(); \
+    T += stopwatch.elapsed().wall;
+#else
+#define STOPWATCH
+#define START
+#define STOP( T )
+#endif
+
 struct Stats {
     std::atomic_size_t matches = {0};
     std::atomic_size_t filesSearched = {0};
     std::atomic_size_t filesMatched = {0};
+    std::atomic_size_t bytesRead = {0};
+
+    std::atomic_long t_recurse = {0}; // time to recurse directory
+    std::atomic_long t_read = {0};    // time to read files
+    std::atomic_long t_search = {0};  // time to search in files
+    std::atomic_long t_collect = {0}; // time to prepare matches for printing
+    std::atomic_long t_print = {0};   // time to print
 };
 
 struct Searcher {
