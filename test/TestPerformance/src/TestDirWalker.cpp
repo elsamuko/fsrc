@@ -48,7 +48,8 @@ BOOST_AUTO_TEST_CASE( Test_DirWalker ) {
 
     long usUtils = 0;
     long usNftw = 0;
-    fs::path include = "../../../../libs/boost/include/boost/asio";
+
+    fs::path include = "../../../../libs/boost";
 
     {
         std::atomic_size_t files = 0;

@@ -37,14 +37,6 @@ enum class Color {
     Neutral
 };
 
-namespace utils {
-
-struct ScopeGuard {
-    std::function<void()> onExit;
-    ScopeGuard( const std::function<void()>& onExit ) : onExit( onExit ) {}
-    ~ScopeGuard() { onExit(); }
-};
-
 constexpr unsigned long long int operator "" _MB( unsigned long long int in ) {
     return in * 1024 * 1024;
 }
@@ -52,6 +44,14 @@ constexpr unsigned long long int operator "" _MB( unsigned long long int in ) {
 constexpr unsigned long long int operator "" _kB( unsigned long long int in ) {
     return in * 1024;
 }
+
+namespace utils {
+
+struct ScopeGuard {
+    std::function<void()> onExit;
+    ScopeGuard( const std::function<void()>& onExit ) : onExit( onExit ) {}
+    ~ScopeGuard() { onExit(); }
+};
 
 struct Buffer {
     char* ptr = static_cast<char*>( malloc( 1_MB ) );
@@ -94,7 +94,7 @@ bool isTextFile( const std::string_view& content );
 #define IF_RET( A ) if( A ) { view.size = 0; return view; }
 
 //! \returns content of filename as vector with C API
-FileView fromFileC( const sys_string& filename );
+FileView fromFileP( const sys_string& filename );
 
 #ifdef _WIN32
 //! \returns content of filename as vector with WINAPI

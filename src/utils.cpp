@@ -131,7 +131,7 @@ utils::Lines utils::parseContent( const char* data, const size_t size, const lon
     return lines;
 }
 
-utils::FileView utils::fromFileC( const sys_string& filename ) {
+utils::FileView utils::fromFileP( const sys_string& filename ) {
     FileView view;
     int file = open( filename.c_str(), O_RDONLY | O_BINARY );
     IF_RET( file == -1 );

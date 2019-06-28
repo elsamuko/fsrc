@@ -59,7 +59,6 @@ utils::FileView fromFileFind( const sys_string& filename ) {
 using fromFileFunc = utils::FileView( const sys_string& filename );
 
 std::map<fromFileFunc*, const char*> names = {
-    {fromFilePosix, "fromFilePosix"},
     {fromFileMmap, "fromFileMmap"},
     {fromFileLocal, "fromFileLocal"},
     {fromFileString, "fromFileString"},
@@ -70,7 +69,7 @@ std::map<fromFileFunc*, const char*> names = {
     {fromFileForLoop, "fromFileForLoop"},
     {fromFileFind, "fromFileFind"},
     {fromFileCPP, "fromFileCPP"},
-    {utils::fromFileC, "utils::fromFileC"},
+    {utils::fromFileP, "utils::fromFileC"},
 #if BOOST_OS_WINDOWS
     {utils::fromWinAPI, "utils::fromWinAPI"},
 #endif
@@ -81,7 +80,12 @@ long run( fromFileFunc fromFile ) {
     size_t lineCount = 0;
     size_t files = 0;
 
+    //! \note Windows is slow in I/O
+#if BOOST_OS_WINDOWS
     fs::path include = "../../../../libs/boost/include/boost/asio";
+#else
+    fs::path include = "../../../../libs/boost";
+#endif
 
     boost::timer::cpu_timer stopwatch;
     stopwatch.start();
@@ -107,16 +111,15 @@ BOOST_AUTO_TEST_SUITE( Performance )
 BOOST_AUTO_TEST_CASE( Test_fromFile ) {
     printf( "I/O\n" );
     size_t t2 = run( fromFileCPP );
-    /*long tM = */run( fromFileMmap );
     /*long tS = */run( fromFileString );
-    /*long tF = */run( fromFileLSeek );
     /*long tL = */run( fromFileLocal );
+    /*long tF = */run( fromFileLSeek );
+    /*long tM = */run( fromFileMmap );
     /*long tO = */run( fromFileTwoFread );
-    /*long tP = */run( fromFilePosix );
 #if BOOST_OS_WINDOWS
     /*long tW = */run( utils::fromWinAPI );
 #endif
-    long t1 = run( utils::fromFileC );
+    long t1 = run( utils::fromFileP );
     printf( "\n" );
     BOOST_CHECK_LT( t1, t2 ); // assume FILE* is faster than std::ifstream
 }

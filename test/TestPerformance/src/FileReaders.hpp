@@ -2,35 +2,11 @@
 
 #include "utils.hpp"
 
-//! POSIX API with thread local storage
-BOOST_FORCEINLINE utils::FileView fromFilePosix( const sys_string& filename ) {
-    utils::FileView view;
-    int file = open( filename.c_str(), O_RDONLY | O_BINARY );
-    IF_RET( file == -1 );
-    utils::ScopeGuard onExit( [file] { close( file ); } );
-
-    view.size = utils::fileSize( file );
-    IF_RET( !view.size );
-
-    // growing buffer for each thread
-    static thread_local utils::Buffer buffer;
-    char* ptr = buffer.grow( view.size );
-
-    size_t bytes = _read( file, ptr, view.size );
-    IF_RET( view.size != bytes );
-
-    // check first 100 bytes for binary
-    IF_RET( !utils::isTextFile( std::string_view( ptr, std::min<size_t>( view.size, 100ul ) ) ) );
-
-    view.content = std::string_view( ptr, view.size );
-    return view;
-}
-
 #if !BOOST_OS_WINDOWS
 //! memory mapped API with thread local storage
 BOOST_FORCEINLINE utils::FileView fromFileMmap( const sys_string& filename ) {
     utils::FileView view;
-    int file = open( filename.c_str(), O_RDONLY );
+    int file = open( filename.c_str(), O_RDONLY | O_BINARY );
     IF_RET( file == -1 );
     utils::ScopeGuard onExit( [file] { close( file ); } );
 
@@ -152,10 +128,20 @@ BOOST_FORCEINLINE utils::FileView fromFileLSeek( const sys_string& filename ) {
     static thread_local utils::Buffer buffer;
     char* ptr = buffer.grow( view.size );
 
-    IF_RET( view.size != fread( ptr, 1, view.size, file ) );
+    // read first 16 kB
+    size_t offset = std::min<size_t>( view.size, 4_kB );
+    size_t bytes = fread( ptr, 1, offset, file );
+    IF_RET( offset != bytes );
 
     // check first 100 bytes for binary
-    IF_RET( !utils::isTextFile( std::string_view( ptr, std::min<size_t>( view.size, 100ul ) ) ) );
+    IF_RET( !utils::isTextFile( std::string_view( ptr, std::min<size_t>( offset, 100ul ) ) ) );
+
+    // read rest
+    if( view.size > offset ) {
+        size_t newSize = view.size - offset;
+        size_t bytes2 = fread( ptr + offset, 1, newSize, file );
+        IF_RET( newSize != bytes2 );
+    }
 
     view.content = std::string_view( ptr, view.size );
     return view;
