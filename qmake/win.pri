@@ -11,6 +11,9 @@ DEFINES += '_HAS_ITERATOR_DEBUGGING=0'
 # https://www.boost.org/doc/libs/1_70_0/libs/regex/doc/html/boost_regex/configuration/locale.html
 DEFINES += BOOST_REGEX_NO_W32
 
+# make compiler happy
+DEFINES += _WIN32_WINNT=_WIN32_WINNT_WIN7
+
 # set 'd'
 CONFIG(debug, debug|release) {
     COMPILE_FLAG=d
