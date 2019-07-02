@@ -42,6 +42,8 @@ int main( int argc, char* argv[] ) {
         exit( -1 );
     }
 
+    Color gray = opts.colorized ? Color::Gray : Color::Neutral;
+
     Searcher searcher( opts );
 
     if( !opts.noGit && fs::exists( opts.path / ".git" ) ) {
@@ -56,10 +58,10 @@ int main( int argc, char* argv[] ) {
         std::vector<sys_string> gitFiles = utils::run( "git ls-files 2> " + nullDevice );
         STOP( searcher.stats.t_recurse );
 
-        utils::printColor( Color::Gray, utils::format( "Searching for \"%s\" in repo:\n\n", searcher.opts.term.c_str() ) );
+        utils::printColor( gray, utils::format( "Searching for \"%s\" in repo:\n\n", searcher.opts.term.c_str() ) );
         onGitFiles( gitFiles, searcher );
     } else {
-        utils::printColor( Color::Gray, utils::format( "Searching for \"%s\" in folder:\n\n", searcher.opts.term.c_str() ) );
+        utils::printColor( gray, utils::format( "Searching for \"%s\" in folder:\n\n", searcher.opts.term.c_str() ) );
         onAllFiles( searcher );
     }
 
@@ -67,7 +69,7 @@ int main( int argc, char* argv[] ) {
     long ms = total.elapsed().wall / 1000000;
 
 #if DETAILED_STATS
-    utils::printColor( Color::Gray, utils::format(
+    utils::printColor( gray, utils::format(
                            "Times: Recurse %ld ms, Read %ld ms, Search %ld ms, Collect %ld ms, Print %ld ms \n",
                            searcher.stats.t_recurse / 1000000,
                            searcher.stats.t_read / 1000000,
@@ -76,7 +78,7 @@ int main( int argc, char* argv[] ) {
                            searcher.stats.t_print / 1000000 ) );
 #endif
 
-    utils::printColor( Color::Gray, utils::format(
+    utils::printColor( gray, utils::format(
                            "Found %lu matches in %lu/%lu files (%lu kB) in %ld ms\n",
                            searcher.stats.matches.load(),
                            searcher.stats.filesMatched.load(),
