@@ -1,4 +1,4 @@
-# fsrc (fast code search)
+z# fsrc (fast code search)
 
 This tool is meant to search large codebases for text snippets. It uses a threadpool to open and search in all text files in the current folder.
 The string search is sse2 optimized code from [mischasan](https://mischasan.wordpress.com/2011/07/16/convergence-sse2-and-strstr/).
@@ -28,7 +28,7 @@ L  16 :     namespace fs = boost::filesystem;
 L 205 :         catch (const fs::filesystem_error& ex)
 L 215 :         boost::filesystem::ifstream file(p);
 
-Found 449 hits in 68/12520 files in 40 ms
+Found 449 matches in 68/12520 files (108658 kB) in 35 ms
 user@home:/usr/include/boost$
 ```
 
