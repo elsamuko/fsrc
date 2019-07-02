@@ -1,6 +1,7 @@
 #include <iterator>
 
 #include "searcher.hpp"
+#include "ssestr.hpp"
 
 std::vector<Searcher::Match> Searcher::caseInsensitiveSearch( const std::string_view& content ) {
     std::vector<Match> matches;
@@ -27,7 +28,7 @@ std::vector<Searcher::Match> Searcher::caseInsensitiveSearch( const std::string_
     return matches;
 }
 
-#if BOOST_OS_WINDOWS
+#if 1
 std::vector<Searcher::Match> Searcher::caseSensitiveSearch( const std::string_view& content ) {
     std::vector<Match> matches;
 
@@ -37,7 +38,7 @@ std::vector<Searcher::Match> Searcher::caseSensitiveSearch( const std::string_vi
     const char* ptr = start;
 
     while( pos != end ) {
-        ptr = strstr( ptr, term.data() );
+        ptr = scanstrN( ptr, term.data(), term.size() );
 
         if( ptr ) {
             Iter from = pos + ( ptr - start );

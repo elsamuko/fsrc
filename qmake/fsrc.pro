@@ -17,6 +17,9 @@ SOURCES += $${SRC_DIR}/searchoptions.cpp
 HEADERS += $${SRC_DIR}/threadpool.hpp
 SOURCES += $${SRC_DIR}/threadpool.cpp
 
+# via https://mischasan.wordpress.com/2011/07/16/convergence-sse2-and-strstr/
+HEADERS += $${SRC_DIR}/ssestr.hpp
+
 # options
 DEFINES += 'BOOST_THREADPOOL=1'     # if 1, use boost::asio instead own threadpool
 DEFINES += 'THREADED_THREADPOOL=1'  # if 0, use no threadpool
