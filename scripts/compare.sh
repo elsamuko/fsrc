@@ -22,8 +22,8 @@ echo "Searching in $SEARCH_DIR for $TERM"
 
 echo
 echo "===FSRC==="
-echo "./fsrc -t \"$TERM\" -d \"$SEARCH_DIR\""
-./fsrc -t "$TERM" -d "$SEARCH_DIR" | tail -n 2 | grep .
+echo "./fsrc -t \"$TERM\" --no-colors -d \"$SEARCH_DIR\""
+./fsrc -t "$TERM" --no-colors -d "$SEARCH_DIR" | tail -n 2 | grep .
 echo
 
 echo "====RG===="
