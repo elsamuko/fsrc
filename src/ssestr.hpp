@@ -21,6 +21,7 @@
 // IF YOU ARE UNABLE TO WORK WITH GPL2, CONTACT ME.
 //-------------------------------------------------------------------
 
+#include <cstring>
 #include <cstdint>
 #include <emmintrin.h>
 
@@ -28,6 +29,16 @@
 #define xmload(p)   _mm_load_si128((__m128i const *)(p))
 #define load16(p)   (*(uint16_t const*)(p))
 #define load32(p)   (*(uint32_t const*)(p))
+
+#ifdef _WIN32
+#include <intrin.h>
+#pragma intrinsic(_BitScanForward)
+inline unsigned long ffs( const unsigned long mask ) {
+    unsigned long rv = 0;
+    _BitScanForward( &rv, mask );
+    return rv;
+}
+#endif
 
 inline char const* scanstr2( char const* tgt, char const pat[2] ) {
     __m128i const   zero = _mm_setzero_si128();
