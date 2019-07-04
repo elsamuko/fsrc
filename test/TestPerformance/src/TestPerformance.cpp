@@ -139,53 +139,44 @@ BOOST_AUTO_TEST_CASE( Test_printf ) {
     printf( "Output\n" );
 
     std::string text = "text123";
+
 #if BOOST_OS_WINDOWS
     FILE* file = fopen( L"dump.txt", L"w" );
 #else
     FILE* file = fopen( "dump.txt", "w" );
 #endif
 
+    auto reset = [file] { fseek( file, 0, SEEK_SET ); };
+
     /*long t_write = */timed1000( "write", [file, text] {
         std::string data = "[" + text + "]\n";
         write( fileno( file ), data.c_str(), data.size() );
-    } );
-
-    fseek( file, 0, SEEK_SET );
+    }, reset );
 
     long t_printf = timed1000( "fprintf", [file, text] {
         fprintf( file, "%s%s]\n", "[", text.c_str() );
-    } );
-
-    fseek( file, 0, SEEK_SET );
+    }, reset );
 
     /*long t_fputs = */timed1000( "fputs", [file, text] {
         fputs( ( "[" + text + "]\n" ).c_str(), file );
-    } );
+    }, reset );
 
 #ifdef __linux__
     /* long t_fputs_unlocked = */timed1000( "fputs_unlocked", [file, text] {
         fputs_unlocked( ( "[" + text + "]\n" ).c_str(), file );
-    } );
-
-    fseek( file, 0, SEEK_SET );
+    }, reset );
 #endif
-
-    fseek( file, 0, SEEK_SET );
 
     long t_fwrite = timed1000( "fwrite", [file, text] {
         std::string data = "[" + text + "]\n";
         fwrite( data.c_str(), 1, data.size(), file );
-    } );
-
-    fseek( file, 0, SEEK_SET );
+    }, reset );
 
 #ifdef __linux__
-    long t_fwrite_unlocked = timed1000( "fwrite_unlocked", [file, text] {
+    /*long t_fwrite_unlocked = */timed1000( "fwrite_unlocked", [file, text] {
         std::string data = "[" + text + "]\n";
         fwrite_unlocked( data.c_str(), 1, data.size(), file );
-    } );
-
-    fseek( file, 0, SEEK_SET );
+    }, reset );
 #endif
 
     fclose( file );

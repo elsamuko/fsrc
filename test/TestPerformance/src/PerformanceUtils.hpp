@@ -5,7 +5,7 @@
 
 #include "boost/timer/timer.hpp"
 
-BOOST_FORCEINLINE long timed1000( const std::string& name, const std::function<void()>& func ) {
+BOOST_FORCEINLINE long timed1000( const std::string& name, const std::function<void()>& func, const std::function<void()>& cleanup = std::function<void()>() ) {
     boost::timer::cpu_timer stopwatch;
     stopwatch.start();
 
@@ -16,5 +16,9 @@ BOOST_FORCEINLINE long timed1000( const std::string& name, const std::function<v
     stopwatch.stop();
     long ns = stopwatch.elapsed().wall;
     printf( "%17s : %6ld us\n", name.c_str(), ns / 1000 );
+
+    // call cleanup function
+    if( cleanup ) { cleanup(); }
+
     return ns;
 }
