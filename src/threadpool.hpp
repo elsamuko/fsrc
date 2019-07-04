@@ -5,8 +5,9 @@
 #include <atomic>
 #include <functional>
 
-#include "boost/asio.hpp"
 #include "boost/lockfree/queue.hpp"
+#include "boost/asio/thread_pool.hpp"
+#include "boost/asio/post.hpp"
 
 #if THREADED_THREADPOOL
 
