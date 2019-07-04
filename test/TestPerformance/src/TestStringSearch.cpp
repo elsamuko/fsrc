@@ -4,6 +4,7 @@
 
 #include "PerformanceUtils.hpp"
 #include "licence.hpp"
+#include "ssestr.hpp"
 
 BOOST_AUTO_TEST_CASE( Test_find ) {
     printf( "String search\n" );
@@ -26,6 +27,7 @@ material under section 10.
 )gpl";
 
     for( std::string text : { small, full } ) {
+        std::string_view view( text );
         size_t pos = 0;
         char* ptr = nullptr;
         std::string::const_iterator it;
@@ -37,9 +39,17 @@ material under section 10.
             pos = text.find( term );
         } );
 
+        long t_view = timed1000( "view", [&view, &term, &pos] {
+            pos = view.find( term );
+        } );
+
 #if !BOOST_OS_WINDOWS
         long t_memmem = timed1000( "memmem", [&text, &term, &ptr] {
             ptr = ( char* )memmem( text.data(), text.size(), term.data(), term.size() );
+        } );
+
+        long t_ssestr = timed1000( "ssestr", [&text, &term, &ptr] {
+            ptr = ( char* )scanstrN( text.data(), term.data(), term.size() );
         } );
 #endif
 
