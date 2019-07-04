@@ -105,8 +105,6 @@ long run( fromFileFunc fromFile ) {
     return ms;
 }
 
-BOOST_AUTO_TEST_SUITE( Performance )
-
 // test file I/O
 BOOST_AUTO_TEST_CASE( Test_fromFile ) {
     printf( "I/O\n" );
@@ -183,6 +181,3 @@ BOOST_AUTO_TEST_CASE( Test_printf ) {
     BOOST_CHECK_LT( t_fwrite, t_printf ); // assume fwrite is faster than printf
     printf( "\n" );
 }
-
-BOOST_AUTO_TEST_SUITE_END()
-
