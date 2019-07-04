@@ -7,22 +7,14 @@ std::vector<Searcher::Match> Searcher::caseInsensitiveSearch( const std::string_
     std::vector<Match> matches;
 
     Iter pos = content.cbegin();
-    Iter end = content.cend();
     const char* start = content.data();
     const char* ptr = start;
 
-    while( pos != end ) {
-        ptr = strcasestr( ptr, term.data() );
-
-        if( ptr ) {
-            Iter from = pos + ( ptr - start );
-            Iter to = from + term.size();
-            matches.emplace_back( from, to );
-            ptr += term.size();
-        } else {
-            pos = end;
-        }
-
+    while( ( ptr = strcasestr( ptr, term.data() ) ) ) {
+        Iter from = pos + ( ptr - start );
+        Iter to = from + term.size();
+        matches.emplace_back( from, to );
+        ptr += term.size();
     }
 
     return matches;
@@ -33,22 +25,14 @@ std::vector<Searcher::Match> Searcher::caseSensitiveSearch( const std::string_vi
     std::vector<Match> matches;
 
     Iter pos = content.cbegin();
-    Iter end = content.cend();
     const char* start = content.data();
     const char* ptr = start;
 
-    while( pos != end ) {
-        ptr = strstr( ptr, term.data() );
-
-        if( ptr ) {
-            Iter from = pos + ( ptr - start );
-            Iter to = from + term.size();
-            matches.emplace_back( from, to );
-            ptr += term.size();
-        } else {
-            pos = end;
-        }
-
+    while( ( ptr = strstr( ptr, term.data() ) ) ) {
+        Iter from = pos + ( ptr - start );
+        Iter to = from + term.size();
+        matches.emplace_back( from, to );
+        ptr += term.size();
     }
 
     return matches;
@@ -58,22 +42,14 @@ std::vector<Searcher::Match> Searcher::caseSensitiveSearch( const std::string_vi
     std::vector<Match> matches;
 
     Iter pos = content.cbegin();
-    Iter end = content.cend();
     const char* start = content.data();
     const char* ptr = start;
 
-    while( pos != end ) {
-        ptr = scanstrN( ptr, term.data(), term.size() );
-
-        if( ptr ) {
-            Iter from = pos + ( ptr - start );
-            Iter to = from + term.size();
-            matches.emplace_back( from, to );
-            ptr += term.size();
-        } else {
-            pos = end;
-        }
-
+    while( ( ptr = scanstrN( ptr, term.data(), term.size() ) ) ) {
+        Iter from = pos + ( ptr - start );
+        Iter to = from + term.size();
+        matches.emplace_back( from, to );
+        ptr += term.size();
     }
 
     return matches;
