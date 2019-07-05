@@ -1,4 +1,6 @@
+#ifndef __APPLE__
 #include <experimental/filesystem>
+#endif
 #include <system_error>
 #include <fcntl.h>
 
@@ -32,6 +34,7 @@ void recurseDir( const sys_string& filename, const std::function<void( const sys
 }
 }
 
+#ifndef __APPLE__
 namespace withStd {
 namespace stdfs = std::experimental::filesystem;
 void recurseDir( const sys_string& filename, const std::function<void( const sys_string& filename )>& callback ) {
@@ -54,6 +57,7 @@ void recurseDir( const sys_string& filename, const std::function<void( const sys
     }
 }
 }
+#endif
 
 long runDirWalkerTest( const std::string& name, const decltype( utils::recurseDir )& func ) {
     std::atomic_size_t files = 0;
@@ -92,7 +96,9 @@ BOOST_AUTO_TEST_CASE( Test_DirWalker ) {
     long nsNftw  = runDirWalkerTest( "withNFTW", withNFTW::recurseDir );
     long nsUtils = runDirWalkerTest( "utils", utils::recurseDir );
     long nsBoost = runDirWalkerTest( "withBoost", withBoost::recurseDir );
+#ifndef __APPLE__
     long nsStdFS = runDirWalkerTest( "withStd", withStd::recurseDir );
+#endif
 
     // assume, that readdir is faster than nftw
     BOOST_CHECK_LT( nsUtils, nsNftw );
