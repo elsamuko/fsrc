@@ -40,6 +40,8 @@
 
 #endif // THREADED_THREADPOOL
 
+//! busy waiting lockfree threadpool
+//! fast, if you keep the queue filled with jobs
 class ThreadPool {
     public:
         typedef std::function<void()> Job;
