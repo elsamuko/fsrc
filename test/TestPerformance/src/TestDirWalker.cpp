@@ -5,6 +5,7 @@
 #include "ftswalker.hpp"
 
 #include <fcntl.h>
+#include <threadpool.hpp>
 
 long runDirWalkerTest( const std::string& name, const decltype( utils::recurseDir )& func ) {
     std::atomic_size_t files = 0;
@@ -12,17 +13,20 @@ long runDirWalkerTest( const std::string& name, const decltype( utils::recurseDi
     fs::path include = "../../../../libs/boost";
 
     long ns = 0;
+    POOL;
     STOPWATCH
     START
 
-    func( include.native(), [&bytes, &files]( const sys_string & filename ) {
-        int fd = open( filename.c_str(), O_RDONLY | O_BINARY );
+    func( include.native(), [&pool, &bytes, &files]( const sys_string & filename ) {
+        pool.add( [&bytes, &files, filename] {
+            int fd = open( filename.c_str(), O_RDONLY | O_BINARY );
 
-        if( fd != -1 ) {
-            files++;
-            bytes += utils::fileSize( fd );
-            close( fd );
-        }
+            if( fd != -1 ) {
+                files++;
+                bytes += utils::fileSize( fd );
+                close( fd );
+            }
+        } );
     } );
 
     STOP( ns )
