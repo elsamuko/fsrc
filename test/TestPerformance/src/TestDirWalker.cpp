@@ -1,13 +1,17 @@
-#include <chrono>
-
 #include "boost/test/unit_test.hpp"
-#include "utils.hpp"
 #include "stopwatch.hpp"
+#include "utils.hpp"
+
+#ifdef __linux__
+#define stat stat64
+#define nftw nftw64
+#endif
 
 #include <ftw.h>
 #include <fcntl.h>
 
 #define SPARE_FDS 5
+
 
 static std::atomic_size_t nftwFiles = 0;
 static std::atomic_size_t nftwBytes = 0;
@@ -19,7 +23,7 @@ size_t withNftw( const sys_string& filename, const std::function<void( const sys
     int nfds = getdtablesize() - SPARE_FDS;
 
     auto process = []( const char* file,
-                       const struct stat64 * sb,
+                       const struct stat * sb,
                        int flag,
                        struct FTW*  /*ftw*/
     ) -> int {
@@ -36,7 +40,7 @@ size_t withNftw( const sys_string& filename, const std::function<void( const sys
         return 0;
     };
 
-    if( nftw64( filename.c_str(), process, nfds, flags ) != 0 ) {
+    if( nftw( filename.c_str(), process, nfds, flags ) != 0 ) {
         printf( "nftw returned an error\n" );
     }
 
@@ -70,7 +74,7 @@ BOOST_AUTO_TEST_CASE( Test_DirWalker ) {
 
         STOP( nsUtils )
 
-        printf( "   utils::recurseDir : %zu files with %zu kB in %ld us\n", files.load(), bytes.load() / 1024, nsUtils / 1000 );
+        printf( "   utils::recurseDir : %zu files with %zu kB in %ld ms\n", files.load(), bytes.load() / 1024, nsUtils / 1000000 );
     }
 
     {
@@ -80,7 +84,7 @@ BOOST_AUTO_TEST_CASE( Test_DirWalker ) {
 
         STOP( nsNftw )
 
-        printf( "            withNftw : %zu files with %zu kB in %ld us\n", nftwFiles.load(), nftwBytes.load() / 1024, nsNftw / 1000 );
+        printf( "            withNftw : %zu files with %zu kB in %ld ms\n", nftwFiles.load(), nftwBytes.load() / 1024, nsNftw / 1000000 );
     }
 
     // assume, that readdir + fstat64 is still faster than nftw64

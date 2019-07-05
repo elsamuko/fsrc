@@ -17,7 +17,7 @@ DEFINES += 'DETAILED_STATS=1'
 SOURCES += ../src/TestPerformance.cpp
 SOURCES += ../src/TestStringSearch.cpp
 SOURCES += ../src/TestThreadpool.cpp
-linux: SOURCES += ../src/TestDirWalker.cpp
+!win32: SOURCES += ../src/TestDirWalker.cpp
 HEADERS += ../src/licence.hpp
 HEADERS += ../src/PerformanceUtils.hpp
 HEADERS += ../src/FileReaders.hpp
