@@ -15,11 +15,11 @@ struct Stats {
     std::atomic_size_t filesMatched = {0};
     std::atomic_size_t bytesRead = {0};
 
-    std::atomic_long t_recurse = {0}; // time to recurse directory
-    std::atomic_long t_read = {0};    // time to read files
-    std::atomic_long t_search = {0};  // time to search in files
-    std::atomic_long t_collect = {0}; // time to prepare matches for printing
-    std::atomic_long t_print = {0};   // time to print
+    std::atomic_llong t_recurse = {0}; // time to recurse directory
+    std::atomic_llong t_read = {0};    // time to read files
+    std::atomic_llong t_search = {0};  // time to search in files
+    std::atomic_llong t_collect = {0}; // time to prepare matches for printing
+    std::atomic_llong t_print = {0};   // time to print
 };
 
 struct Searcher {

@@ -66,7 +66,7 @@ int main( int argc, char* argv[] ) {
         onAllFiles( searcher );
     }
 
-    long ms = total.stop() / 1000000;
+    auto ms = total.stop() / 1000000;
 
 #if DETAILED_STATS
     utils::printColor( gray, utils::format(

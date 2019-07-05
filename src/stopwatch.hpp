@@ -13,15 +13,17 @@
 #endif
 
 class StopWatch {
+        using clock = std::chrono::high_resolution_clock;
+        using ns_type = std::chrono::nanoseconds::rep;
     public:
         //! starts stopwatch
         inline void start() {
-            started = std::chrono::high_resolution_clock::now();
+            started = clock::now();
         }
         //! stops stopwatch and returns elapsed nanoseconds
-        inline long stop() {
-            return std::chrono::duration_cast<std::chrono::nanoseconds>( std::chrono::high_resolution_clock::now() - started ).count();
+        inline ns_type stop() {
+            return std::chrono::duration_cast<std::chrono::nanoseconds>( clock::now() - started ).count();
         }
     private:
-        std::chrono::time_point<std::chrono::high_resolution_clock> started;
+        std::chrono::time_point<clock> started;
 };
