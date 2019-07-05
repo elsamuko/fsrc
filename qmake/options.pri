@@ -1,8 +1,8 @@
 
 # on macOS, use own threadpool
-macx:  DEFINES += 'BOOST_THREADPOOL=0'
+macx:  DEFINES += 'THREADPOOL=OWN_THREADPOOL'
 # else use boost::asio
-!macx: DEFINES += 'BOOST_THREADPOOL=1'
+!macx: DEFINES += 'THREADPOOL=BOOST_THREADPOOL'
 
 DEFINES += 'THREADED_THREADPOOL=1'  # if 0, use no threadpool at all
 DEFINES += 'DETAILED_STATS=1'       # if 1, print detailed times

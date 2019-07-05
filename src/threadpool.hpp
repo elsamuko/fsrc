@@ -5,15 +5,26 @@
 #include <thread>
 #include <atomic>
 #include <functional>
+#include <future>
 
 #include "boost/lockfree/queue.hpp"
 #include "boost/asio/thread_pool.hpp"
 #include "boost/asio/post.hpp"
 
-#if THREADED_THREADPOOL
+#define NO_THREADPOOL    0
+#define OWN_THREADPOOL   1
+#define BOOST_THREADPOOL 2
+#define ASYNC_THREADPOOL 3
 
-#if BOOST_THREADPOOL
+#if THREADPOOL == NO_THREADPOOL
+#define POOL struct { \
+    void add( const std::function<void()>& f ) { \
+        f(); \
+    } \
+    } pool;
+#endif // NO_THREADPOOL
 
+#if THREADPOOL == BOOST_THREADPOOL
 #define POOL struct ThreadPool { \
     boost::asio::thread_pool mPool{ std::min<size_t>( std::thread::hardware_concurrency(), 8u ) }; \
     void add( const std::function<void()>& f ) { \
@@ -22,23 +33,22 @@
     ThreadPool() {} \
     ~ThreadPool() { mPool.join(); } \
 } pool;
-
-#else
-
-// max 8 threads, else start/stop needs longer than the actual work
-#define POOL ThreadPool pool( std::min<size_t>( std::thread::hardware_concurrency(), 8u ) );
-
 #endif // BOOST_THREADPOOL
 
-#else
-
-#define POOL struct { \
+#if THREADPOOL == ASYNC_THREADPOOL
+#define POOL struct ThreadPool { \
+    std::vector<std::future<void>> results; \
     void add( const std::function<void()>& f ) { \
-        f(); \
+        results.emplace_back( std::async( std::launch::async, f ) ); \
     } \
-    } pool;
+    ThreadPool() { results.reserve( 1024 ); } \
+} pool;
+#endif // BOOST_THREADPOOL
 
-#endif // THREADED_THREADPOOL
+#if THREADPOOL == OWN_THREADPOOL
+// max 8 threads, else start/stop needs longer than the actual work
+#define POOL ThreadPool pool( std::min<size_t>( std::thread::hardware_concurrency(), 8u ) );
+#endif // OWN_THREADPOOL
 
 //! busy waiting lockfree threadpool
 //! fast, if you keep the queue filled with jobs
