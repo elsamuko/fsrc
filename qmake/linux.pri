@@ -1,5 +1,5 @@
 
-QMAKE_CXXFLAGS_RELEASE += -msse2 -Ofast -march=native -Wno-disabled-macro-expansion
+QMAKE_CXXFLAGS_RELEASE += -msse2 -Ofast -Wno-disabled-macro-expansion
 QMAKE_LFLAGS_RELEASE += -flto
 
 LIBS += -lstdc++fs -lpthread -lrt
