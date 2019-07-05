@@ -87,8 +87,9 @@ long run( fromFileFunc fromFile ) {
     fs::path include = "../../../../libs/boost";
 #endif
 
-    boost::timer::cpu_timer stopwatch;
-    stopwatch.start();
+    long ns = 0;
+    STOPWATCH
+    START
 
     utils::recurseDir( include.native(), [&sum, &lineCount, &files, fromFile]( const sys_string & filename ) {
         auto view = fromFile( filename );
@@ -97,12 +98,11 @@ long run( fromFileFunc fromFile ) {
         lineCount += view.lines.size();
     } );
 
-    stopwatch.stop();
-    long ms = stopwatch.elapsed().wall / 1000000;
+    STOP( ns );
 
     printf( "%17s : %zu files, %5zu kB and %zu lines in %ld ms\n",
-            names[fromFile], files, sum / 1024, lineCount, ms );
-    return ms;
+            names[fromFile], files, sum / 1024, lineCount, ns / 1000000 );
+    return ns / 1000000;
 }
 
 // test file I/O

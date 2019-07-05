@@ -1,8 +1,8 @@
 #include "boost/test/unit_test.hpp"
-#include "boost/timer/timer.hpp"
 #include "boost/asio.hpp"
 
 #include "threadpool.hpp"
+#include "stopwatch.hpp"
 
 using boost::asio::post;
 
@@ -10,11 +10,11 @@ BOOST_AUTO_TEST_CASE( Test_ThreadPool ) {
     long ns_asio = 0;
     long ns_own = 0;
     long ns_async = 0;
+    STOPWATCH
+
     std::atomic_int counter = 0;
     {
-        boost::timer::cpu_timer stopwatch;
-        stopwatch.start();
-        {
+        START {
             boost::asio::thread_pool pool( std::min( std::thread::hardware_concurrency(), 8u ) );
 
             for( int i = 0; i < 1000; ++i ) {
@@ -24,14 +24,11 @@ BOOST_AUTO_TEST_CASE( Test_ThreadPool ) {
             pool.join();
         }
 
-        stopwatch.stop();
-        ns_asio = stopwatch.elapsed().wall;
+        STOP( ns_asio );
     }
     BOOST_REQUIRE_EQUAL( counter, 1000 );
     {
-        boost::timer::cpu_timer stopwatch;
-        stopwatch.start();
-        {
+        START {
             ThreadPool pool( std::min( std::thread::hardware_concurrency(), 8u ) );
 
             for( int i = 0; i < 1000; ++i ) {
@@ -39,14 +36,11 @@ BOOST_AUTO_TEST_CASE( Test_ThreadPool ) {
             }
         }
 
-        stopwatch.stop();
-        ns_own = stopwatch.elapsed().wall;
+        STOP( ns_own )
     }
     BOOST_REQUIRE_EQUAL( counter, 2000 );
     {
-        boost::timer::cpu_timer stopwatch;
-        stopwatch.start();
-        {
+        START {
             std::vector<std::future<void>> results;
             results.reserve( 1000 );
 
@@ -55,8 +49,7 @@ BOOST_AUTO_TEST_CASE( Test_ThreadPool ) {
             }
         }
 
-        stopwatch.stop();
-        ns_async = stopwatch.elapsed().wall;
+        STOP( ns_async )
     }
     BOOST_REQUIRE_EQUAL( counter, 3000 );
 

@@ -1,8 +1,8 @@
 #include <chrono>
 
 #include "boost/test/unit_test.hpp"
-#include "boost/timer/timer.hpp"
 #include "utils.hpp"
+#include "stopwatch.hpp"
 
 #include <ftw.h>
 #include <fcntl.h>
@@ -46,16 +46,16 @@ size_t withNftw( const sys_string& filename, const std::function<void( const sys
 BOOST_AUTO_TEST_CASE( Test_DirWalker ) {
     printf( "DirWalker\n" );
 
-    long usUtils = 0;
-    long usNftw = 0;
+    long nsUtils = 0;
+    long nsNftw = 0;
+    STOPWATCH
 
     fs::path include = "../../../../libs/boost";
 
     {
         std::atomic_size_t files = 0;
         std::atomic_size_t bytes = 0;
-        boost::timer::cpu_timer stopwatch;
-        stopwatch.start();
+        START
 
         utils::recurseDir( include.native(), [&bytes, &files]( const sys_string & filename ) {
             int fd = open( filename.c_str(), O_RDONLY | O_BINARY );
@@ -68,24 +68,21 @@ BOOST_AUTO_TEST_CASE( Test_DirWalker ) {
 
         } );
 
-        stopwatch.stop();
-        usUtils = stopwatch.elapsed().wall / 1000;
+        STOP( nsUtils )
 
-        printf( "   utils::recurseDir : %zu files with %zu kB in %ld us\n", files.load(), bytes.load() / 1024, usUtils );
+        printf( "   utils::recurseDir : %zu files with %zu kB in %ld us\n", files.load(), bytes.load() / 1024, nsUtils / 1000 );
     }
 
     {
-        boost::timer::cpu_timer stopwatch;
-        stopwatch.start();
+        START
 
         withNftw( include.native(), []( const sys_string& ) {} );
 
-        stopwatch.stop();
-        usNftw = stopwatch.elapsed().wall / 1000;
+        STOP( nsNftw )
 
-        printf( "            withNftw : %zu files with %zu kB in %ld us\n", nftwFiles.load(), nftwBytes.load() / 1024, usNftw );
+        printf( "            withNftw : %zu files with %zu kB in %ld us\n", nftwFiles.load(), nftwBytes.load() / 1024, nsNftw / 1000 );
     }
 
     // assume, that readdir + fstat64 is still faster than nftw64
-    BOOST_CHECK_LT( usUtils, usNftw );
+    BOOST_CHECK_LT( nsUtils, nsNftw );
 }

@@ -11,6 +11,8 @@ macx:  include( $${PRI_DIR}/mac.pri )
 include( $${PRI_DIR}/unit_test.pri )
 include( $${PRI_DIR}/boost.pri )
 
+DEFINES += 'DETAILED_STATS=1'
+
 # testsuite
 SOURCES += ../src/TestPerformance.cpp
 SOURCES += ../src/TestStringSearch.cpp
