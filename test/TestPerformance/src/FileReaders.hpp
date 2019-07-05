@@ -128,7 +128,7 @@ BOOST_FORCEINLINE utils::FileView fromFileLSeek( const sys_string& filename ) {
     static thread_local utils::Buffer buffer;
     char* ptr = buffer.grow( view.size );
 
-    // read first 16 kB
+    // read first 4 kB
     size_t offset = std::min<size_t>( view.size, 4_kB );
     size_t bytes = fread( ptr, 1, offset, file );
     IF_RET( offset != bytes );
