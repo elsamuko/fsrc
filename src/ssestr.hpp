@@ -40,6 +40,8 @@ inline unsigned long ffs( const unsigned long mask ) {
 }
 #endif
 
+namespace  {
+
 inline char const* scanstr2( char const* tgt, char const pat[2] ) {
     __m128i const   zero = _mm_setzero_si128();
     __m128i const   p0   = _mm_set1_epi8( pat[0] );
@@ -125,6 +127,10 @@ inline char const* scanstr3( char const* tgt, char const pat[3] ) {
     }
 }
 
+}
+
+namespace sse {
+
 inline char const* scanstrN( char const* tgt, char const* pat, int len ) {
     for( ; ( tgt = scanstr2( tgt, pat ) ); tgt++ )
         if( !memcmp( tgt + 2, pat + 2, len - 2 ) ) {
@@ -132,4 +138,6 @@ inline char const* scanstrN( char const* tgt, char const* pat, int len ) {
         }
 
     return NULL;
+}
+
 }
