@@ -1,4 +1,4 @@
-z# fsrc (fast code search)
+# fsrc (fast code search)
 
 This tool is meant to search large codebases for text snippets. It uses a threadpool to open and search in all text files in the current folder.
 The string search is sse2 optimized code from [mischasan](https://mischasan.wordpress.com/2011/07/16/convergence-sse2-and-strstr/).
