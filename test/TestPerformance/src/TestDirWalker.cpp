@@ -2,16 +2,15 @@
 #include "stopwatch.hpp"
 #include "utils.hpp"
 
+#include <ftw.h>
+#include <fcntl.h>
+
 #ifdef __linux__
 #define stat stat64
 #define nftw nftw64
 #endif
 
-#include <ftw.h>
-#include <fcntl.h>
-
 #define SPARE_FDS 5
-
 
 static std::atomic_size_t nftwFiles = 0;
 static std::atomic_size_t nftwBytes = 0;
