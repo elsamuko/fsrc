@@ -6,8 +6,6 @@ The string search is sse2 optimized code from [mischasan](https://mischasan.word
 ## Usage
 ```console
 user@home:/usr/include/boost$ fsrc
-Usage  : fsrc [options] term
-Build  : Jun 23 2019
 Options:
   -h [ --help ]         Help
   -d [ --dir ] arg      Search folder
@@ -17,18 +15,22 @@ Options:
   --no-colors           Disable colorized output
   -q [ --quiet ]        only print status
 
+
+Build : v0.9 from Jul  5 2019
+Web   : https://github.com/elsamuko/fsrc
 user@home:/usr/include/boost$ fsrc filesystem
 Searching for "filesystem" in folder:
 
 ...
-./boost/spirit/home/x3/support/utility/testing.hpp
+/usr/include/boost/spirit/home/x3/support/utility/testing.hpp
 L  11 : #include <boost/filesystem.hpp>
 L  12 : #include <boost/filesystem/fstream.hpp>
 L  16 :     namespace fs = boost::filesystem;
 L 205 :         catch (const fs::filesystem_error& ex)
 L 215 :         boost::filesystem::ifstream file(p);
 
-Found 449 matches in 68/12520 files (108658 kB) in 35 ms
+Times: Recurse 22 ms, Read 83 ms, Search 14 ms, Collect 0 ms, Print 28 ms
+Found 449 matches in 68/12520 files (108658 kB) in 34 ms
 user@home:/usr/include/boost$
 ```
 
