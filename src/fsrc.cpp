@@ -1,5 +1,6 @@
 #include "threadpool.hpp"
 #include "searcher.hpp"
+#include "stopwatch.hpp"
 #include "utils.hpp"
 
 void onAllFiles( Searcher& searcher ) {

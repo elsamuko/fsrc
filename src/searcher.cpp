@@ -1,6 +1,7 @@
 #include <iterator>
 
 #include "searcher.hpp"
+#include "stopwatch.hpp"
 #include "ssestr.hpp"
 
 std::vector<Searcher::Match> Searcher::caseInsensitiveSearch( const std::string_view& content ) {
