@@ -70,7 +70,7 @@ int main( int argc, char* argv[] ) {
 
 #if DETAILED_STATS
     utils::printColor( gray, utils::format(
-                           "Times: Recurse %ld ms, Read %ld ms, Search %ld ms, Collect %ld ms, Print %ld ms \n",
+                           "Times: Recurse %ld ms, Read %ld ms, Search %ld ms, Collect %ld ms, Print %ld ms\n",
                            searcher.stats.t_recurse / 1000000,
                            searcher.stats.t_read / 1000000,
                            searcher.stats.t_search / 1000000,
