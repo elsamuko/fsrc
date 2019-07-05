@@ -5,34 +5,7 @@
 #include "PerformanceUtils.hpp"
 #include "licence.hpp"
 #include "ssestr.hpp"
-
-#include <string>
-
-// derived from
-// https://github.com/gcc-mirror/gcc/blob/master/libstdc%2B%2B-v3/include/bits/basic_string.tcc#L1199
-inline const char* std_strstr( const char* data, const size_t size, const char* pattern, size_t patternSize ) {
-
-    const char* ptr = data;
-    const char* last = data + size;
-    size_t length = size;
-    const char p0 = pattern[0];
-
-    while( length >= patternSize ) {
-        // find first character
-        ptr = std::char_traits<char>::find( ptr, length - patternSize + 1, p0 );
-
-        if( !ptr ) { return ptr; }
-
-        // compare with pattern
-        if( std::char_traits<char>::compare( ptr, pattern, patternSize ) == 0 ) {
-            return ptr;
-        }
-
-        length = last - ++ptr;
-    }
-
-    return nullptr;
-}
+#include "stdstr.hpp"
 
 BOOST_AUTO_TEST_CASE( Test_find ) {
     printf( "String search\n" );
@@ -67,8 +40,8 @@ material under section 10.
             pos = text.find( term );
         } );
 
-        long t_std = timed1000( "std", [&text, &term, &ptr] {
-            ptr = ( char* )std_strstr( text.data(), text.size(), term.data(), term.size() );
+        long t_std = timed1000( "fromStd", [&text, &term, &ptr] {
+            ptr = ( char* )fromStd::strstr( text.data(), text.size(), term.data(), term.size() );
         } );
 
         long t_view = timed1000( "view", [&view, &term, &pos] {
@@ -81,7 +54,7 @@ material under section 10.
         } );
 
         long t_ssestr = timed1000( "ssestr", [&text, &term, &ptr] {
-            ptr = ( char* )scanstrN( text.data(), term.data(), term.size() );
+            ptr = ( char* )sse::scanstrN( text.data(), term.data(), term.size() );
         } );
 #endif
 
