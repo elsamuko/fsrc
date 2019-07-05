@@ -40,7 +40,7 @@ struct Searcher {
         if( opts.isRegex ) {
             rx::regex::flag_type flags = rx::regex::normal;
 
-            if( opts.ignoreCase ) { flags ^= boost::regex::icase; }
+            if( opts.ignoreCase ) { flags ^= rx::regex::icase; }
 
             try {
                 regex.assign( term, flags );
