@@ -122,7 +122,10 @@ std::vector<Searcher::Print> Searcher::collectPrints( const sys_string& path, co
             // if there are no more matches in this file, print rest of line in neutral
             // and exit search for this file
             if( std::next( match ) == matches.cend() ) {
-                prints.emplace_back( utils::printFunc( Color::Neutral, std::string( from, to ) ) );
+                if( from < to ) {
+                    prints.emplace_back( utils::printFunc( Color::Neutral, std::string( from, to ) ) );
+                }
+
                 goto end;
             }
 
