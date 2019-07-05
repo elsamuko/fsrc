@@ -3,6 +3,7 @@
 #include "searcher.hpp"
 #include "stopwatch.hpp"
 #include "ssestr.hpp"
+#include "stdstr.hpp"
 
 std::vector<Searcher::Match> Searcher::caseInsensitiveSearch( const std::string_view& content ) {
     std::vector<Match> matches;
@@ -44,9 +45,17 @@ std::vector<Searcher::Match> Searcher::caseSensitiveSearch( const std::string_vi
 
     Iter pos = content.cbegin();
     const char* start = content.data();
+    const char* end = start + content.size();
     const char* ptr = start;
 
-    while( ( ptr = scanstrN( ptr, term.data(), term.size() ) ) ) {
+#if WITH_SSE
+
+    while( ( ptr = sse::scanstrN( ptr, term.data(), term.size() ) ) )
+#else
+    while( ( ptr = fromStd::strstr( ptr, end - ptr, term.data(), term.size() ) ) )
+#endif
+
+    {
         Iter from = pos + ( ptr - start );
         Iter to = from + term.size();
         matches.emplace_back( from, to );

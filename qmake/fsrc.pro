@@ -22,6 +22,9 @@ SOURCES += $${SRC_DIR}/threadpool.cpp
 # via https://mischasan.wordpress.com/2011/07/16/convergence-sse2-and-strstr/
 HEADERS += $${SRC_DIR}/ssestr.hpp
 
+# via https://github.com/gcc-mirror/gcc/blob/master/libstdc%2B%2B-v3/include/bits/basic_string.tcc#L1199
+HEADERS += $${SRC_DIR}/stdstr.hpp
+
 # version
 DEFINES += 'GIT_TAG=\\\"$$system(git describe --abbrev=0)\\\"'
 
