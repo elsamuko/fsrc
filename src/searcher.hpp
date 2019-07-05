@@ -8,17 +8,6 @@ namespace rx = boost;
 
 #include "utils.hpp"
 #include "searchoptions.hpp"
-#include "stopwatch.hpp"
-
-#if DETAILED_STATS
-#define STOPWATCH static thread_local StopWatch stopwatch;
-#define START stopwatch.start();
-#define STOP( T ) T += stopwatch.stop();
-#else
-#define STOPWATCH
-#define START
-#define STOP( T )
-#endif
 
 struct Stats {
     std::atomic_size_t matches = {0};

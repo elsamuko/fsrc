@@ -2,6 +2,16 @@
 
 #include <chrono>
 
+#if DETAILED_STATS
+#define STOPWATCH static thread_local StopWatch stopwatch;
+#define START stopwatch.start();
+#define STOP( T ) T += stopwatch.stop();
+#else
+#define STOPWATCH
+#define START
+#define STOP( T )
+#endif
+
 class StopWatch {
     public:
         //! starts stopwatch
