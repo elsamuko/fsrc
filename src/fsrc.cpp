@@ -30,7 +30,7 @@ void onGitFiles( const std::vector<sys_string>& filenames, Searcher& searcher ) 
 
 int main( int argc, char* argv[] ) {
 
-    boost::timer::cpu_timer total;
+    StopWatch total;
     total.start();
 
     SearchOptions opts = SearchOptions::parseArgs( argc, argv );
@@ -65,8 +65,7 @@ int main( int argc, char* argv[] ) {
         onAllFiles( searcher );
     }
 
-    total.stop();
-    long ms = total.elapsed().wall / 1000000;
+    long ms = total.stop() / 1000000;
 
 #if DETAILED_STATS
     utils::printColor( gray, utils::format(

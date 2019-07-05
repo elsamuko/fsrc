@@ -14,6 +14,8 @@ SOURCES += $${SRC_DIR}/searcher.cpp
 HEADERS += $${SRC_DIR}/searchoptions.hpp
 SOURCES += $${SRC_DIR}/searchoptions.cpp
 
+HEADERS += $${SRC_DIR}/stopwatch.hpp
+
 HEADERS += $${SRC_DIR}/threadpool.hpp
 SOURCES += $${SRC_DIR}/threadpool.cpp
 
