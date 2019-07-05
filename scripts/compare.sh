@@ -15,6 +15,7 @@ function cyan  {
 
 SEARCH_DIR="libs/boost/include"
 TERM="filesystem"
+REGEX="fil.{1}system"
 TIMEFORMAT="%R"
 
 cyan "Searching in $SEARCH_DIR for $TERM"
@@ -26,9 +27,19 @@ echo "./fsrc -t \"$TERM\" --no-colors -d \"$SEARCH_DIR\""
 red $(cat tmp/time)
 echo
 
+echo "./fsrc -r -t \"$REGEX\" --no-colors -d \"$SEARCH_DIR\""
+{ time ./fsrc -r -t "$REGEX" --no-colors -d "$SEARCH_DIR" | tail -n 2 | grep . ;} 2> tmp/time
+red $(cat tmp/time)
+echo
+
 green "====RG===="
 echo "rg --stats -u -e \"$TERM\" \"$SEARCH_DIR\""
 { time rg --stats -u -e "$TERM" "$SEARCH_DIR" | tail -n 8 ;} 2> tmp/time
+red $(cat tmp/time)
+echo
+
+echo "rg --stats -u -e \"$REGEX\" \"$SEARCH_DIR\""
+{ time rg --stats -u -e "$REGEX" "$SEARCH_DIR" | tail -n 8 ;} 2> tmp/time
 red $(cat tmp/time)
 echo
 
