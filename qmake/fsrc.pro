@@ -27,6 +27,9 @@ DEFINES += 'BOOST_THREADPOOL=1'     # if 1, use boost::asio instead own threadpo
 DEFINES += 'THREADED_THREADPOOL=1'  # if 0, use no threadpool
 DEFINES += 'DETAILED_STATS=1'       # if 1, print detailed times
 
+# version
+DEFINES += 'GIT_TAG=\\\"$$system(git describe --abbrev=0)\\\"'
+
 include( setup.pri )
 linux: include( linux.pri )
 win32: include( win.pri )
