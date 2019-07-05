@@ -46,6 +46,6 @@ You need g++ 7 or newer.
 You need XCode 9 or later.
 
 # General
-Run `./script/build_boost.sh` to build boost deps.  
+Run `./scripts/build_boost.sh` to build boost deps.  
 You need a shell and curl.  
 You need Qt/qmake to open the fscr.pro build file.
