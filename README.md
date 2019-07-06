@@ -37,15 +37,16 @@ user@home:/usr/include/boost$
 ## Building
 
 ### Windows
-You need VS2019 and cygwin.
+You need [VS2019](https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2017) and [cygwin](https://www.cygwin.com/).
 
 ### Linux
 You need g++ 7 or newer.
 
 ### macOS
-You need XCode 9 or later.
+You need [XCode 9](https://developer.apple.com/xcode/) or later.
 
 # General
+You need bash, curl and zip available from the command line.  
+Run `./deploy.sh` to compile the current source and package it as zip file.  
 Run `./scripts/build_boost.sh` to build boost deps.  
-You need a shell and curl.  
-You need Qt/qmake to open the fscr.pro build file.
+You need [Qt/qmake](http://download.qt.io/archive/qt/) to open the `fscr.pro` build file.
