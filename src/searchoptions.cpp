@@ -6,7 +6,7 @@ namespace po = boost::program_options;
 void usage( const std::string& description ) {
     LOG( "Usage  : fsrc [options] term" );
     LOG( description );
-    LOG( "\nBuild : " << GIT_TAG << " from " << __DATE__ );
+    LOG( "Build : " << GIT_TAG << " from " << __DATE__ );
     LOG( "Web   : https://github.com/elsamuko/fsrc" );
 }
 
