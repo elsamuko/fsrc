@@ -56,7 +56,9 @@ int main( int argc, char* argv[] ) {
         fs::current_path( opts.path );
         STOPWATCH
         START
-        std::vector<sys_string> gitFiles = utils::run( "git ls-files 2> " + nullDevice );
+        // -c all from repo
+        // -o other not ignored
+        std::vector<sys_string> gitFiles = utils::run( "git ls-files -co --exclude-standard 2> " + nullDevice );
         STOP( searcher.stats.t_recurse );
 
         utils::printColor( gray, utils::format( "Searching for \"%s\" in repo:\n\n", searcher.opts.term.c_str() ) );
