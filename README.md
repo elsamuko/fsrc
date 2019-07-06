@@ -6,6 +6,7 @@ The string search is sse2 optimized code from [mischasan](https://mischasan.word
 ## Usage
 ```console
 user@home:/usr/include/boost$ fsrc
+Usage  : fsrc [options] term
 Options:
   -h [ --help ]         Help
   -d [ --dir ] arg      Search folder
@@ -14,7 +15,6 @@ Options:
   --no-git              Disable search with 'git ls-files'
   --no-colors           Disable colorized output
   -q [ --quiet ]        only print status
-
 
 Build : v0.9 from Jul  5 2019
 Web   : https://github.com/elsamuko/fsrc
@@ -33,6 +33,15 @@ Times: Recurse 22 ms, Read 83 ms, Search 14 ms, Collect 0 ms, Print 28 ms
 Found 449 matches in 68/12520 files (108658 kB) in 34 ms
 user@home:/usr/include/boost$
 ```
+
+## Behaviour
+  * If there is a .git folder in the main search folder, it uses git ls-files to get all files to search in
+  * a .git folder is never searched
+  * hidden folders and files are searched
+  * binaries are 'detected', if they contain two binary 0's within the first 100 bytes or are PDF or PostScript files.
+  * pipe behaviour is not implemented yet
+  * it supports one option-less argument as search term
+  * folders are set with -d
 
 ## Building
 
