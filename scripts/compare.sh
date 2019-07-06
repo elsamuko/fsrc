@@ -33,13 +33,13 @@ red $(cat tmp/time)
 echo
 
 green "====RG===="
-echo "rg --stats -u -e \"$TERM\" \"$SEARCH_DIR\""
-{ time rg --stats -u -e "$TERM" "$SEARCH_DIR" | tail -n 8 ;} 2> tmp/time
+echo "rg --stats -uu --fixed-strings --case-sensitive \"$TERM\" \"$SEARCH_DIR\""
+{ time rg --stats -uu --fixed-strings --case-sensitive "$TERM" "$SEARCH_DIR" | tail -n 8 ;} 2> tmp/time
 red $(cat tmp/time)
 echo
 
-echo "rg --stats -u -e \"$REGEX\" \"$SEARCH_DIR\""
-{ time rg --stats -u -e "$REGEX" "$SEARCH_DIR" | tail -n 8 ;} 2> tmp/time
+echo "rg --stats -uu --regexp \"$REGEX\" \"$SEARCH_DIR\""
+{ time rg --stats -uu --regexp "$REGEX" "$SEARCH_DIR" | tail -n 8 ;} 2> tmp/time
 red $(cat tmp/time)
 echo
 
