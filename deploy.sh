@@ -38,7 +38,7 @@ function buildBoost {
 
 function buildFsrc {
     ( 
-        cd qmake
+        cd qmake || exit 1
         "$QMAKE" fsrc.pro 2> "$TMP_DIR/qmake.log"
         make clean &> "$TMP_DIR/make.log"
         make &> "$TMP_DIR/make.log"
