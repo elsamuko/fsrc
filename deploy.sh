@@ -25,6 +25,7 @@ ZIP_FILE="fsrc-$OS-$GIT_TAG.zip"
 FSRC_BIN="$MAIN_DIR/fsrc$EXT"
 
 function prepare {
+    if [ -f "$ZIP_FILE" ]; then rm "$ZIP_FILE"; fi
     mkdir -p "$TMP_DIR"
 }
 
@@ -39,7 +40,8 @@ function buildFsrc {
     ( 
         cd qmake
         "$QMAKE" fsrc.pro 2> "$TMP_DIR/qmake.log"
-        make > "$TMP_DIR/make.log"
+        make clean &> "$TMP_DIR/make.log"
+        make &> "$TMP_DIR/make.log"
     )
 }
 
@@ -54,9 +56,14 @@ function package {
     zip -j "$ZIP_FILE" "$FSRC_BIN" > "$TMP_DIR/zip.log"
 }
 
+function please {
+    echo "$1"
+    "$1"
+}
+
 echo "Deploying fsrc $GIT_TAG to $ZIP_FILE"
-prepare
-buildBoost
-buildFsrc
-check
-package
+please prepare
+please buildBoost
+please buildFsrc
+please check
+please package
