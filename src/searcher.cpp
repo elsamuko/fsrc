@@ -69,7 +69,10 @@ std::vector<Searcher::Match> Searcher::caseSensitiveSearch( const std::string_vi
 std::vector<Searcher::Match> Searcher::regexSearch( const std::string_view& content ) {
     std::vector<Match> matches;
 
-    auto begin = rx::cregex_iterator( &content.front(), 1 + &content.back(), regex );
+    // https://www.boost.org/doc/libs/1_70_0/libs/regex/doc/html/boost_regex/ref/match_flag_type.html
+    rx::regex_constants::match_flags flags = rx::regex_constants::match_not_dot_newline;
+
+    auto begin = rx::cregex_iterator( &content.front(), 1 + &content.back(), regex, flags );
     auto end   = rx::cregex_iterator();
 
     for( rx::cregex_iterator match = begin; match != end; ++match ) {
