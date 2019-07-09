@@ -220,12 +220,15 @@ void utils::recurseDir( const sys_string& filename, const std::function<void( co
 
     if( !dir ) { return; }
 
+    // add slash only, if there is none
+    const char* slash = filename.back() == '/' ? "" : "/";
+
     struct dirent* dp = nullptr;
 
     while( ( dp = readdir( dir ) ) != nullptr ) {
 
         if( dp->d_type == DT_REG ) {
-            callback( filename + "/" + dp->d_name );
+            callback( filename + slash + dp->d_name );
             continue;
         }
 
@@ -236,7 +239,7 @@ void utils::recurseDir( const sys_string& filename, const std::function<void( co
 
             if( !strcmp( dp->d_name, ".git" ) ) { continue; }
 
-            utils::recurseDir( filename + "/" + dp->d_name, callback );
+            utils::recurseDir( filename + slash + dp->d_name, callback );
             continue;
         }
 
