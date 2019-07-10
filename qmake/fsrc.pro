@@ -5,6 +5,7 @@ INCLUDEPATH += $${SRC_DIR}
 
 SOURCES += $${SRC_DIR}/fsrc.cpp
 
+HEADERS += $${SRC_DIR}/types.hpp
 HEADERS += $${SRC_DIR}/utils.hpp
 SOURCES += $${SRC_DIR}/utils.cpp
 
