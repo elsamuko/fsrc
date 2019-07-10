@@ -1,5 +1,6 @@
 #include "threadpool.hpp"
 #include "searcher.hpp"
+#include "prettyprinter.hpp"
 #include "stopwatch.hpp"
 #include "utils.hpp"
 
@@ -43,9 +44,16 @@ int main( int argc, char* argv[] ) {
         exit( -1 );
     }
 
-    Color gray = opts.colorized ? Color::Gray : Color::Neutral;
+    bool colorized = opts.colorized;
+    Color gray = colorized ? Color::Gray : Color::Neutral;
 
-    Searcher searcher( opts );
+    auto makePrinter = [colorized] {
+        PrettyPrinter* printer = new PrettyPrinter();
+        printer->opts.colorized = colorized;
+        return printer;
+    };
+
+    Searcher searcher( opts, makePrinter );
 
     if( !opts.noGit && fs::exists( opts.path / ".git" ) ) {
 #ifdef _WIN32
