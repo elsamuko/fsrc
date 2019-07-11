@@ -14,9 +14,10 @@ Options:
   -r [ --regex ]        Regex search (slower)
   --no-git              Disable search with 'git ls-files'
   --no-colors           Disable colorized output
+  --no-piped            Disable piped output
   -q [ --quiet ]        only print status
 
-Build : v0.9 from Jul  5 2019
+Build : v0.11 from Jul 11 2019
 Web   : https://github.com/elsamuko/fsrc
 user@home:/usr/include/boost$ fsrc filesystem
 Searching for "filesystem" in folder:
@@ -39,7 +40,6 @@ user@home:/usr/include/boost$
   * a .git folder is never searched
   * hidden folders and files are searched
   * binaries are 'detected', if they contain two binary 0's within the first 100 bytes or are PDF or PostScript files.
-  * pipe behaviour is not implemented yet
   * it supports one option-less argument as search term
   * folders are set with -d
 
