@@ -7,14 +7,17 @@
 #include <functional>
 #include <future>
 
-#include "boost/lockfree/queue.hpp"
-#include "boost/asio/thread_pool.hpp"
-#include "boost/asio/post.hpp"
-
 #define NO_THREADPOOL    0
 #define OWN_THREADPOOL   1
 #define BOOST_THREADPOOL 2
 #define ASYNC_THREADPOOL 3
+
+#include "boost/lockfree/queue.hpp"
+#if THREADPOOL == BOOST_THREADPOOL
+#include "boost/asio/thread_pool.hpp"
+#include "boost/asio/post.hpp"
+#endif // BOOST_THREADPOOL
+
 
 #if THREADPOOL == NO_THREADPOOL
 #define POOL struct { \
