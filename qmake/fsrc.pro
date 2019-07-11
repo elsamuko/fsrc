@@ -24,6 +24,7 @@ SOURCES += $${SRC_DIR}/threadpool.cpp
 HEADERS += $${SRC_DIR}/printer.hpp
 HEADERS += $${SRC_DIR}/prettyprinter.hpp
 HEADERS += $${SRC_DIR}/pipedprinter.hpp
+HEADERS += $${SRC_DIR}/printerfactory.hpp
 
 # via https://mischasan.wordpress.com/2011/07/16/convergence-sse2-and-strstr/
 HEADERS += $${SRC_DIR}/ssestr.hpp
