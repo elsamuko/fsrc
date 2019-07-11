@@ -1,5 +1,5 @@
 #include "searcher.hpp"
-#include "prettyprinter.hpp"
+#include "printerfactory.hpp"
 #include "stopwatch.hpp"
 
 int main( int argc, char* argv[] ) {
@@ -16,15 +16,7 @@ int main( int argc, char* argv[] ) {
         exit( -1 );
     }
 
-    bool colorized = opts.colorized;
-    Color gray = colorized ? Color::Gray : Color::Neutral;
-
-    auto makePrinter = [colorized] {
-        PrettyPrinter* printer = new PrettyPrinter();
-        printer->opts.colorized = colorized;
-        return printer;
-    };
-
+    std::function<Printer*()> makePrinter = printerfactory::printerFunc( opts );
     Searcher searcher( opts, makePrinter );
 
     if( !opts.noGit && fs::exists( opts.path / ".git" ) ) {
