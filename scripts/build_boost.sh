@@ -20,7 +20,7 @@ VERSION="1.70.0"
 VERSION_DL="${VERSION//./_}"
 DL_URL="https://dl.bintray.com/boostorg/release/${VERSION}/source/boost_${VERSION_DL}.tar.gz" 
 
-B2_OPTIONS="cxxstd=17 link=static threading=multi address-model=64 optimization=speed"
+B2_OPTIONS="cxxstd=17 link=static threading=multi address-model=64"
 # ./b2 --show-libraries
 NEEDED_LIBS="--with-system --with-filesystem --with-date_time --with-chrono --with-timer --with-test --with-program_options --with-regex --with-iostreams"
 
@@ -69,7 +69,7 @@ function macBuild {
         $NEEDED_LIBS
 
     # release
-    ./b2 -j 8 --stagedir=stage_release toolset=clang variant=release \
+    ./b2 -j 8 --stagedir=stage_release toolset=clang variant=release optimization=speed \
         cxxflags="-std=c++1z -msse2 -oFast -stdlib=libc++ -mmacosx-version-min=10.10" linkflags="-lc++ -flto" \
         $B2_OPTIONS \
         $NEEDED_LIBS
@@ -88,7 +88,7 @@ function winBuild {
         $NEEDED_LIBS
 
     # release
-    ./b2.exe -j 8 --stagedir=stage_release toolset=msvc-14.2 variant=release runtime-link=static \
+    ./b2.exe -j 8 --stagedir=stage_release toolset=msvc-14.2 variant=release runtime-link=static optimization=speed \
         cxxflags="/Qpar /O2 /Oi /Ot /Oy /GT /GL /Gw /fp:fast" linkflags="/LTCG /OPT:REF /OPT:ICF" \
         define='_HAS_ITERATOR_DEBUGGING=0' \
         define='BOOST_REGEX_NO_W32' \
@@ -111,7 +111,7 @@ function linuxBuild {
         $NEEDED_LIBS
 
     # release
-    ./b2 -j 8 --disable-icu --stagedir=stage_release toolset=gcc variant=release \
+    ./b2 -j 8 --disable-icu --stagedir=stage_release toolset=gcc variant=release optimization=speed \
         cxxflags="-std=c++17 -msse2 -oFast" linkflags="-flto" \
         $B2_OPTIONS \
         $NEEDED_LIBS
