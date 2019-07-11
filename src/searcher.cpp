@@ -46,13 +46,14 @@ std::vector<search::Match> Searcher::caseSensitiveSearch( const std::string_view
 
     search::Iter pos = content.cbegin();
     const char* start = content.data();
-    const char* end = start + content.size();
     const char* ptr = start;
 
 #if WITH_SSE
 
     while( ( ptr = sse::scanstrN( ptr, term.data(), term.size() ) ) )
 #else
+    const char* end = start + content.size();
+
     while( ( ptr = fromStd::strstr( ptr, end - ptr, term.data(), term.size() ) ) )
 #endif
 
