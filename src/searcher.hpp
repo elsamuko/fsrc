@@ -7,7 +7,11 @@
 namespace rx = boost;
 
 #include "utils.hpp"
+#include "types.hpp"
+#include "stopwatch.hpp"
 #include "searchoptions.hpp"
+
+struct Printer;
 
 struct Stats {
     std::atomic_size_t matches = {0};
@@ -27,14 +31,19 @@ struct Searcher {
     std::string term;
     rx::regex regex;
     SearchOptions opts;
+    std::function<Printer*()> makePrinter;
     Stats stats;
+    Color gray = Color::Gray;
 
-    using Iter = std::string_view::const_iterator;
-    using Match = std::pair<Iter, Iter>;
-    using Print = std::function<void()>;
+    Searcher( const SearchOptions& opts, std::function<Printer*()> printer ):
+        opts( opts ),
+        makePrinter( printer ) {
 
-    Searcher( const SearchOptions& opts ) : opts( opts ) {
         term = opts.term;
+
+        if( !opts.colorized ) {
+            gray = Color::Neutral;
+        }
 
         // use regex only for complex searches
         if( opts.isRegex ) {
@@ -53,16 +62,20 @@ struct Searcher {
 
     ~Searcher() {}
 
+    void onAllFiles();
+    void onGitFiles();
+
+    void printHeader();
+    void printGitHeader();
+    void printStats();
+    void printFooter( const StopWatch::ns_type& ms );
+
     void search( const sys_string& path );
 
     //! search with strcasestr
-    std::vector<Match> caseInsensitiveSearch( const std::string_view& content );
+    std::vector<search::Match> caseInsensitiveSearch( const std::string_view& content );
     //! search with strstr or string_view::find
-    std::vector<Match> caseSensitiveSearch( const std::string_view& content );
+    std::vector<search::Match> caseSensitiveSearch( const std::string_view& content );
     //! search with boost::regex
-    std::vector<Match> regexSearch( const std::string_view& content );
-    //! collect what is printed
-    std::vector<Print> collectPrints( const sys_string& path, const std::vector<Match>& matches, const std::string_view& content );
-    //! call print functions locked
-    void printPrints( const std::vector<Print>& prints );
+    std::vector<search::Match> regexSearch( const std::string_view& content );
 };

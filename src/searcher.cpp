@@ -1,20 +1,21 @@
 #include <iterator>
 
+#include "threadpool.hpp"
 #include "searcher.hpp"
-#include "stopwatch.hpp"
 #include "ssestr.hpp"
 #include "stdstr.hpp"
+#include "printer.hpp"
 
-std::vector<Searcher::Match> Searcher::caseInsensitiveSearch( const std::string_view& content ) {
-    std::vector<Match> matches;
+std::vector<search::Match> Searcher::caseInsensitiveSearch( const std::string_view& content ) {
+    std::vector<search::Match> matches;
 
-    Iter pos = content.cbegin();
+    search::Iter pos = content.cbegin();
     const char* start = content.data();
     const char* ptr = start;
 
     while( ( ptr = strcasestr( ptr, term.data() ) ) ) {
-        Iter from = pos + ( ptr - start );
-        Iter to = from + term.size();
+        search::Iter from = pos + ( ptr - start );
+        search::Iter to = from + term.size();
         matches.emplace_back( from, to );
         ptr += term.size();
     }
@@ -23,16 +24,16 @@ std::vector<Searcher::Match> Searcher::caseInsensitiveSearch( const std::string_
 }
 
 #if BOOST_OS_WINDOWS
-std::vector<Searcher::Match> Searcher::caseSensitiveSearch( const std::string_view& content ) {
-    std::vector<Match> matches;
+std::vector<search::Match> Searcher::caseSensitiveSearch( const std::string_view& content ) {
+    std::vector<search::Match> matches;
 
-    Iter pos = content.cbegin();
+    search::Iter pos = content.cbegin();
     const char* start = content.data();
     const char* ptr = start;
 
     while( ( ptr = strstr( ptr, term.data() ) ) ) {
-        Iter from = pos + ( ptr - start );
-        Iter to = from + term.size();
+        search::Iter from = pos + ( ptr - start );
+        search::Iter to = from + term.size();
         matches.emplace_back( from, to );
         ptr += term.size();
     }
@@ -40,24 +41,25 @@ std::vector<Searcher::Match> Searcher::caseSensitiveSearch( const std::string_vi
     return matches;
 }
 #else
-std::vector<Searcher::Match> Searcher::caseSensitiveSearch( const std::string_view& content ) {
-    std::vector<Match> matches;
+std::vector<search::Match> Searcher::caseSensitiveSearch( const std::string_view& content ) {
+    std::vector<search::Match> matches;
 
-    Iter pos = content.cbegin();
+    search::Iter pos = content.cbegin();
     const char* start = content.data();
-    const char* end = start + content.size();
     const char* ptr = start;
 
 #if WITH_SSE
 
     while( ( ptr = sse::scanstrN( ptr, term.data(), term.size() ) ) )
 #else
+    const char* end = start + content.size();
+
     while( ( ptr = fromStd::strstr( ptr, end - ptr, term.data(), term.size() ) ) )
 #endif
 
     {
-        Iter from = pos + ( ptr - start );
-        Iter to = from + term.size();
+        search::Iter from = pos + ( ptr - start );
+        search::Iter to = from + term.size();
         matches.emplace_back( from, to );
         ptr += term.size();
     }
@@ -66,8 +68,8 @@ std::vector<Searcher::Match> Searcher::caseSensitiveSearch( const std::string_vi
 }
 #endif
 
-std::vector<Searcher::Match> Searcher::regexSearch( const std::string_view& content ) {
-    std::vector<Match> matches;
+std::vector<search::Match> Searcher::regexSearch( const std::string_view& content ) {
+    std::vector<search::Match> matches;
 
     // https://www.boost.org/doc/libs/1_70_0/libs/regex/doc/html/boost_regex/ref/match_flag_type.html
     rx::regex_constants::match_flags flags = rx::regex_constants::match_not_dot_newline;
@@ -76,97 +78,91 @@ std::vector<Searcher::Match> Searcher::regexSearch( const std::string_view& cont
     auto end   = rx::cregex_iterator();
 
     for( rx::cregex_iterator match = begin; match != end; ++match ) {
-        Iter from = content.cbegin() + match->position();
-        Iter to = from + match->length();
+        search::Iter from = content.cbegin() + match->position();
+        search::Iter to = from + match->length();
         matches.emplace_back( from, to );
     }
 
     return matches;
 }
 
-std::vector<Searcher::Print> Searcher::collectPrints( const sys_string& path, const std::vector<Searcher::Match>& matches, const std::string_view& content ) {
-    std::vector<std::function<void()>> prints;
-    prints.reserve( 3 * matches.size() );
+void Searcher::onAllFiles() {
+    this->printHeader();
 
-    // don't pipe colors
-    Color cred   = opts.colorized ? Color::Red   : Color::Neutral;
-    Color cblue  = opts.colorized ? Color::Blue  : Color::Neutral;
-    Color cgreen = opts.colorized ? Color::Green : Color::Neutral;
+    POOL;
+    STOPWATCH
+    START
 
-    // print file path
-#ifdef _WIN32
-    prints.emplace_back( utils::printFunc( cgreen, std::string( path.cbegin(), path.cend() ) ) );
-#else
-    prints.emplace_back( utils::printFunc( cgreen, path ) );
-#endif
+    utils::recurseDir( opts.path.native(), [&pool, this]( const sys_string & filename ) {
+        pool.add( [filename, this] {
+            stats.filesSearched++;
+            search( filename );
+        } );
+    } );
 
-    // parse file for newlines until last match
-    long long stop = matches.back().second - content.cbegin();
-    utils::Lines lines = utils::parseContent( content.data(), content.size(), stop );
-
-    std::vector<Match>::const_iterator match = matches.cbegin();
-    size_t size = lines.size();
-
-    for( size_t i = 0; i < size; ++i ) {
-        Iter from = lines[i].cbegin();
-        Iter to   = lines[i].cend();
-        bool printedLine = false;
-
-        // find all matches in this line
-        while( from <= match->first && match->first < to ) {
-
-            // print line information in blue once per line
-            if( !printedLine ) {
-                printedLine = true;
-                std::string number = utils::format( "\nL%4i : ", i + 1 );
-                prints.emplace_back( utils::printFunc( cblue, number ) );
-            }
-
-            // print code in neutral
-            prints.emplace_back( utils::printFunc( Color::Neutral, std::string( from, match->first ) ) );
-
-            // print match in red
-            prints.emplace_back( utils::printFunc( cred, std::string( match->first, match->second ) ) );
-
-            // set from to end of match
-            from = match->second;
-
-            // if there are no more matches in this file, print rest of line in neutral
-            // and exit search for this file
-            if( std::next( match ) == matches.cend() ) {
-                if( from < to ) {
-                    prints.emplace_back( utils::printFunc( Color::Neutral, std::string( from, to ) ) );
-                }
-
-                goto end;
-            }
-
-            ++match;
-
-            // if next match is within this line, print code in neutral until next match
-            if( from <= match->first && match->first < to ) {
-                prints.emplace_back( utils::printFunc( Color::Neutral, std::string( from, match->first ) ) );
-                from = match->first;
-            }
-            // else print code in neutral until end and break to next line
-            else {
-                prints.emplace_back( utils::printFunc( Color::Neutral, std::string( from, to ) ) );
-                break;
-            }
-        }
-    }
-
-end:
-    // print newlines
-    prints.emplace_back( utils::printFunc( Color::Neutral, "\n\n" ) );
-
-    return prints;
+    STOP( stats.t_recurse )
 }
 
-void Searcher::printPrints( const std::vector<Searcher::Print>& prints ) {
-    std::unique_lock<std::mutex> lock( m );
+void Searcher::onGitFiles() {
+    this->printGitHeader();
 
-    for( const std::function<void()>& func : prints ) { func(); }
+    POOL;
+#ifdef _WIN32
+    std::string nullDevice = "NUL";
+#else
+    std::string nullDevice = "/dev/null";
+#endif
+    fs::current_path( opts.path );
+    STOPWATCH
+    START
+    // -c all from repo
+    // -o other not ignored
+    std::vector<sys_string> gitFiles = utils::run( "git ls-files -co --exclude-standard 2> " + nullDevice );
+    STOP( stats.t_recurse );
+
+    for( const sys_string& filename : gitFiles ) {
+        pool.add( [filename, this] {
+            stats.filesSearched++;
+            search( filename );
+        } );
+    }
+}
+
+void Searcher::printHeader() {
+    if( !opts.piped ) {
+        utils::printColor( gray, utils::format( "Searching for \"%s\" in folder:\n\n", opts.term.c_str() ) );
+    }
+}
+
+void Searcher::printGitHeader() {
+    if( !opts.piped ) {
+        utils::printColor( gray, utils::format( "Searching for \"%s\" in git repo:\n\n", opts.term.c_str() ) );
+    }
+}
+
+void Searcher::printStats() {
+    if( !opts.piped ) {
+        utils::printColor( gray, utils::format(
+                               "Times: Recurse %ld ms, Read %ld ms, Search %ld ms, Collect %ld ms, Print %ld ms\n",
+                               stats.t_recurse / 1000000,
+                               stats.t_read / 1000000,
+                               stats.t_search / 1000000,
+                               stats.t_collect / 1000000,
+                               stats.t_print / 1000000 ) );
+
+    }
+}
+
+void Searcher::printFooter( const StopWatch::ns_type& ms ) {
+    if( !opts.piped ) {
+        utils::printColor( gray, utils::format(
+                               "Found %lu matches in %lu/%lu files (%lu kB) in %ld ms\n",
+                               stats.matches.load(),
+                               stats.filesMatched.load(),
+                               stats.filesSearched.load(),
+                               stats.bytesRead.load() / 1024,
+                               ms ) );
+    }
 }
 
 void Searcher::search( const sys_string& path ) {
@@ -188,7 +184,7 @@ void Searcher::search( const sys_string& path ) {
     // collect matches
     START
     const std::string_view& content = view.content;
-    std::vector<Match> matches;
+    std::vector<search::Match> matches;
 
     if( !opts.isRegex ) {
         if( opts.ignoreCase ) {
@@ -208,12 +204,14 @@ void Searcher::search( const sys_string& path ) {
         stats.matches += matches.size();
 
         START
-        std::vector<std::function<void()>> prints = collectPrints( path, matches, content );
+        static thread_local std::unique_ptr<Printer> printer( makePrinter() );
+        printer->collectPrints( path, matches, content );
         STOP( stats.t_collect );
 
         if( !opts.quiet ) {
             START
-            printPrints( prints );
+            std::unique_lock<std::mutex> lock( m );
+            printer->printPrints();
             STOP( stats.t_print );
         }
     }

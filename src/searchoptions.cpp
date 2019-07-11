@@ -22,6 +22,7 @@ SearchOptions SearchOptions::parseArgs( int argc, char* argv[] ) {
     ( "regex,r", "Regex search (slower)" )
     ( "no-git", "Disable search with 'git ls-files'" )
     ( "no-colors", "Disable colorized output" )
+    ( "no-piped", "Disable piped output" )
     ( "quiet,q", "only print status" )
     ;
 
@@ -62,6 +63,11 @@ SearchOptions SearchOptions::parseArgs( int argc, char* argv[] ) {
     // disable ls-files
     if( args.count( "no-git" ) ) {
         opts.noGit = true;
+    }
+
+    // disable piped output
+    if( args.count( "no-piped" ) ) {
+        opts.piped = false;
     }
 
     // disable colors
