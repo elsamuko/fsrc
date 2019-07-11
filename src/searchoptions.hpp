@@ -18,7 +18,8 @@ struct SearchOptions {
     bool quiet = false;
     std::string term;
     fs::path path;
-    bool colorized = isatty( fileno( stdout ) ) != 0;
+    bool piped = isatty( fileno( stdout ) ) == 0;
+    bool colorized = !piped;
     operator bool() const { return success; }
     static SearchOptions parseArgs( int argc, char* argv[] );
 };
