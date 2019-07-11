@@ -22,13 +22,13 @@ cyan "Searching in $SEARCH_DIR for $TERM"
 
 echo
 green "===FSRC==="
-echo "./fsrc -t \"$TERM\" --no-colors -d \"$SEARCH_DIR\""
-{ time ./fsrc -t "$TERM" --no-colors -d "$SEARCH_DIR" | tail -n 2 | grep . ;} 2> tmp/time
+echo "./fsrc -t \"$TERM\" --no-piped --no-colors -d \"$SEARCH_DIR\""
+{ time ./fsrc -t "$TERM" --no-piped --no-colors -d "$SEARCH_DIR" | tail -n 2 | grep . ;} 2> tmp/time
 red $(cat tmp/time)
 echo
 
-echo "./fsrc -r -t \"$REGEX\" --no-colors -d \"$SEARCH_DIR\""
-{ time ./fsrc -r -t "$REGEX" --no-colors -d "$SEARCH_DIR" | tail -n 2 | grep . ;} 2> tmp/time
+echo "./fsrc -r -t \"$REGEX\" --no-piped --no-colors -d \"$SEARCH_DIR\""
+{ time ./fsrc -r -t "$REGEX" --no-piped --no-colors -d "$SEARCH_DIR" | tail -n 2 | grep . ;} 2> tmp/time
 red $(cat tmp/time)
 echo
 
