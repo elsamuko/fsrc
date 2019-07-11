@@ -1,10 +1,10 @@
 #include <iterator>
 
+#include "threadpool.hpp"
 #include "searcher.hpp"
 #include "ssestr.hpp"
 #include "stdstr.hpp"
 #include "printer.hpp"
-#include "threadpool.hpp"
 
 std::vector<search::Match> Searcher::caseInsensitiveSearch( const std::string_view& content ) {
     std::vector<search::Match> matches;
@@ -27,13 +27,13 @@ std::vector<search::Match> Searcher::caseInsensitiveSearch( const std::string_vi
 std::vector<search::Match> Searcher::caseSensitiveSearch( const std::string_view& content ) {
     std::vector<search::Match> matches;
 
-    Iter pos = content.cbegin();
+    search::Iter pos = content.cbegin();
     const char* start = content.data();
     const char* ptr = start;
 
     while( ( ptr = strstr( ptr, term.data() ) ) ) {
-        Iter from = pos + ( ptr - start );
-        Iter to = from + term.size();
+        search::Iter from = pos + ( ptr - start );
+        search::Iter to = from + term.size();
         matches.emplace_back( from, to );
         ptr += term.size();
     }
