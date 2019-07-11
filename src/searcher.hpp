@@ -8,6 +8,7 @@ namespace rx = boost;
 
 #include "utils.hpp"
 #include "types.hpp"
+#include "stopwatch.hpp"
 #include "searchoptions.hpp"
 
 struct Printer;
@@ -32,12 +33,17 @@ struct Searcher {
     SearchOptions opts;
     std::function<Printer*()> makePrinter;
     Stats stats;
+    Color gray = Color::Gray;
 
     Searcher( const SearchOptions& opts, std::function<Printer*()> printer ):
         opts( opts ),
         makePrinter( printer ) {
 
         term = opts.term;
+
+        if( !opts.colorized ) {
+            gray = Color::Neutral;
+        }
 
         // use regex only for complex searches
         if( opts.isRegex ) {
@@ -55,6 +61,14 @@ struct Searcher {
     }
 
     ~Searcher() {}
+
+    void onAllFiles();
+    void onGitFiles();
+
+    void printHeader();
+    void printGitHeader();
+    void printStats();
+    void printFooter( const StopWatch::ns_type& ms );
 
     void search( const sys_string& path );
 

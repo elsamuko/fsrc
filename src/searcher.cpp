@@ -1,10 +1,10 @@
 #include <iterator>
 
 #include "searcher.hpp"
-#include "stopwatch.hpp"
 #include "ssestr.hpp"
 #include "stdstr.hpp"
 #include "printer.hpp"
+#include "threadpool.hpp"
 
 std::vector<search::Match> Searcher::caseInsensitiveSearch( const std::string_view& content ) {
     std::vector<search::Match> matches;
@@ -83,6 +83,85 @@ std::vector<search::Match> Searcher::regexSearch( const std::string_view& conten
     }
 
     return matches;
+}
+
+void Searcher::onAllFiles() {
+    this->printHeader();
+
+    POOL;
+    STOPWATCH
+    START
+
+    utils::recurseDir( opts.path.native(), [&pool, this]( const sys_string & filename ) {
+        pool.add( [filename, this] {
+            stats.filesSearched++;
+            search( filename );
+        } );
+    } );
+
+    STOP( stats.t_recurse )
+}
+
+void Searcher::onGitFiles() {
+    this->printGitHeader();
+
+    POOL;
+#ifdef _WIN32
+    std::string nullDevice = "NUL";
+#else
+    std::string nullDevice = "/dev/null";
+#endif
+    fs::current_path( opts.path );
+    STOPWATCH
+    START
+    // -c all from repo
+    // -o other not ignored
+    std::vector<sys_string> gitFiles = utils::run( "git ls-files -co --exclude-standard 2> " + nullDevice );
+    STOP( stats.t_recurse );
+
+    for( const sys_string& filename : gitFiles ) {
+        pool.add( [filename, this] {
+            stats.filesSearched++;
+            search( filename );
+        } );
+    }
+}
+
+void Searcher::printHeader() {
+    if( !opts.piped ) {
+        utils::printColor( gray, utils::format( "Searching for \"%s\" in folder:\n\n", opts.term.c_str() ) );
+    }
+}
+
+void Searcher::printGitHeader() {
+    if( !opts.piped ) {
+        utils::printColor( gray, utils::format( "Searching for \"%s\" in git repo:\n\n", opts.term.c_str() ) );
+    }
+}
+
+void Searcher::printStats() {
+    if( !opts.piped ) {
+        utils::printColor( gray, utils::format(
+                               "Times: Recurse %ld ms, Read %ld ms, Search %ld ms, Collect %ld ms, Print %ld ms\n",
+                               stats.t_recurse / 1000000,
+                               stats.t_read / 1000000,
+                               stats.t_search / 1000000,
+                               stats.t_collect / 1000000,
+                               stats.t_print / 1000000 ) );
+
+    }
+}
+
+void Searcher::printFooter( const StopWatch::ns_type& ms ) {
+    if( !opts.piped ) {
+        utils::printColor( gray, utils::format(
+                               "Found %lu matches in %lu/%lu files (%lu kB) in %ld ms\n",
+                               stats.matches.load(),
+                               stats.filesMatched.load(),
+                               stats.filesSearched.load(),
+                               stats.bytesRead.load() / 1024,
+                               ms ) );
+    }
 }
 
 void Searcher::search( const sys_string& path ) {
