@@ -28,17 +28,7 @@ void PipedPrinter::collectPrints( const sys_string& path, const std::vector<sear
     std::vector<search::Match>::const_iterator match = matches.cbegin();
     std::vector<search::Match>::const_iterator end = matches.cend();
 
-    size_t pos = path.rfind( '/' );
-
-    if( pos == sys_string::npos ) { pos = path.rfind( '\\' ); }
-
-    if( pos == sys_string::npos ) {
-        pos = 0;
-    } else {
-        ++pos;
-    }
-
-    std::string filename( path.cbegin() + pos, path.cend() );
+    std::string filename( path.cbegin(), path.cend() );
 
     for( ; match != end; ) {
 
