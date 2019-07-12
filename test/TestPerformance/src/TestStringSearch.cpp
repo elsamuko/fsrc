@@ -29,50 +29,57 @@ material under section 10.
 
     for( std::string text : { small, full } ) {
         std::string_view view( text );
-        size_t pos = 0;
-        char* ptr = nullptr;
-        std::string::const_iterator it;
-        std::string::const_iterator it2;
+
+        // init with correct values
+        size_t pos = text.find( term );
+        const char* ptr = text.data() + pos;
+        std::string::const_iterator it = text.cbegin() + pos;
+
         boost::algorithm::boyer_moore_horspool bmh( term.begin(), term.end() );
         boost::algorithm::knuth_morris_pratt kmp( term.begin(), term.end() );
 
+        auto checks = [&] {
+            BOOST_REQUIRE_NE( pos, std::string::npos );
+            BOOST_REQUIRE_NE( ptr, nullptr );
+            BOOST_REQUIRE_NE( it - text.cbegin(), 0 );
+            BOOST_REQUIRE_EQUAL( ptr - text.data(), it - text.cbegin() );
+            BOOST_REQUIRE_EQUAL( pos, it - text.cbegin() );
+        };
+
         long t_find = timed1000( "find", [&text, &term, &pos] {
             pos = text.find( term );
-        } );
+        }, checks );
 
         long t_std = timed1000( "fromStd", [&text, &term, &ptr] {
-            ptr = ( char* )fromStd::strstr( text.data(), text.size(), term.data(), term.size() );
-        } );
+            ptr = fromStd::strstr( text.data(), text.size(), term.data(), term.size() );
+        }, checks );
 
         long t_view = timed1000( "view", [&view, &term, &pos] {
             pos = view.find( term );
-        } );
+        }, checks );
 
 #if !BOOST_OS_WINDOWS
         long t_memmem = timed1000( "memmem", [&text, &term, &ptr] {
             ptr = ( char* )memmem( text.data(), text.size(), term.data(), term.size() );
-        } );
+        }, checks );
 
         long t_ssestr = timed1000( "ssestr", [&text, &term, &ptr] {
-            ptr = ( char* )sse::scanstrN( text.data(), term.data(), term.size() );
-        } );
+            ptr = sse::scanstrN( text.data(), term.data(), term.size() );
+        }, checks );
 #endif
 
         long t_strstr = timed1000( "strstr", [&text, &term, &ptr] {
             ptr = strstr( text.data(), term.data() );
-        } );
+        }, checks );
 
         long t_BMH = timed1000( "BMH search", [&text, &it, &bmh] {
             it = bmh( text.cbegin(), text.cend() ).first;
-        } );
+        }, checks );
 
-        long t_KMP = timed1000( "KMP search", [&text, &it2, &kmp] {
-            it2 = kmp( text.cbegin(), text.cend() ).first;
-        } );
+        long t_KMP = timed1000( "KMP search", [&text, &it, &kmp] {
+            it = kmp( text.cbegin(), text.cend() ).first;
+        }, checks );
 
-        BOOST_REQUIRE_NE( pos, std::string::npos );
-        BOOST_REQUIRE_NE( ptr, nullptr );
-        BOOST_REQUIRE_EQUAL( ptr - text.data(), it - text.cbegin() );
 
 #if BOOST_OS_WINDOWS
         BOOST_CHECK_GT( t_find, t_strstr ); // assume find is slower than strstr on Windows
