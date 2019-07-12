@@ -1,13 +1,43 @@
 #include <regex>
 
+
 #include "boost/test/unit_test.hpp"
 #include "boost/xpressive/xpressive.hpp"
 #include "boost/regex.hpp"
+
+#if !BOOST_OS_WINDOWS
+#include <regex.h>
+#endif
 
 #include "PerformanceUtils.hpp"
 #include "utils.hpp"
 #include "types.hpp"
 #include "licence.hpp"
+
+#if !BOOST_OS_WINDOWS
+// http://pubs.opengroup.org/onlinepubs/9699919799/functions/regcomp.html
+size_t posixRegex( const std::string& content, const std::string& term ) {
+
+    regex_t re;
+    regmatch_t pm;
+    regcomp( &re, term.c_str(), 0 );
+
+    const char* start = content.data();
+
+    size_t count = 0;
+    int error = regexec( &re, start, 1, &pm, 0 );
+
+    while( error == 0 ) {
+        ++count;
+        start += pm.rm_eo;
+        error = regexec( &re, start, 1, &pm, 0 );
+    }
+
+    regfree( &re );
+
+    return count;
+}
+#endif
 
 size_t boostRegex( const std::string& content, const std::string& term ) {
 
