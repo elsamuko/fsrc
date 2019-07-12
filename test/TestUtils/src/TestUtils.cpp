@@ -66,9 +66,9 @@ BOOST_AUTO_TEST_CASE( Test_parseContent ) {
     BOOST_CHECK_EQUAL( lines.size(), 4 );
 }
 
-#ifdef __linux__
 BOOST_AUTO_TEST_CASE( Test_openFile ) {
     BOOST_CHECK( utils::openFile( "/usr/include/errno.h" ) );
+#ifdef __linux__
     BOOST_CHECK( called );
-}
 #endif
+}

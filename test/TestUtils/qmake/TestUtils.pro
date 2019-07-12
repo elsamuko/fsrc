@@ -14,6 +14,8 @@ include( $${PRI_DIR}/boost.pri )
 # testsuite
 SOURCES += ../src/TestUtils.cpp
 
-INCLUDEPATH += $${MAIN_DIR}/src
-HEADERS += $${MAIN_DIR}/src/utils.hpp
-SOURCES += $${MAIN_DIR}/src/utils.cpp
+SRC_DIR=$${MAIN_DIR}/src
+INCLUDEPATH += $${SRC_DIR}
+HEADERS += $${SRC_DIR}/utils.hpp
+SOURCES += $${SRC_DIR}/utils.cpp
+macx: SOURCES += $${SRC_DIR}/macutils.mm
