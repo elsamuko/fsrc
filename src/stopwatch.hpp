@@ -21,7 +21,7 @@ class StopWatch {
             started = clock::now();
         }
         //! stops stopwatch and returns elapsed nanoseconds
-        inline ns_type stop() {
+        inline ns_type stop() const {
             return std::chrono::duration_cast<std::chrono::nanoseconds>( clock::now() - started ).count();
         }
     private:
