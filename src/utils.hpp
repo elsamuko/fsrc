@@ -125,6 +125,9 @@ inline std::function<void()> printFunc( Color color, const std::string& text ) {
     return [color, text] { printColor( color, text ); };
 }
 
+//! opens file with platforms standard program
+bool openFile( const sys_string& filename );
+
 void recurseDir( const sys_string& filename, const std::function<void( const sys_string& filename )>& callback );
 
 }

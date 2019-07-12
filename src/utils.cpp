@@ -285,3 +285,10 @@ size_t utils::fileSize( const int file ) {
 
     return st.st_size;
 }
+
+#ifdef __linux__
+bool utils::openFile( const sys_string& filename ) {
+    std::string command = "xdg-open " + filename;
+    return 0 == system( command.c_str() );
+}
+#endif
