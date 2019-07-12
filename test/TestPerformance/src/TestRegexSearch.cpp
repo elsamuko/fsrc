@@ -21,6 +21,8 @@ size_t boostRegex( const std::string& content, const std::string& term ) {
     for( boost::cregex_iterator match = begin; match != end; ++match ) {
         ++count;
     }
+
+    return count;
 }
 
 size_t boostXpressive( const std::string& content, const std::string& term ) {
@@ -35,6 +37,8 @@ size_t boostXpressive( const std::string& content, const std::string& term ) {
     for( boost::xpressive::cregex_iterator match = begin; match != end; ++match ) {
         ++count;
     }
+
+    return count;
 }
 
 size_t stdRegex( const std::string& content, const std::string& term ) {
@@ -49,6 +53,8 @@ size_t stdRegex( const std::string& content, const std::string& term ) {
     for( std::cregex_iterator match = begin; match != end; ++match ) {
         ++count;
     }
+
+    return count;
 }
 
 BOOST_AUTO_TEST_CASE( Test_regex ) {
@@ -58,17 +64,28 @@ BOOST_AUTO_TEST_CASE( Test_regex ) {
     std::string text( ( const char* )licence, sizeof( licence ) );
     std::string term = "[Ll]icense";
 
+    auto check = [&] {
+        // grep -Po '[Ll]icense' < LICENSE | wc -l
+        BOOST_CHECK_EQUAL( count, 116 );
+    };
+
+#if !BOOST_OS_WINDOWS
+    long t_posix = timed1000( "posix", [&text, &term, &count] {
+        count = posixRegex( text, term );
+    }, check );
+#endif
+
     long t_boost = timed1000( "boost::regex", [&text, &term, &count] {
         count = boostRegex( text, term );
-    } );
+    }, check );
 
     long t_xpressive = timed1000( "boost::xpressive", [&text, &term, &count] {
         count = boostXpressive( text, term );
-    } );
+    }, check );
 
     long t_std = timed1000( "std::regex", [&text, &term, &count] {
         count = stdRegex( text, term );
-    } );
+    }, check );
 
     BOOST_CHECK_GT( t_std, t_boost );
 }
