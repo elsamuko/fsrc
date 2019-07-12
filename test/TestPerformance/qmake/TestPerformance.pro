@@ -15,6 +15,7 @@ include( $${PRI_DIR}/boost.pri )
 # testsuite
 SOURCES += ../src/TestPerformance.cpp
 SOURCES += ../src/TestStringSearch.cpp
+SOURCES += ../src/TestRegexSearch.cpp
 SOURCES += ../src/TestThreadpool.cpp
 !win32: SOURCES += ../src/TestDirWalker.cpp
 HEADERS += ../src/licence.hpp
@@ -34,4 +35,3 @@ HEADERS += $${MAIN_DIR}/src/stdstr.hpp
 
 HEADERS += $${MAIN_DIR}/src/threadpool.hpp
 SOURCES += $${MAIN_DIR}/src/threadpool.cpp
-
