@@ -20,10 +20,8 @@ int main( int argc, char* argv[] ) {
     Searcher searcher( opts, makePrinter );
 
     if( !opts.noGit && fs::exists( opts.path / ".git" ) ) {
-        searcher.printGitHeader();
         searcher.onGitFiles();
     } else {
-        searcher.printHeader();
         searcher.onAllFiles();
     }
 
