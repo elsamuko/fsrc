@@ -122,7 +122,7 @@ void HtmlPrinter::collectPrints( const sys_string& path, const std::vector<searc
     // print file path
     result << "<a class=\"file\" href=\"file://"
            << HTML::encode( fs::absolute( file ).string() )
-           << "\">"
+           << "\" download>"
            << HTML::encode( file.string() ) <<
            "</a>\n";
 
