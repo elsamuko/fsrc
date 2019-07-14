@@ -7,23 +7,18 @@
 namespace printerfactory {
 
 std::function<Printer*()> printerFunc( const SearchOptions& opts ) {
-    std::function<Printer*()> makePrinter;
-    bool colorized = opts.colorized;
 
     if( opts.piped ) {
-        makePrinter = [] {
-            PipedPrinter* printer = new PipedPrinter();
+        return [opts] {
+            PipedPrinter* printer = new PipedPrinter( opts );
             return printer;
         };
     } else {
-        makePrinter = [colorized] {
-            PrettyPrinter* printer = new PrettyPrinter();
-            printer->opts.colorized = colorized;
+        return [opts] {
+            PrettyPrinter* printer = new PrettyPrinter( opts );
             return printer;
         };
     }
-
-    return makePrinter;
 }
 
 }
