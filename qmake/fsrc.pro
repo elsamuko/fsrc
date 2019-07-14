@@ -23,6 +23,7 @@ SOURCES += $${SRC_DIR}/threadpool.cpp
 
 HEADERS += $${SRC_DIR}/printer.hpp
 HEADERS += $${SRC_DIR}/prettyprinter.hpp
+HEADERS += $${SRC_DIR}/htmlprinter.hpp
 HEADERS += $${SRC_DIR}/pipedprinter.hpp
 HEADERS += $${SRC_DIR}/printerfactory.hpp
 
