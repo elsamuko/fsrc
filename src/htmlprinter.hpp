@@ -106,7 +106,7 @@ struct HtmlPrinter : public Printer {
                 gray = Color::Neutral;
             }
 
-            utils::printColor( gray, utils::format( "Opening \"%s\".\n\n", html.c_str() ) );
+            utils::printColor( gray, utils::format( "Opening \"%s\".\n\n", html.string().c_str() ) );
             utils::openFile( html.native() );
         } );
     }
