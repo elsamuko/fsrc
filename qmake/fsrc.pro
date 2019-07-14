@@ -18,6 +18,7 @@ SOURCES += $${SRC_DIR}/searchoptions.cpp
 
 HEADERS += $${SRC_DIR}/stopwatch.hpp
 
+HEADERS += $${SRC_DIR}/exitqueue.hpp
 HEADERS += $${SRC_DIR}/threadpool.hpp
 SOURCES += $${SRC_DIR}/threadpool.cpp
 
@@ -27,7 +28,7 @@ HEADERS += $${SRC_DIR}/htmlprinter.hpp
 HEADERS += $${SRC_DIR}/pipedprinter.hpp
 HEADERS += $${SRC_DIR}/printerfactory.hpp
 
-macx: SOURCES += $${SRC_DIR}/macutils.mm
+macx:   SOURCES += $${SRC_DIR}/macutils.mm
 win32:  SOURCES += $${SRC_DIR}/winutils.cpp
 
 # via https://mischasan.wordpress.com/2011/07/16/convergence-sse2-and-strstr/
