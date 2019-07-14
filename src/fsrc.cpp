@@ -1,6 +1,7 @@
 #include "searcher.hpp"
 #include "printerfactory.hpp"
 #include "stopwatch.hpp"
+#include "exitqueue.hpp"
 
 int main( int argc, char* argv[] ) {
 
@@ -32,5 +33,6 @@ int main( int argc, char* argv[] ) {
 #endif
     searcher.printFooter( ms );
 
+    ExitQueue::call();
     return 0;
 }

@@ -7,6 +7,7 @@
 
 #include "printer.hpp"
 #include "utils.hpp"
+#include "exitqueue.hpp"
 
 namespace  HTML {
 const std::string css = R"css(<style>
@@ -62,7 +63,6 @@ std::string encode( const std::string text ) {
 
 struct HtmlPrinter : public Printer {
     static std::once_flag oneHeader;
-    static std::once_flag oneFooter;
     static fs::path html;
 
     std::stringstream result;
@@ -88,32 +88,28 @@ struct HtmlPrinter : public Printer {
                    << "\" in " << HTML::encode( fs::absolute( this->opts.path ).string() )
                    << "</h1>\n\n";
             }
-        } );
-    }
 
-    virtual ~HtmlPrinter() override {
-        std::call_once( oneFooter, [this] {
-            fs::ofstream of( html, std::ios::out | std::ios::binary | std::ios::app );
+            of.close();
 
-            if( of ) {
-                of << "\n</body>\n"
-                   << "</html>\n";
-            }
+            Color gray = this->opts.colorized ? Color::Gray : Color::Neutral;
 
-            Color gray = Color::Gray;
+            ExitQueue::add( [gray] {
+                fs::ofstream of( html, std::ios::out | std::ios::binary | std::ios::app );
 
-            if( !opts.colorized ) {
-                gray = Color::Neutral;
-            }
+                if( of ) {
+                    of << "\n</body>\n"
+                       << "</html>\n";
+                }
 
-            utils::printColor( gray, utils::format( "Opening \"%s\".\n\n", html.string().c_str() ) );
-            utils::openFile( html.native() );
+                of.close();
+                utils::printColor( gray, utils::format( "\nOpening \"%s\".\n", html.string().c_str() ) );
+                utils::openFile( html.native() );
+            } );
         } );
     }
 };
 
 std::once_flag HtmlPrinter::oneHeader;
-std::once_flag HtmlPrinter::oneFooter;
 fs::path HtmlPrinter::html;
 
 void HtmlPrinter::collectPrints( const sys_string& path, const std::vector<search::Match>& matches, const std::string_view& content ) {
