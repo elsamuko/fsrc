@@ -2,11 +2,18 @@
 
 #include "prettyprinter.hpp"
 #include "pipedprinter.hpp"
+#include "htmlprinter.hpp"
 #include "searchoptions.hpp"
 
 namespace printerfactory {
 
 std::function<Printer*()> printerFunc( const SearchOptions& opts ) {
+    if( opts.html ) {
+        return [opts] {
+            HtmlPrinter* printer = new HtmlPrinter( opts );
+            return printer;
+        };
+    }
 
     if( opts.piped ) {
         return [opts] {
