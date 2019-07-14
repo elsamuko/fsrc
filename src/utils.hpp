@@ -23,6 +23,7 @@
 #define O_BINARY 0
 #endif
 
+#include "boost/predef.h"
 #include "boost/filesystem.hpp"
 namespace fs = boost::filesystem;
 using sys_string = fs::path::string_type;
