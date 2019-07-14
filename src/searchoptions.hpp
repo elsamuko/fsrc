@@ -16,6 +16,7 @@ struct SearchOptions {
     bool ignoreCase = false;
     bool isRegex = false;
     bool quiet = false;
+    bool html = false;
     std::string term;
     fs::path path;
     bool piped = isatty( fileno( stdout ) ) == 0;
