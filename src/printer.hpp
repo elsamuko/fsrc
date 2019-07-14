@@ -5,13 +5,11 @@
 
 #include "utils.hpp"
 #include "types.hpp"
-
-struct PrintOptions {
-    bool colorized = true;
-};
+#include "searchoptions.hpp"
 
 struct Printer {
-    PrintOptions opts;
+    SearchOptions opts;
+    Printer( const SearchOptions& opts ) : opts( opts ) {}
     //! collect what is printed
     virtual void collectPrints( const sys_string& path, const std::vector<search::Match>& matches, const std::string_view& content ) = 0;
     //! call print functions locked

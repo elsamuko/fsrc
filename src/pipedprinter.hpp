@@ -7,6 +7,7 @@ struct PipedPrinter : public Printer {
     std::vector<Print> prints;
     virtual void collectPrints( const sys_string& path, const std::vector<search::Match>& matches, const std::string_view& content ) override;
     virtual void printPrints() override;
+    PipedPrinter( const SearchOptions& opts ) : Printer( opts ) {}
     virtual ~PipedPrinter() override {}
 };
 

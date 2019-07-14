@@ -23,6 +23,7 @@ SearchOptions SearchOptions::parseArgs( int argc, char* argv[] ) {
     ( "no-git", "Disable search with 'git ls-files'" )
     ( "no-colors", "Disable colorized output" )
     ( "no-piped", "Disable piped output" )
+    ( "html", "open web page with results" )
     ( "quiet,q", "only print status" )
     ;
 
@@ -78,6 +79,11 @@ SearchOptions SearchOptions::parseArgs( int argc, char* argv[] ) {
     // don't print findings
     if( args.count( "quiet" ) ) {
         opts.quiet = true;
+    }
+
+    // print results to html
+    if( args.count( "html" ) ) {
+        opts.html = true;
     }
 
     // ignore case

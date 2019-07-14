@@ -12,7 +12,12 @@ size_t fwrite( const void* ptr, size_t size, size_t count, FILE* /*file*/ ) {
     return printed.size();
 }
 
-BOOST_AUTO_TEST_SUITE( Utils )
+#ifdef __linux__
+static bool called = false;
+int system( const char* command ) {
+    return called;
+}
+#endif
 
 BOOST_AUTO_TEST_CASE( Test_isTextFile ) {
 
@@ -61,5 +66,9 @@ BOOST_AUTO_TEST_CASE( Test_parseContent ) {
     BOOST_CHECK_EQUAL( lines.size(), 4 );
 }
 
-BOOST_AUTO_TEST_SUITE_END()
-
+BOOST_AUTO_TEST_CASE( Test_openFile ) {
+    BOOST_CHECK( utils::openFile( "/usr/include/errno.h" ) );
+#ifdef __linux__
+    BOOST_CHECK( called );
+#endif
+}

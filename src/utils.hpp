@@ -23,6 +23,7 @@
 #define O_BINARY 0
 #endif
 
+#include "boost/predef.h"
 #include "boost/filesystem.hpp"
 namespace fs = boost::filesystem;
 using sys_string = fs::path::string_type;
@@ -124,6 +125,9 @@ std::string format( const char* format, Args const& ... args ) {
 inline std::function<void()> printFunc( Color color, const std::string& text ) {
     return [color, text] { printColor( color, text ); };
 }
+
+//! opens file with platforms standard program
+bool openFile( const sys_string& filename );
 
 void recurseDir( const sys_string& filename, const std::function<void( const sys_string& filename )>& callback );
 

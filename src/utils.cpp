@@ -285,3 +285,24 @@ size_t utils::fileSize( const int file ) {
 
     return st.st_size;
 }
+
+#if BOOST_OS_LINUX
+bool utils::openFile( const sys_string& filename ) {
+    std::string command = "xdg-open " + filename;
+    return 0 == system( command.c_str() );
+}
+#elif BOOST_OS_WINDOWS
+//! \note Must run on main thread!
+bool utils::openFile( const sys_string& filename ) {
+    HINSTANCE rv = ::ShellExecuteW( nullptr, // HWND   hwnd
+                                    L"open", // LPCWSTR lpOperation,
+                                    filename.c_str(),
+                                    nullptr, // LPCWSTR lpParameters,
+                                    nullptr, // LPCWSTR lpDirectory,
+                                    SW_SHOW ); // INT    nShowCmd
+
+    return ( int )rv > 32;
+}
+#else
+// mac's impl is in macutils.mm
+#endif

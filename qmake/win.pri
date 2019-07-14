@@ -20,9 +20,9 @@ CONFIG(debug, debug|release) {
 }
 
 # delay load rare used deps
-LIBS += delayimp.lib
+LIBS += delayimp.lib shell32.lib
 QMAKE_LFLAGS += /DELAYLOAD:shlwapi.dll # StrStrIA
-QMAKE_LFLAGS += /DELAYLOAD:ws2_32.dll  # boost::asio
+QMAKE_LFLAGS += /DELAYLOAD:shell32.dll # utils::openFile
 
 QMAKE_CXXFLAGS += /std:c++17
 
