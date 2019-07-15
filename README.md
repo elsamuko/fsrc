@@ -15,9 +15,10 @@ Options:
   --no-git              Disable search with 'git ls-files'
   --no-colors           Disable colorized output
   --no-piped            Disable piped output
+  --html                open web page with results
   -q [ --quiet ]        only print status
 
-Build : v0.11 from Jul 11 2019
+Build : v0.12 from Jul 14 2019
 Web   : https://github.com/elsamuko/fsrc
 user@home:/usr/include/boost$ fsrc filesystem
 Searching for "filesystem" in folder:
