@@ -6,8 +6,9 @@
 #include <algorithm>
 #include <cstdio>
 #include <cstring>
-
 #include <fcntl.h>
+
+#include "stdstr.hpp"
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -101,8 +102,7 @@ bool utils::isTextFile( const std::string_view& content ) {
         if( 0 == memcmp( content.data(), "%!PS", 4 ) ) { return false; }
     }
 
-    static std::string_view zerozero( "\0\0", 2 );
-    bool hasDoubleZero = content.find( zerozero ) != std::string::npos;
+    const bool hasDoubleZero = fromStd::strstr( content.data(), content.size(), "\0\0", 2 ) != nullptr;
     return !hasDoubleZero;
 }
 
