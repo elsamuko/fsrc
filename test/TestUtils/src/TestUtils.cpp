@@ -5,20 +5,6 @@
 
 #include "utils.hpp"
 
-// dummy for Test_printFunc
-std::string printed;
-size_t fwrite( const void* ptr, size_t size, size_t count, FILE* /*file*/ ) {
-    printed.assign( ( char* ) ptr, size * count );
-    return printed.size();
-}
-
-#ifdef __linux__
-static bool called = false;
-int system( const char* command ) {
-    return called;
-}
-#endif
-
 BOOST_AUTO_TEST_CASE( Test_isTextFile ) {
 
     std::string_view pdf( "%PDF", 4 );
@@ -31,16 +17,12 @@ BOOST_AUTO_TEST_CASE( Test_isTextFile ) {
     BOOST_CHECK( utils::isTextFile( text ) );
 }
 
-BOOST_AUTO_TEST_CASE( Test_run ) {
-    std::vector<std::string> res = utils::run( "echo test123" );
-    BOOST_REQUIRE( !res.empty() );
-    BOOST_CHECK_EQUAL( res.front(), "test123" );
-}
-
 BOOST_AUTO_TEST_CASE( Test_printFunc ) {
-    std::function<void()> func = utils::printFunc( Color::Neutral, "test123" );
-    func();
-    BOOST_CHECK_EQUAL( printed, "test123" );
+    utils::printFunc( Color::Red, "Red" )();
+    utils::printFunc( Color::Green, "Green" )();
+    utils::printFunc( Color::Blue, "Blue" )();
+    utils::printFunc( Color::Neutral, "\n" )();
+    BOOST_CHECK( true );
 }
 
 BOOST_AUTO_TEST_CASE( Test_parseContent ) {
