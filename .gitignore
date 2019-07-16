@@ -15,6 +15,5 @@
 !*.hpp
 !*.fl
 
-test/bin
 tmp
 libs
