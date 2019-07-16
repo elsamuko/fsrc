@@ -88,7 +88,7 @@ void printColor( Color color, const std::string& text );
 
 //! runs shell command
 //! \returns output of command as vector
-std::vector<sys_string> run( const std::string& command );
+std::vector<sys_string> gitLsFiles(const boost::filesystem::path &path);
 
 //! \returns true, if filename has no "\0\0" in the first 1000 bytes
 bool isTextFile( const std::string_view& content );

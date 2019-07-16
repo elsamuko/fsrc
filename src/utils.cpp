@@ -62,9 +62,25 @@ void utils::printColor( Color color, const std::string& text ) {
     }
 }
 
-std::vector<sys_string> utils::run( const std::string& command ) {
+// git ls-files -zco --exclude-standard | tr '\0' '\n'
+std::vector<sys_string> utils::gitLsFiles( const fs::path& path ) {
+
+#ifdef _WIN32
+    std::string nullDevice = "NUL";
+#else
+    std::string nullDevice = "/dev/null";
+#endif
+    fs::current_path( path );
+
+    // -c Show cached files in the output (default)
+    // -o Show other (i.e. untracked) files in the output
+    // -z \0 line termination on output and do not quote filenames
+    const std::string command = "git ls-files -coz --exclude-standard 2> " + nullDevice;
+
     sys_string buffer( 1_kB, '\0' );
+    sys_string rest;
     std::vector<sys_string> result;
+    const sys_string::value_type* last = &buffer.back();
 
     FILE* pipe = popen( command.c_str(), "r" );
 
@@ -73,19 +89,41 @@ std::vector<sys_string> utils::run( const std::string& command ) {
     while( !feof( pipe ) ) {
 #ifdef _WIN32
 
-        if( fgetws( buffer.data(), 101, pipe ) != nullptr ) {
+        if( fgetws( buffer.data(), 1_kB, pipe ) != nullptr ) {
 #else
 
-        if( fgets( buffer.data(), 101, pipe ) != nullptr ) {
+        if( fgets( buffer.data(), 1_kB, pipe ) != nullptr ) {
 #endif
-            result.emplace_back( buffer.c_str() );
+            const sys_string::value_type* from = buffer.data();
+
+            // search first path
+            const sys_string::value_type* to = std::char_traits<sys_string::value_type>::find( from, buffer.size(), '\0' );
+
+            if( !to ) { goto end; }
+
+            // and prepend rest to it
+            rest.append( from, to );
+            result.emplace_back( rest );
+            from = to + 1;
+
+            // search for git's single null terminators
+            while( ( to = std::char_traits<sys_string::value_type>::find( from, last - from, '\0' ) ) ) {
+                result.emplace_back( from, to );
+                from = to + 1;
+
+                // two nulls -> no more output
+                if( to[1] == '\0' ) { goto end; }
+            }
+
+            // keep rest for next fgets round
+            rest.assign( from, last );
+
+            // and clear buffer so we don't read old data
+            memset( buffer.data(), '\0', buffer.size() * sizeof( sys_string::value_type ) );
         }
     }
 
-    for( sys_string& line : result ) {
-        line.pop_back(); // remove newline
-    }
-
+end:
     pclose( pipe );
     return result;
 }
