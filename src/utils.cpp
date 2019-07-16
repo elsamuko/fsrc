@@ -65,22 +65,31 @@ void utils::printColor( Color color, const std::string& text ) {
 // git ls-files -zco --exclude-standard | tr '\0' '\n'
 std::vector<sys_string> utils::gitLsFiles( const fs::path& path ) {
 
+    boost::system::error_code ec;
+    std::vector<sys_string> result;
+
+    if( !fs::is_directory( path, ec ) ) { return result; }
+
+    fs::current_path( path, ec );
+
+    if( ec ) { return result; }
+
 #ifdef _WIN32
     std::string nullDevice = "NUL";
 #else
     std::string nullDevice = "/dev/null";
 #endif
-    fs::current_path( path );
 
     // -c Show cached files in the output (default)
     // -o Show other (i.e. untracked) files in the output
     // -z \0 line termination on output and do not quote filenames
     const std::string command = "git ls-files -coz --exclude-standard 2> " + nullDevice;
 
-    sys_string buffer( 1_kB, '\0' );
+    const size_t size = 1_kB;
+    sys_string buffer( size, '\0' );
+    const sys_string::value_type* first = &buffer.front();
+    const sys_string::value_type* last  = &buffer.back();
     sys_string rest;
-    std::vector<sys_string> result;
-    const sys_string::value_type* last = &buffer.back();
 
     FILE* pipe = popen( command.c_str(), "r" );
 
@@ -94,10 +103,10 @@ std::vector<sys_string> utils::gitLsFiles( const fs::path& path ) {
 
         if( fgets( buffer.data(), 1_kB, pipe ) != nullptr ) {
 #endif
-            const sys_string::value_type* from = buffer.data();
+            const sys_string::value_type* from = first;
 
             // search first path
-            const sys_string::value_type* to = std::char_traits<sys_string::value_type>::find( from, buffer.size(), '\0' );
+            const sys_string::value_type* to = std::char_traits<sys_string::value_type>::find( from, size, '\0' );
 
             if( !to ) { goto end; }
 
