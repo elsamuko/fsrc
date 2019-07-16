@@ -48,9 +48,50 @@ BOOST_AUTO_TEST_CASE( Test_parseContent ) {
     BOOST_CHECK_EQUAL( lines.size(), 4 );
 }
 
-BOOST_AUTO_TEST_CASE( Test_openFile ) {
-    BOOST_CHECK( utils::openFile( "/usr/include/errno.h" ) );
-#ifdef __linux__
-    BOOST_CHECK( called );
-#endif
+BOOST_AUTO_TEST_CASE( Test_recurseDir ) {
+
+    fs::path dir = fs::temp_directory_path( ) / "test_recurseDir";
+    fs::remove_all( dir );
+    fs::create_directories( dir );
+    fs::path test = dir / "test\">.txt";
+    std::string content = "hase";
+    boost::filesystem::ofstream( test ) << content;
+
+    size_t counter = 0;
+    utils::recurseDir( dir.native(), [&]( const sys_string & filename ) {
+        ++counter;
+        utils::FileView view = utils::fromFileP( filename );
+        BOOST_CHECK_EQUAL( std::string( view.content ), content );
+    } );
+
+
+    BOOST_CHECK_EQUAL( counter, 1 );
+}
+
+BOOST_AUTO_TEST_CASE( Test_recurseGit ) {
+
+    // must be in within repo
+    const fs::path dir = "test_recurseGit";
+    fs::remove_all( dir );
+    fs::create_directories( dir );
+
+    std::string content = "hase";
+
+    for( size_t i = 0; i < 100; ++i ) {
+        boost::filesystem::ofstream of( dir / utils::format( "test%02d\\\">.cpp", i ) );
+        of << content;
+        of.close();
+    }
+
+    std::vector<sys_string> gitFiles = utils::gitLsFiles( dir );
+
+    size_t counter = 0;
+
+    for( const sys_string& filename : gitFiles ) {
+        ++counter;
+        utils::FileView view = utils::fromFileP( filename );
+        BOOST_CHECK_EQUAL( std::string( view.content ), content );
+    }
+
+    BOOST_CHECK_EQUAL( counter, 100 );
 }
