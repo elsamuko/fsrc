@@ -107,17 +107,9 @@ void Searcher::onGitFiles() {
     this->printGitHeader();
 
     POOL;
-#ifdef _WIN32
-    std::string nullDevice = "NUL";
-#else
-    std::string nullDevice = "/dev/null";
-#endif
-    fs::current_path( opts.path );
     STOPWATCH
     START
-    // -c all from repo
-    // -o other not ignored
-    std::vector<sys_string> gitFiles = utils::run( "git ls-files -co --exclude-standard 2> " + nullDevice );
+    std::vector<sys_string> gitFiles = utils::gitLsFiles( opts.path );
     STOP( stats.t_recurse );
 
     for( const sys_string& filename : gitFiles ) {
