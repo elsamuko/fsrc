@@ -83,15 +83,13 @@ BOOST_AUTO_TEST_CASE( Test_recurseGit ) {
         of.close();
     }
 
-    std::vector<sys_string> gitFiles = utils::gitLsFiles( dir );
-
     size_t counter = 0;
 
-    for( const sys_string& filename : gitFiles ) {
+    utils::gitLsFiles( dir, [&]( const sys_string & filename ) {
         ++counter;
         utils::FileView view = utils::fromFileP( filename );
         BOOST_CHECK_EQUAL( std::string( view.content ), content );
-    }
+    } );
 
     BOOST_CHECK_EQUAL( counter, 100 );
 }

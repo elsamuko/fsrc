@@ -63,16 +63,15 @@ void utils::printColor( Color color, const std::string& text ) {
 }
 
 // git ls-files -zco --exclude-standard | tr '\0' '\n'
-std::vector<sys_string> utils::gitLsFiles( const fs::path& path ) {
+void utils::gitLsFiles( const fs::path& path, const std::function<void( const sys_string& filename )>& callback ) {
 
     boost::system::error_code ec;
-    std::vector<sys_string> result;
 
-    if( !fs::is_directory( path, ec ) ) { return result; }
+    if( !fs::is_directory( path, ec ) ) { return; }
 
     fs::current_path( path, ec );
 
-    if( ec ) { return result; }
+    if( ec ) { return; }
 
 #ifdef _WIN32
     std::string nullDevice = "NUL";
@@ -93,7 +92,7 @@ std::vector<sys_string> utils::gitLsFiles( const fs::path& path ) {
 
     FILE* pipe = popen( command.c_str(), "r" );
 
-    if( !pipe ) { return result; }
+    if( !pipe ) { return; }
 
     while( !feof( pipe ) ) {
 #ifdef _WIN32
@@ -111,13 +110,13 @@ std::vector<sys_string> utils::gitLsFiles( const fs::path& path ) {
             if( !to ) { goto end; }
 
             // and prepend rest to it
-            rest.append( from, to );
-            result.emplace_back( rest );
+            callback( rest + sys_string( from, to ) );
+
             from = to + 1;
 
             // search for git's single null terminators
             while( ( to = std::char_traits<sys_string::value_type>::find( from, last - from, '\0' ) ) ) {
-                result.emplace_back( from, to );
+                callback( sys_string( from, to ) );
                 from = to + 1;
 
                 // two nulls -> no more output
@@ -125,7 +124,7 @@ std::vector<sys_string> utils::gitLsFiles( const fs::path& path ) {
             }
 
             // keep rest for next fgets round
-            rest.assign( from, last );
+            rest = sys_string( from, last );
 
             // and clear buffer so we don't read old data
             memset( buffer.data(), '\0', buffer.size() * sizeof( sys_string::value_type ) );
@@ -134,7 +133,6 @@ std::vector<sys_string> utils::gitLsFiles( const fs::path& path ) {
 
 end:
     pclose( pipe );
-    return result;
 }
 
 // binary files have usually zero padding

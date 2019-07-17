@@ -109,15 +109,15 @@ void Searcher::onGitFiles() {
     POOL;
     STOPWATCH
     START
-    std::vector<sys_string> gitFiles = utils::gitLsFiles( opts.path );
-    STOP( stats.t_recurse );
 
-    for( const sys_string& filename : gitFiles ) {
+    utils::gitLsFiles( opts.path, [&pool, this]( const sys_string & filename ) {
         pool.add( [filename, this] {
             stats.filesSearched++;
             search( filename );
         } );
-    }
+    } );
+
+    STOP( stats.t_recurse );
 }
 
 void Searcher::printHeader() {
