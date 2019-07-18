@@ -1,14 +1,7 @@
 #pragma once
 
 #include "utils.hpp"
-
-#ifdef _WIN32
-#include <io.h>
-#define isatty _isatty
-#define fileno _fileno
-#else
-#include <unistd.h>
-#endif
+#include "pipes.hpp"
 
 struct SearchOptions {
     bool success = false;
@@ -19,7 +12,7 @@ struct SearchOptions {
     bool html = false;
     std::string term;
     fs::path path;
-    bool piped = isatty( fileno( stdout ) ) == 0;
+    bool piped = pipes::stdoutIsPipe();
     bool colorized = !piped;
     operator bool() const { return success; }
     static SearchOptions parseArgs( int argc, char* argv[] );

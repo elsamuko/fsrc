@@ -10,6 +10,9 @@ HEADERS += $${SRC_DIR}/types.hpp
 HEADERS += $${SRC_DIR}/utils.hpp
 SOURCES += $${SRC_DIR}/utils.cpp
 
+HEADERS += $${SRC_DIR}/pipes.hpp
+SOURCES += $${SRC_DIR}/pipes.cpp
+
 HEADERS += $${SRC_DIR}/searcher.hpp
 SOURCES += $${SRC_DIR}/searcher.cpp
 
