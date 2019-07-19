@@ -36,7 +36,8 @@ enum class Color {
     Green,
     Blue,
     Gray,
-    Neutral
+    Neutral,
+    Reset
 };
 
 constexpr unsigned long long int operator "" _MB( unsigned long long int in ) {
