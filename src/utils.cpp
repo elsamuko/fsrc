@@ -8,18 +8,21 @@
 #include <cstring>
 #include <fcntl.h>
 
+#include "pipes.hpp"
 #include "stdstr.hpp"
 
 #ifdef _WIN32
 #include <Windows.h>
 
-const std::map<Color, WORD> colors = {
+const std::map<Color, WORD> winColors = {
     {Color::Red,     FOREGROUND_RED},
     {Color::Green,   FOREGROUND_GREEN},
     {Color::Blue,    FOREGROUND_BLUE | FOREGROUND_GREEN},
     {Color::Gray,    FOREGROUND_INTENSITY},
 };
+
 #else
+
 #include <dirent.h>
 #include <sys/stat.h>
 
@@ -32,31 +35,41 @@ const std::map<Color, WORD> colors = {
 #define fstat fstat64
 #endif
 
-const std::map<Color, std::string> colors = {
+#endif
+
+const std::map<Color, std::string> bashColors = {
     {Color::Red,     "\033[1;31m"},
     {Color::Green,   "\033[1;32m"},
     {Color::Blue,    "\033[1;34m"},
     {Color::Gray,    "\033[38;5;245m"},
+    {Color::Reset,   "\033[0m"},
 };
-#endif
 
 void utils::printColor( Color color, const std::string& text ) {
     if( color == Color::Neutral ) {
         fwrite( text.c_str(), 1, text.size(), stdout );
     } else {
 #ifdef _WIN32
-        const HANDLE h = ::GetStdHandle( STD_OUTPUT_HANDLE );
-        const static WORD attributes = []( const HANDLE h ) {
-            CONSOLE_SCREEN_BUFFER_INFO csbiInfo = {};
-            ::GetConsoleScreenBufferInfo( h, &csbiInfo );
-            return csbiInfo.wAttributes;
-        }( h );
-        const static WORD background = attributes & ( 0x00F0 );
-        ::SetConsoleTextAttribute( h, background | colors.at( color ) | FOREGROUND_INTENSITY );
-        fwrite( text.c_str(), 1, text.size(), stdout );
-        ::SetConsoleTextAttribute( h, attributes );
+
+        if( pipes::stdoutIsMsysPty() ) {
+            std::string data = bashColors.at( color ) + text + bashColors.at( Color::Reset );
+            fwrite( data.c_str(), 1, data.size(), stdout );
+        } else {
+
+            const HANDLE h = ::GetStdHandle( STD_OUTPUT_HANDLE );
+            const static WORD attributes = []( const HANDLE h ) {
+                CONSOLE_SCREEN_BUFFER_INFO csbiInfo = {};
+                ::GetConsoleScreenBufferInfo( h, &csbiInfo );
+                return csbiInfo.wAttributes;
+            }( h );
+            const static WORD background = attributes & ( 0x00F0 );
+            ::SetConsoleTextAttribute( h, background | winColors.at( color ) | FOREGROUND_INTENSITY );
+            fwrite( text.c_str(), 1, text.size(), stdout );
+            ::SetConsoleTextAttribute( h, attributes );
+        }
+
 #else
-        std::string data = colors.at( color ) + text + "\033[0m";
+        std::string data = bashColors.at( color ) + text + bashColors.at( Color::Reset );
         fwrite( data.c_str(), 1, data.size(), stdout );
 #endif
     }
