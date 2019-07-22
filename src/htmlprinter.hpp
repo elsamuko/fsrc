@@ -78,12 +78,12 @@ struct HtmlPrinter : public Printer {
 
             if( of ) {
                 of << "<!DOCTYPE html>\n"
+                   << "<html>\n\n"
                    << "<head>\n"
                    << "<title>fsrc \"" << HTML::encode( this->opts.term ) << "\"</title>\n"
                    << HTML::css
                    << "</head>\n\n"
-                   << "<html>\n"
-                   << "<body>\n\n"
+                   << "<body>\n"
                    << "<h1>fsrc results for \"" << HTML::encode( this->opts.term )
                    << "\" in " << HTML::encode( fs::absolute( this->opts.path ).string() )
                    << "</h1>\n\n";
@@ -97,7 +97,7 @@ struct HtmlPrinter : public Printer {
                 fs::ofstream of( html, std::ios::out | std::ios::binary | std::ios::app );
 
                 if( of ) {
-                    of << "\n</body>\n"
+                    of << "</body>\n\n"
                        << "</html>\n";
                 }
 
