@@ -18,7 +18,7 @@ Options:
   --html                open web page with results
   -q [ --quiet ]        only print status
 
-Build : v0.13 from Jul 17 2019
+Build : v0.14 from Jul 19 2019
 Web   : https://github.com/elsamuko/fsrc
 user@home:/usr/include/boost$ fsrc filesystem
 Searching for "filesystem" in folder:
@@ -43,6 +43,9 @@ user@home:/usr/include/boost$
   * binaries are 'detected', if they contain two binary 0's within the first 100 bytes or are PDF or PostScript files.
   * it supports one option-less argument as search term
   * folders are set with -d
+
+## Architecture
+fsrc has a simple architecture: https://elsamuko.github.io/fsrc/docs/architecture.html
 
 ## Building
 
