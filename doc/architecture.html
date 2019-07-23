@@ -1,0 +1,97 @@
+<!doctype html>
+<html>
+
+<head>
+  <title>fsrc architecture</title>
+
+  <script type="text/javascript" src="vis-network.min.js"></script>
+  <link href="vis-network.min.css" rel="stylesheet" type="text/css" />
+
+  <style type="text/css">
+    body,
+    html {
+      height: 100%;
+    }
+
+    #architecture {
+      height: 95%;
+      border: 1px solid lightgray;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="architecture"></div>
+
+  <script type="text/javascript">
+
+    var nodes = new vis.DataSet([
+      { id: 'htmlprinter', label: 'HTML Printer', group: 'printer' },
+      { id: 'prettyprinter', label: 'Pretty Printer', group: 'printer' },
+      { id: 'pipedprinter', label: 'Piped Printer', group: 'printer' },
+      { id: 'printerfactory', label: 'Printer Factory', group: 'printer', shape: 'box' },
+      { id: 'searchoptions', label: 'Search Options', group: 'search' },
+      { id: 'searcher', font: { size: 30 }, label: 'Searcher', group: 'search', shape: 'box' },
+      { id: 'threadpool', label: 'ThreadPool', group: 'threadpool', shape: 'box' },
+      { id: 'ongitfiles', label: 'onGitFiles', group: 'search' },
+      { id: 'onallfiles', label: 'onAllFiles', group: 'search' },
+      { id: 'search', font: { size: 24 }, label: 'search', group: 'search' },
+      { id: 'caseinsensitivesearch', label: 'caseInsensitiveSearch', group: 'search' },
+      { id: 'casesensitivesearch', label: 'caseSensitiveSearch', group: 'search' },
+      { id: 'regexsearch', label: 'regexSearch', group: 'search' },
+      { id: 'collectprints', label: 'collectPrints', group: 'printer' },
+      { id: 'printprints', label: 'printPrints', group: 'printer' },
+      { id: 'gitlsfiles', label: 'utils::gitLsFiles', group: 'utils' },
+      { id: 'recursedir', label: 'utils::recurseDir', group: 'utils' },
+      { id: 'fromfilep', label: 'utils::fromFileP', group: 'utils' },
+      { id: 'printcolor', label: 'utils::printColor', group: 'utils' },
+    ]);
+
+    var edges = new vis.DataSet([
+      { from: 'htmlprinter', to: 'printerfactory', arrows: 'to' },
+      { from: 'prettyprinter', to: 'printerfactory', arrows: 'to' },
+      { from: 'pipedprinter', to: 'printerfactory', arrows: 'to' },
+      { from: 'printerfactory', to: 'searcher', arrows: 'to' },
+      { from: 'searchoptions', to: 'searcher', arrows: 'to' },
+      { from: 'searcher', to: 'ongitfiles', arrows: 'to' },
+      { from: 'searcher', to: 'onallfiles', arrows: 'to' },
+      { from: 'gitlsfiles', to: 'ongitfiles' },
+      { from: 'recursedir', to: 'onallfiles' },
+      { from: 'ongitfiles', to: 'threadpool', arrows: 'to' },
+      { from: 'onallfiles', to: 'threadpool', arrows: 'to' },
+      { from: 'threadpool', to: 'search', arrows: 'to' },
+      { from: 'fromfilep', to: 'search' },
+      { from: 'search', to: 'caseinsensitivesearch', arrows: 'to' },
+      { from: 'search', to: 'casesensitivesearch', arrows: 'to' },
+      { from: 'search', to: 'regexsearch', arrows: 'to' },
+      { from: 'caseinsensitivesearch', to: 'collectprints', arrows: 'to' },
+      { from: 'casesensitivesearch', to: 'collectprints', arrows: 'to' },
+      { from: 'regexsearch', to: 'collectprints', arrows: 'to' },
+      { from: 'collectprints', to: 'printprints', arrows: 'to' },
+      { from: 'printprints', to: 'printcolor' },
+    ]);
+
+    var container = document.getElementById('architecture');
+
+    var data = {
+      nodes: nodes,
+      edges: edges
+    };
+
+    var options = {
+      nodes: {
+        shadow: true
+      },
+      edges: {
+        width: 2,
+        shadow: true
+      },
+    };
+
+    var network = new vis.Network(container, data, options);
+  </script>
+
+</body>
+
+</html>
