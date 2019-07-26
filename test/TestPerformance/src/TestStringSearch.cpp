@@ -10,7 +10,7 @@
 BOOST_AUTO_TEST_CASE( Test_find ) {
     printf( "String search\n" );
 
-    std::string term = "Termination";
+    std::string term = "t4tb7qfSFb2";
     std::string full( ( const char* )licence, sizeof( licence ) );
     std::string small = R"gpl(
 Moreover, your license from a particular copyright holder is
@@ -31,19 +31,17 @@ material under section 10.
         std::string_view view( text );
 
         // init with correct values
-        size_t pos = text.find( term );
-        const char* ptr = text.data() + pos;
-        std::string::const_iterator it = text.cbegin() + pos;
+        size_t pos = std::string::npos;
+        const char* ptr = nullptr;
+        std::string::const_iterator it = text.cend();
 
         boost::algorithm::boyer_moore_horspool bmh( term.begin(), term.end() );
         boost::algorithm::knuth_morris_pratt kmp( term.begin(), term.end() );
 
         auto checks = [&] {
-            BOOST_REQUIRE_NE( pos, std::string::npos );
-            BOOST_REQUIRE_NE( ptr, nullptr );
-            BOOST_REQUIRE_NE( it - text.cbegin(), 0 );
-            BOOST_REQUIRE_EQUAL( ptr - text.data(), it - text.cbegin() );
-            BOOST_REQUIRE_EQUAL( pos, it - text.cbegin() );
+            BOOST_REQUIRE_EQUAL( pos, std::string::npos );
+            BOOST_REQUIRE_EQUAL( ptr, nullptr );
+            BOOST_REQUIRE_EQUAL( it - text.cbegin(), text.size() );
         };
 
         long t_find = timed1000( "find", [&text, &term, &pos] {
@@ -81,12 +79,8 @@ material under section 10.
         }, checks );
 
 
-#if BOOST_OS_WINDOWS
-        BOOST_CHECK_GT( t_find, t_strstr ); // assume find is slower than strstr on Windows
-#else
-        BOOST_CHECK_LT( t_find, t_strstr ); // assume find is faster than strstr
-#endif
-        BOOST_CHECK_GT( t_BMH, t_find ); // assume bmh is slower than find
+        BOOST_CHECK_GT( t_find, t_strstr ); // assume find is slower than strstr
+        BOOST_CHECK_LT( t_BMH, t_find ); // assume bmh is slower than find
         printf( "\n" );
     }
 }
