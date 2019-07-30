@@ -18,7 +18,7 @@ Options:
   --html                open web page with results
   -q [ --quiet ]        only print status
 
-Build : v0.14 from Jul 19 2019
+Build : v0.15 from Jul 30 2019
 Web   : https://github.com/elsamuko/fsrc
 user@home:/usr/include/boost$ fsrc filesystem
 Searching for "filesystem" in folder:
