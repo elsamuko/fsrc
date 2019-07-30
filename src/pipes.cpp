@@ -27,9 +27,9 @@ typedef struct _OBJECT_NAME_INFORMATION {
 
 #define ObjectNameInformation ( OBJECT_INFORMATION_CLASS )1
 
-bool pipes::stdoutIsMsysPty() {
+bool pipes::stdoutIsPipedPty() {
     static std::once_flag once;
-    static bool isMsysPty = false;
+    static bool isPipedPty = false;
 
     std::call_once( once, [] {
         HANDLE hOut = ( HANDLE ) _get_osfhandle( _fileno( stdout ) );
@@ -43,19 +43,21 @@ bool pipes::stdoutIsMsysPty() {
         POBJECT_NAME_INFORMATION ni = ( POBJECT_NAME_INFORMATION )buffer.data();
         NTSTATUS ok = NtQueryObject_( hOut, ObjectNameInformation, ni, buffer.size(), &length );
 
-        // unpiped cygwin: \Device\ConDrv
-        //   piped cygwin: \Device\NamedPipe\cygwin-e022582115c10879-2492-pipe-0x5
-        //   unpiped msys: \Device\NamedPipe\msys-dd50a72ab4668b33-pty0-to-master
-        //     piped msys: \Device\NamedPipe\msys-dd50a72ab4668b33-9588-pipe-0xF
+        // unpiped ConsoleZ : \Device\ConDrv
+        //   unpiped cygwin : \Device\NamedPipe\cygwin-e022582115c10879-pty0-to-master
+        //     piped cygwin : \Device\NamedPipe\cygwin-e022582115c10879-2492-pipe-0x5
+        //     unpiped msys : \Device\NamedPipe\msys-dd50a72ab4668b33-pty0-to-master
+        //       piped msys : \Device\NamedPipe\msys-dd50a72ab4668b33-9588-pipe-0xF
         if( NT_SUCCESS( ok ) ) {
             std::wstring_view name( ni->Name.Buffer, ni->Name.Length );
             bool isMsys = name.find( L"msys" ) != std::wstring::npos;
+            bool isCygwin = name.find( L"cygwin" ) != std::wstring::npos;
             bool isPty = name.find( L"pty" ) != std::wstring::npos;
-            isMsysPty = isMsys && isPty;
+            isPipedPty = ( isMsys || isCygwin ) && isPty;
         }
     } );
 
-    return isMsysPty;
+    return isPipedPty;
 }
 
 #endif
@@ -76,7 +78,7 @@ bool pipes::stdoutIsPipe() {
                 break;
 
             case FILE_TYPE_PIPE:
-                pipe = !stdoutIsMsysPty();
+                pipe = !stdoutIsPipedPty();
                 break;
         }
 

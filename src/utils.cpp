@@ -51,7 +51,7 @@ void utils::printColor( Color color, const std::string& text ) {
     } else {
 #ifdef _WIN32
 
-        if( pipes::stdoutIsMsysPty() ) {
+        if( pipes::stdoutIsPipedPty() ) {
             std::string data = bashColors.at( color ) + text + bashColors.at( Color::Reset );
             fwrite( data.c_str(), 1, data.size(), stdout );
         } else {

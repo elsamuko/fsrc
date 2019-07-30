@@ -1,6 +1,6 @@
 #pragma once
 
 namespace pipes {
-bool stdoutIsMsysPty();
+bool stdoutIsPipedPty();
 bool stdoutIsPipe();
 }
