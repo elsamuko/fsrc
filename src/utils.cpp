@@ -297,6 +297,10 @@ void utils::recurseDir( const sys_string& filename, const std::function<void( co
 
             if( !strcmp( dp->d_name, ".git" ) ) { continue; }
 
+            if( !strcmp( dp->d_name, ".svn" ) ) { continue; }
+
+            if( !strcmp( dp->d_name, ".hg" ) ) { continue; }
+
             utils::recurseDir( filename + slash + dp->d_name, callback );
             continue;
         }
@@ -321,6 +325,10 @@ void utils::recurseDir( const sys_string& filename, const std::function<void ( c
             if( !wcscmp( data.cFileName, L".." ) ) { continue; }
 
             if( !wcscmp( data.cFileName, L".git" ) ) { continue; }
+
+            if( !wcscmp( data.cFileName, L".svn" ) ) { continue; }
+
+            if( !wcscmp( data.cFileName, L".hg" ) ) { continue; }
 
             recurseDir( filename + L"\\" + data.cFileName, callback );
             continue;
