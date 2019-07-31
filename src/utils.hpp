@@ -25,6 +25,8 @@
 
 #include "boost/predef.h"
 #include "boost/filesystem.hpp"
+#include "boost/align/aligned_alloc.hpp"
+
 namespace fs = boost::filesystem;
 using sys_string = fs::path::string_type;
 namespace os = boost::system;
@@ -57,13 +59,15 @@ struct ScopeGuard {
 };
 
 struct Buffer {
-    char* ptr = static_cast<char*>( malloc( 1_MB ) );
     size_t size = 0;
     size_t reserved = 1_MB;
+    // align at 128 bits for ssestr
+    char* ptr = static_cast<char*>( boost::alignment::aligned_alloc( 16, reserved ) );
     inline char* grow( const size_t requested ) {
         if( reserved < requested ) {
             reserved = requested;
-            ptr = static_cast<char*>( realloc( ptr, reserved + 1 ) );
+            boost::alignment::aligned_free( ptr );
+            ptr = static_cast<char*>( boost::alignment::aligned_alloc( 16, reserved + 1 ) );
         }
 
         size = requested;
@@ -72,7 +76,7 @@ struct Buffer {
     }
 
     ~Buffer() {
-        free( ptr );
+        boost::alignment::aligned_free( ptr );
     }
 };
 
