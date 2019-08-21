@@ -129,11 +129,11 @@ void utils::gitLsFiles( const fs::path& path, const std::function<void( const sy
 
             // search for git's single null terminators
             while( ( to = std::char_traits<sys_string::value_type>::find( from, last - from, '\0' ) ) ) {
+                // two nulls -> no more output
+                if( from == to ) { goto end; }
+
                 callback( sys_string( from, to ) );
                 from = to + 1;
-
-                // two nulls -> no more output
-                if( to[1] == '\0' ) { goto end; }
             }
 
             // keep rest for next fgets round
