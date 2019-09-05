@@ -45,7 +45,7 @@ user@home:/usr/include/boost$
   * folders are set with -d
 
 ## Architecture
-fsrc has a simple architecture: https://elsamuko.github.io/fsrc/docs/architecture.html
+fsrc has a simple architecture: https://elsamuko.github.io/fsrc/architecture.html
 
 ## Building
 
