@@ -1,0 +1,15 @@
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+set(MAIN_DIR "${CMAKE_CURRENT_SOURCE_DIR}/..")
+SET(EXECUTABLE_OUTPUT_PATH ${MAIN_DIR})
+set(SRC_DIR "${MAIN_DIR}/src")
+set(TMP_DIR "${MAIN_DIR}/tmp")
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(COMPILE_MODE "debug")
+else()
+    set(COMPILE_MODE "release")
+endif()
+
+message(STATUS "Building [${COMPILE_MODE}]")
