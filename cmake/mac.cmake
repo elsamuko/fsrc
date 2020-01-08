@@ -9,4 +9,4 @@ if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_link_options(${PROJECT} BEFORE PRIVATE -flto)
 endif()
 
-target_link_options(${PROJECT} BEFORE PRIVATE -framework Foundation -framework Appkit)
+target_link_options(${PROJECT} BEFORE PRIVATE "SHELL:-framework Appkit")

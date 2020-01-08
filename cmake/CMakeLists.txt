@@ -22,6 +22,7 @@ if(UNIX AND NOT APPLE)
 endif()
 
 if(APPLE)
+    target_sources(${PROJECT} PRIVATE "../src/macutils.mm")
     include(mac.cmake)
 endif()
 
