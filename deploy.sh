@@ -5,17 +5,17 @@ MAIN_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 case $(uname) in
     Linux)
         OS=linux
-        MAKE="make"
+        CMAKE="/snap/bin/cmake" # snap install cmake --classic
         ;;
     Darwin)
         OS=mac
-        MAKE="make"
+        CMAKE="cmake" # brew install cmake
         ;;
     CYGWIN*|MINGW*|MSYS*)
         OS=win
         OS_EXT=Win
         EXT=".exe"
-        MAKE="$MAIN_DIR/utils/jom/jom.exe"
+        CMAKE="$USERPROFILE/scoop/apps/cmake/current/bin/cmake" # scoop install cmake
         ;;
     *)
         echo "Error: Unknown OS."
@@ -24,17 +24,18 @@ case $(uname) in
 esac
 
 TMP_DIR="$MAIN_DIR/tmp/deploy"
-QMAKE="$MAIN_DIR/utils/qmake/bin/qmake_$OS$EXT"
+CMAKE_DIR="$MAIN_DIR/cmake"
+BUILD_DIR="$CMAKE_DIR/build"
 GIT_TAG=$(git describe --abbrev=0)
 ZIP_FILE="fsrc-$OS-$GIT_TAG.zip"
 FSRC_BIN="$MAIN_DIR/fsrc$EXT"
-HELPER="$MAIN_DIR/qmake/compile.bat"
+HELPER="$BUILD_DIR/compile.bat"
 
 function createHelper {
     local VERSIONS=("2019")
     local EDITIONS=("BuildTools" "Community" "Professional" "Enterprise")
     
-    echo -e '@echo off\r\n' > "$HELPER"
+    echo -ne '@echo off\r\n\r\n' > "$HELPER"
 
     for VERSION in "${VERSIONS[@]}"; do
         for EDITION in "${EDITIONS[@]}"; do
@@ -54,20 +55,22 @@ function createHelper {
         exit 1
     fi
     
-    echo -e ' > nul\r\n' >> "$HELPER"
-    echo -e 'echo %*' >> "$HELPER"
-    echo -e '%*' >> "$HELPER"
+    echo -ne ' > nul\r\n\r\n' >> "$HELPER"
+    echo -ne 'echo %*\r\n' >> "$HELPER"
+    echo -ne '%*\r\n' >> "$HELPER"
     chmod +x "$HELPER"
 }
 
 function please_remove {
     if [ -f "$1" ]; then rm "$1"; fi
+    if [ -d "$1" ]; then rm -r "$1"; fi
 }
 
 function prepare {
     please_remove "$FSRC_BIN"
     please_remove "$ZIP_FILE"
-    please_remove "$HELPER"
+    please_remove "$BUILD_DIR"
+    mkdir -p "$BUILD_DIR"
     mkdir -p "$TMP_DIR"
 }
 
@@ -80,20 +83,27 @@ function buildBoost {
 
 function buildFsrc {
     ( 
-        cd qmake || exit 1
-        "$QMAKE" fsrc.pro &> "$TMP_DIR/qmake.log"
-        "$MAKE" clean &> "$TMP_DIR/make.log"
-        "$MAKE" &> "$TMP_DIR/make.log"
+        cd "$BUILD_DIR" || exit 1
+        # configure
+        "$CMAKE" -S .. &> "$TMP_DIR/cmake.log"
+
+        # build
+        "$CMAKE" --build . --parallel --config Release &> "$TMP_DIR/cmake.log"
     )
 }
 
 function buildFsrcWin {
     createHelper
     ( 
-        cd qmake || exit 1
-        "$HELPER" "$(cygpath -w "$QMAKE")" fsrc.pro &> "$TMP_DIR/qmake.log"
-        "$HELPER" "$(cygpath -w "$MAKE")" clean &> "$TMP_DIR/make.log"
-        "$HELPER" "$(cygpath -w "$MAKE")" &> "$TMP_DIR/make.log"
+        cd "$BUILD_DIR" || exit 1
+
+        # configure
+        "$HELPER" \
+        "$CMAKE" -S .. &> "$TMP_DIR/cmake.log"
+
+        # build
+        "$HELPER" \
+        "$CMAKE" --build . --parallel --config Release &> "$TMP_DIR/cmake.log"
     )
 }
 
