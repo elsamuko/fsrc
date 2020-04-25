@@ -99,19 +99,20 @@ function winBuild {
 function linuxBuild {
     cd "$BUILD_DIR"
     
+    alias g++=g++-10
     ./bootstrap.sh --without-icu
 
     # https://stackoverflow.com/a/5346531
-    # echo "using gcc : 9.1 : /usr/bin/g++-9 ; " >> tools/build/src/user-config.jam
+    echo "using gcc : 10 : /usr/bin/g++-10 ; " >> tools/build/src/user-config.jam
 
     # debug
-    ./b2 -j 8 --disable-icu --stagedir=stage_debug toolset=gcc variant=debug \
+    ./b2 -j 8 --disable-icu --stagedir=stage_debug toolset=gcc-10 variant=debug \
         cxxflags="-std=c++17" \
         $B2_OPTIONS \
         $NEEDED_LIBS
 
     # release
-    ./b2 -j 8 --disable-icu --stagedir=stage_release toolset=gcc variant=release optimization=speed \
+    ./b2 -j 8 --disable-icu --stagedir=stage_release toolset=gcc-10 variant=release optimization=speed \
         cxxflags="-std=c++17 -msse2 -oFast" linkflags="-flto" \
         $B2_OPTIONS \
         $NEEDED_LIBS
