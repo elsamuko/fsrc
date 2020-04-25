@@ -5,7 +5,7 @@ MAIN_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 case $(uname) in
     Linux)
         OS=linux
-        CMAKE="/snap/bin/cmake" # snap install cmake --classic
+        CMAKE="cmake" # sudo apt install cmake
         ;;
     Darwin)
         OS=mac
