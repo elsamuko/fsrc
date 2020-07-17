@@ -2,6 +2,8 @@
 
 #include "printer.hpp"
 
+#define CUT_OFF 200
+
 struct PrettyPrinter : public Printer {
     using Print = std::function<void()>;
     std::vector<Print> prints;
@@ -9,6 +11,9 @@ struct PrettyPrinter : public Printer {
     virtual void printPrints() override;
     PrettyPrinter( const SearchOptions& opts ) : Printer( opts ) {}
     virtual ~PrettyPrinter() override {}
+    inline void ellipsis() {
+        prints.emplace_back( utils::printFunc( Color::Gray, std::string( "..." ) ) );
+    }
 };
 
 void PrettyPrinter::collectPrints( const sys_string& path, const std::vector<search::Match>& matches, const std::string_view& content ) {
@@ -59,7 +64,13 @@ void PrettyPrinter::collectPrints( const sys_string& path, const std::vector<sea
 
             // code in neutral
             if( line.cbegin() < match->first ) {
-                prints.emplace_back( utils::printFunc( Color::Neutral, std::string( line.cbegin(), match->first ) ) );
+                // elide left if line is too long
+                if( match->first - line.cbegin() > CUT_OFF ) {
+                    this->ellipsis();
+                    prints.emplace_back( utils::printFunc( Color::Neutral, std::string( match->first - CUT_OFF, match->first ) ) );
+                } else {
+                    prints.emplace_back( utils::printFunc( Color::Neutral, std::string( line.cbegin(), match->first ) ) );
+                }
             }
         }
 
@@ -74,7 +85,13 @@ void PrettyPrinter::collectPrints( const sys_string& path, const std::vector<sea
         // and exit search for this file
         if( std::next( match ) == end ) {
             if( from < line.cend() ) {
-                prints.emplace_back( utils::printFunc( Color::Neutral, std::string( from, line.cend() ) ) );
+                // elide right if line is too long
+                if( line.cend() - from > CUT_OFF ) {
+                    prints.emplace_back( utils::printFunc( Color::Neutral, std::string( from, from + CUT_OFF ) ) );
+                    this->ellipsis();
+                } else {
+                    prints.emplace_back( utils::printFunc( Color::Neutral, std::string( from, line.cend() ) ) );
+                }
             }
 
             goto end;
@@ -84,11 +101,24 @@ void PrettyPrinter::collectPrints( const sys_string& path, const std::vector<sea
 
         // if next match is within this line, print code in neutral until next match
         if( match->first < line.cend() ) {
-            prints.emplace_back( utils::printFunc( Color::Neutral, std::string( from, match->first ) ) );
+            if( line.cend() - match->first > CUT_OFF ) {
+                // elide middle if line is too long
+                prints.emplace_back( utils::printFunc( Color::Neutral, std::string( from, from + CUT_OFF / 2 ) ) );
+                this->ellipsis();
+                prints.emplace_back( utils::printFunc( Color::Neutral, std::string( match->first - CUT_OFF / 2, match->first ) ) );
+            } else {
+                prints.emplace_back( utils::printFunc( Color::Neutral, std::string( from, match->first ) ) );
+            }
         }
         // else print code in neutral until end
         else {
-            prints.emplace_back( utils::printFunc( Color::Neutral, std::string( from, line.cend() ) ) );
+            // elide right if line is too long
+            if( line.cend() - from > CUT_OFF ) {
+                prints.emplace_back( utils::printFunc( Color::Neutral, std::string( from, from + CUT_OFF ) ) );
+                this->ellipsis();
+            } else {
+                prints.emplace_back( utils::printFunc( Color::Neutral, std::string( from, line.cend() ) ) );
+            }
         }
     }
 
