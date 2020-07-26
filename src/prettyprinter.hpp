@@ -9,21 +9,27 @@ struct PrettyPrinter : public Printer {
     std::vector<Print> prints;
     virtual void collectPrints( const sys_string& path, const std::vector<search::Match>& matches, const std::string_view& content ) override;
     virtual void printPrints() override;
-    PrettyPrinter( const SearchOptions& opts ) : Printer( opts ) {}
+    PrettyPrinter( const SearchOptions& opts ) : Printer( opts ) {
+        // don't pipe colors
+        cred   = opts.colorized ? Color::Red   : Color::Neutral;
+        cblue  = opts.colorized ? Color::Blue  : Color::Neutral;
+        cgreen = opts.colorized ? Color::Green : Color::Neutral;
+        cgray  = opts.colorized ? Color::Gray  : Color::Neutral;
+    }
     virtual ~PrettyPrinter() override {}
     inline void ellipsis() {
-        prints.emplace_back( utils::printFunc( Color::Gray, std::string( "..." ) ) );
+        prints.emplace_back( utils::printFunc( cgray, std::string( "..." ) ) );
     }
+
+    Color cred;
+    Color cblue;
+    Color cgreen;
+    Color cgray;
 };
 
 void PrettyPrinter::collectPrints( const sys_string& path, const std::vector<search::Match>& matches, const std::string_view& content ) {
     prints.clear();
     prints.reserve( 3 * matches.size() );
-
-    // don't pipe colors
-    Color cred   = opts.colorized ? Color::Red   : Color::Neutral;
-    Color cblue  = opts.colorized ? Color::Blue  : Color::Neutral;
-    Color cgreen = opts.colorized ? Color::Green : Color::Neutral;
 
     // print file path
 #ifdef _WIN32
