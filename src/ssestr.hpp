@@ -86,13 +86,16 @@ inline char const* scanstr2( char const* tgt, char const pat[2] ) {
 
 namespace sse {
 
-inline char const* scanstrN( char const* tgt, char const* pat, int len ) {
-    for( ; ( tgt = scanstr2( tgt, pat ) ); tgt++ )
+inline const char* scanstrN( char const* tgt, const int size, char const* pat, int len ) {
+    if( len == 1 ) { return static_cast<const char*>( memchr( tgt, pat[0], size ) ); }
+
+    for( ; ( tgt = scanstr2( tgt, pat ) ); tgt++ ) {
         if( !memcmp( tgt + 2, pat + 2, len - 2 ) ) {
             return tgt;
         }
+    }
 
-    return NULL;
+    return nullptr;
 }
 
 }
