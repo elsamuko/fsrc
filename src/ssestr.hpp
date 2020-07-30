@@ -82,51 +82,6 @@ inline char const* scanstr2( char const* tgt, char const pat[2] ) {
     }
 }
 
-inline char const* scanstr3( char const* tgt, char const pat[3] ) {
-    __m128i const   zero = _mm_setzero_si128();
-    __m128i const   p0   = _mm_set1_epi8( pat[0] );
-    __m128i const   p1   = _mm_set1_epi8( pat[1] );
-    __m128i const   p2   = _mm_set1_epi8( pat[2] );
-    unsigned        trio = load32( pat ) & 0x00FFFFFF;
-    unsigned        f    = 15 & ( uintptr_t )tgt;
-
-    if( f ) {
-        __m128i  x = xmload( tgt );
-        unsigned u = compxm( zero, x );
-        unsigned v = compxm( p0, x ) & ( compxm( p1, x ) >> 1 );
-        v = ( v & ( compxm( p2, x ) >> 2 ) & ~u & ( u - 1 ) ) >> f;
-
-        if( v ) { return tgt + ffs( v ) - 1; }
-
-        tgt += 16 - f;
-        v = load32( tgt - 2 );
-
-        if( trio == ( v & 0x00FFFFFF ) ) { return tgt - 2; }
-
-        if( trio ==  v >> 8 ) { return tgt - 1; }
-
-        if( u >> f ) { return  NULL; }
-    }
-
-    while( 1 ) {
-        __m128i  x = xmload( tgt );
-        unsigned u = compxm( zero, x );
-        unsigned v = compxm( p0, x ) & ( compxm( p1, x ) >> 1 );
-        v = ( v & ( compxm( p2, x ) >> 2 ) & ~u & ( u - 1 ) ) >> f;
-
-        if( v ) { return tgt + ffs( v ) - 1; }
-
-        tgt += 16;
-        v = load32( tgt - 2 );
-
-        if( trio == ( v & 0x00FFFFFF ) ) { return tgt - 2; }
-
-        if( trio ==  v >> 8 ) { return tgt - 1; }
-
-        if( u ) { return  NULL; }
-    }
-}
-
 }
 
 namespace sse {
