@@ -107,7 +107,7 @@ void PrettyPrinter::collectPrints( const sys_string& path, const std::vector<sea
 
         // if next match is within this line, print code in neutral until next match
         if( match->first < line.cend() ) {
-            if( line.cend() - match->first > CUT_OFF ) {
+            if( match->first - from > CUT_OFF ) {
                 // elide middle if line is too long
                 prints.emplace_back( utils::printFunc( Color::Neutral, std::string( from, from + CUT_OFF / 2 ) ) );
                 this->ellipsis();
