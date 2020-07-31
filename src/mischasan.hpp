@@ -84,7 +84,7 @@ inline char const* scanstr2( char const* tgt, char const pat[2] ) {
 
 }
 
-namespace sse {
+namespace mischasan {
 
 inline const char* scanstrN( char const* tgt, const int size, char const* pat, int len ) {
     if( len == 1 ) { return static_cast<const char*>( memchr( tgt, pat[0], size ) ); }
