@@ -34,7 +34,7 @@ HEADERS += $${SRC_DIR}/printerfactory.hpp
 macx:   SOURCES += $${SRC_DIR}/macutils.mm
 
 # via https://mischasan.wordpress.com/2011/07/16/convergence-sse2-and-strstr/
-HEADERS += $${SRC_DIR}/ssestr.hpp
+HEADERS += $${SRC_DIR}/mischasan.hpp
 
 # via https://github.com/gcc-mirror/gcc/blob/master/libstdc%2B%2B-v3/include/bits/basic_string.tcc#L1199
 HEADERS += $${SRC_DIR}/stdstr.hpp

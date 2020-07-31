@@ -27,7 +27,7 @@ INCLUDEPATH += $${MAIN_DIR}/src
 HEADERS += $${MAIN_DIR}/src/utils.hpp
 SOURCES += $${MAIN_DIR}/src/utils.cpp
 
-HEADERS += $${MAIN_DIR}/src/ssestr.hpp
+HEADERS += $${MAIN_DIR}/src/mischasan.hpp
 HEADERS += $${MAIN_DIR}/src/stdstr.hpp
 
 !win32: HEADERS += $${MAIN_DIR}/src/nftwwalker.hpp

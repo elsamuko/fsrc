@@ -4,7 +4,7 @@
 
 #include "PerformanceUtils.hpp"
 #include "licence.hpp"
-#include "ssestr.hpp"
+#include "mischasan.hpp"
 #include "stdstr.hpp"
 
 BOOST_AUTO_TEST_CASE( Test_find ) {
@@ -62,7 +62,7 @@ material under section 10.
         }, checks );
 
         long t_ssestr = timed1000( "ssestr", [&text, &term, &ptr] {
-            ptr = sse::scanstrN( text.data(), text.size(), term.data(), term.size() );
+            ptr = mischasan::scanstrN( text.data(), text.size(), term.data(), term.size() );
         }, checks );
 #endif
 

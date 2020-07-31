@@ -2,7 +2,7 @@
 
 #include "threadpool.hpp"
 #include "searcher.hpp"
-#include "ssestr.hpp"
+#include "mischasan.hpp"
 #include "stdstr.hpp"
 #include "printer.hpp"
 
@@ -51,7 +51,7 @@ std::vector<search::Match> Searcher::caseSensitiveSearch( const std::string_view
 
 #if WITH_SSE
 
-    while( ( ptr = sse::scanstrN( ptr, end - ptr, term.data(), term.size() ) ) )
+    while( ( ptr = mischasan::scanstrN( ptr, end - ptr, term.data(), term.size() ) ) )
 #else
 
     while( ( ptr = fromStd::strstr( ptr, end - ptr, term.data(), term.size() ) ) )
