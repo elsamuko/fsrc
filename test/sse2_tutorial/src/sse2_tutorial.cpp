@@ -5,14 +5,24 @@
 #include <cstring>
 #include <iostream>
 #include <string>
+#include <vector>
 #include <emmintrin.h>
 
 #define LOG( A ) std::cout << A << std::endl;
 
-const char* find( const char* text, size_t s1, const char* term, size_t s2 ) {
+std::vector<const char*> find( const char* text, size_t s1, const char* term, size_t s2 ) {
+
+    std::vector<const char*> matches;
 
     if( s2 == 1 ) {
-        return static_cast<const char*>( memchr( static_cast<const void*>( text ), term[0], s1 ) );
+        const char* pos = text;
+
+        while( ( pos = static_cast<const char*>( memchr( static_cast<const void*>( pos ), term[0], s1 - ( pos - text ) ) ) ) ) {
+            matches.push_back( pos );
+            ++pos;
+        }
+
+        return matches;
     }
 
     static __m128i lastOne = _mm_setr_epi8( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff );
@@ -40,31 +50,39 @@ const char* find( const char* text, size_t s1, const char* term, size_t s2 ) {
         // if both
         const __m128i comp3  = _mm_and_si128( comp1, shift );
 
-        const int mv2        = _mm_movemask_epi8( comp3 );
+        int mv2 = _mm_movemask_epi8( comp3 );
         diff = ffs( mv2 );
 
-        if( diff && !memcmp( text + i + diff - 1, term, s2 ) ) {
-            return text + i + diff - 1;
+        while( ( diff = ffs( mv2 ) ) ) {
+            if( !memcmp( text + i + diff - 1, term, s2 ) ) {
+                matches.push_back( text + i + diff - 1 );
+            }
+
+            mv2 ^= ( 1 << ( diff - 1 ) );
         }
     }
 
-    return nullptr;
+    return matches;
 }
 
 void findAndLog( const std::string& text, const std::string& pattern ) {
-    const char* pos = find( text.data(), text.size(), pattern.data(), pattern.size() );
+    std::vector<const char*> matches = find( text.data(), text.size(), pattern.data(), pattern.size() );
 
     LOG( text );
-    LOG( std::string( pos - text.data(), ' ' ) << std::string( pattern.size(), '^' ) );
+
+    for( const char* match : matches ) {
+        LOG( std::string( match - text.data(), ' ' ) << std::string( pattern.size(), '^' ) );
+    }
 }
 
 int main( int /*argc*/, char** /*argv*/ ) {
 
     //                  0123456879abcdef0123456879abcdef0123456879abcdef0123456879abcdef
-    std::string text = "This is another text, and now with even longer stuff";
+    std::string text = "This is another text, and now with even longer stuff and two and and so on";
     // findAndLog( text, "oth" );
     // findAndLog( text, "a" );
     findAndLog( text, "stuff" );
+    findAndLog( text, "and" );
 
     return 0;
 }
