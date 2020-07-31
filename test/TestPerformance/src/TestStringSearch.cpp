@@ -62,7 +62,7 @@ material under section 10.
         }, checks );
 
         long t_ssestr = timed1000( "ssestr", [&text, &term, &ptr] {
-            ptr = sse::scanstrN( text.data(), term.data(), term.size() );
+            ptr = sse::scanstrN( text.data(), text.size(), term.data(), term.size() );
         }, checks );
 #endif
 
