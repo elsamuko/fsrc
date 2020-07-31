@@ -62,16 +62,16 @@ struct Buffer {
     size_t size = 0;
     size_t reserved = 1_MB;
     // align at 128 bits for ssestr
-    char* ptr = static_cast<char*>( boost::alignment::aligned_alloc( 16, reserved ) );
+    char* ptr = static_cast<char*>( boost::alignment::aligned_alloc( 16, reserved + 16 ) );
     inline char* grow( const size_t requested ) {
         if( reserved < requested ) {
             reserved = requested;
             boost::alignment::aligned_free( ptr );
-            ptr = static_cast<char*>( boost::alignment::aligned_alloc( 16, reserved + 1 ) );
+            ptr = static_cast<char*>( boost::alignment::aligned_alloc( 16, reserved + 16 ) );
         }
 
         size = requested;
-        ptr[size] = '\0';
+        memset( ptr + size, 0, 16 );
         return ptr;
     }
 
