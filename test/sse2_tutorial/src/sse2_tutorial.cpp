@@ -13,12 +13,12 @@
 #define LOG( A ) std::cout << A << std::endl;
 
 void findAndLog( const std::string& text, const std::string& pattern ) {
-    std::vector<const char*> matches = sse::find( text.data(), text.size(), pattern.data(), pattern.size() );
+    std::vector<search::Match> matches = sse::find( text.data(), text.size(), pattern.data(), pattern.size() );
 
     LOG( text );
 
-    for( const char* match : matches ) {
-        LOG( std::string( match - text.data(), ' ' ) << std::string( pattern.size(), '^' ) );
+    for( const search::Match& match : matches ) {
+        LOG( std::string( match.first - text.data(), ' ' ) << std::string( pattern.size(), '^' ) );
     }
 }
 
