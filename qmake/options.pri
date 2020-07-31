@@ -7,4 +7,7 @@ linux: DEFINES += 'THREADPOOL=BOOST_THREADPOOL'
 win32: DEFINES += 'THREADPOOL=ASYNC_THREADPOOL'
 
 DEFINES += 'DETAILED_STATS=1'       # if 1, print detailed times
-DEFINES += 'WITH_SSE=1'             # if 1, use mischasan's sse optimized string search
+
+DEFINES += 'FIND_ALGO=FIND_SSE_OWN' # if FIND_MISCHASAN, use mischasan's sse optimized string search
+                                    # if FIND_SSE_OWN, use own sse optimized string search
+                                    # if FIND_TRAITS, use traits search from basic_string.tcc

@@ -3,6 +3,7 @@
 #include "threadpool.hpp"
 #include "searcher.hpp"
 #include "mischasan.hpp"
+#include "ssefind.hpp"
 #include "stdstr.hpp"
 #include "printer/printer.hpp"
 
@@ -41,7 +42,15 @@ std::vector<search::Match> Searcher::caseSensitiveSearch( const std::string_view
     return matches;
 }
 #else
+
+#define FIND_MISCHASAN    0
+#define FIND_SSE_OWN      1
+#define FIND_TRAITS       2
 std::vector<search::Match> Searcher::caseSensitiveSearch( const std::string_view& content ) {
+#if FIND_ALGO == FIND_SSE_OWN
+    return sse::find( content.data(), content.size(), term.data(), term.size() );
+#else
+
     std::vector<search::Match> matches;
 
     search::Iter pos = content.cbegin();
@@ -49,7 +58,7 @@ std::vector<search::Match> Searcher::caseSensitiveSearch( const std::string_view
     const char* ptr = start;
     const char* end = start + content.size();
 
-#if WITH_SSE
+#if FIND_ALGO == FIND_MISCHASAN
 
     while( ( ptr = mischasan::scanstrN( ptr, end - ptr, term.data(), term.size() ) ) )
 #else
@@ -65,6 +74,7 @@ std::vector<search::Match> Searcher::caseSensitiveSearch( const std::string_view
     }
 
     return matches;
+#endif
 }
 #endif
 
