@@ -1,5 +1,5 @@
 #include "searcher.hpp"
-#include "printerfactory.hpp"
+#include "printer/printerfactory.hpp"
 #include "stopwatch.hpp"
 #include "exitqueue.hpp"
 

@@ -4,7 +4,7 @@
 #include "searcher.hpp"
 #include "mischasan.hpp"
 #include "stdstr.hpp"
-#include "printer.hpp"
+#include "printer/printer.hpp"
 
 std::vector<search::Match> Searcher::caseInsensitiveSearch( const std::string_view& content ) {
     std::vector<search::Match> matches;

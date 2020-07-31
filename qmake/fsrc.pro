@@ -25,11 +25,11 @@ HEADERS += $${SRC_DIR}/exitqueue.hpp
 HEADERS += $${SRC_DIR}/threadpool.hpp
 SOURCES += $${SRC_DIR}/threadpool.cpp
 
-HEADERS += $${SRC_DIR}/printer.hpp
-HEADERS += $${SRC_DIR}/prettyprinter.hpp
-HEADERS += $${SRC_DIR}/htmlprinter.hpp
-HEADERS += $${SRC_DIR}/pipedprinter.hpp
-HEADERS += $${SRC_DIR}/printerfactory.hpp
+HEADERS += $${SRC_DIR}/printer/printer.hpp
+HEADERS += $${SRC_DIR}/printer/prettyprinter.hpp
+HEADERS += $${SRC_DIR}/printer/htmlprinter.hpp
+HEADERS += $${SRC_DIR}/printer/pipedprinter.hpp
+HEADERS += $${SRC_DIR}/printer/printerfactory.hpp
 
 macx:   SOURCES += $${SRC_DIR}/macutils.mm
 
