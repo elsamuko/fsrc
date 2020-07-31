@@ -6,6 +6,9 @@ PRI_DIR  = $${MAIN_DIR}/qmake
 
 SOURCES += $${SRC_DIR}/sse2_tutorial.cpp
 
+INCLUDEPATH += $${MAIN_DIR}/src
+HEADERS += $${MAIN_DIR}/src/ssefind.hpp
+
 include( $${PRI_DIR}/options.pri )
 include( $${PRI_DIR}/setup.pri )
 linux: include( $${PRI_DIR}/linux.pri )
