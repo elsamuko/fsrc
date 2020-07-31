@@ -18,7 +18,7 @@ Options:
   --html                open web page with results
   -q [ --quiet ]        only print status
 
-Build : v0.15 from Jul 30 2019
+Build : v0.18 from Jul 31 2020
 Web   : https://github.com/elsamuko/fsrc
 user@home:/usr/include/boost$ fsrc filesystem
 Searching for "filesystem" in folder:
@@ -42,7 +42,9 @@ user@home:/usr/include/boost$
   * hidden folders and files are searched
   * binaries are 'detected', if they contain two binary 0's within the first 100 bytes or are PDF or PostScript files.
   * it supports one option-less argument as search term
-  * folders are set with -d
+  * folders are set with `-d`
+  * when printing a match in a long line, only 100 chars context are printed, which makes searching in minified sources easier
+  * with `--html` you get the results as web page
 
 ## Architecture
 fsrc has a simple architecture: https://elsamuko.github.io/fsrc/architecture.html
@@ -53,13 +55,13 @@ fsrc has a simple architecture: https://elsamuko.github.io/fsrc/architecture.htm
 You need [VS2019](https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2017) and [cygwin](https://www.cygwin.com/).
 
 ### Linux
-You need g++ 7 or newer.
+You need g++ 9 or newer.
 
 ### macOS
-You need [XCode 9](https://developer.apple.com/xcode/) or later.
+You need [XCode 10](https://developer.apple.com/xcode/) or later.
 
 # General
-You need bash, curl and zip available from the command line.  
+You need bash, cmake, curl and zip available from the command line.  
 Run `./deploy.sh` to compile the current source and package it as zip file.  
 Run `./scripts/build_boost.sh` to build boost deps.  
 You need [Qt/qmake](http://download.qt.io/archive/qt/) to open the `fscr.pro` build file.
