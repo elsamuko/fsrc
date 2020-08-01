@@ -1,4 +1,4 @@
-#define BOOST_TEST_MODULE Performance
+﻿#define BOOST_TEST_MODULE Performance
 
 #include "boost/iostreams/device/mapped_file.hpp"
 #include "boost/test/unit_test.hpp"
@@ -56,6 +56,14 @@ utils::FileView fromFileFind( const sys_string& filename ) {
     return fromFileParser( filename, parseContentFind );
 }
 
+utils::FileView fromFileStrchr( const sys_string& filename ) {
+    return fromFileParser( filename, parseContentStrchr );
+}
+
+utils::FileView fromFileMemchr( const sys_string& filename ) {
+    return fromFileParser( filename, parseContentMemchr );
+}
+
 using fromFileFunc = utils::FileView( const sys_string& filename );
 
 std::map<fromFileFunc*, const char*> names = {
@@ -68,8 +76,10 @@ std::map<fromFileFunc*, const char*> names = {
     {fromFileUtils, "fromFileUtils"},
     {fromFileForLoop, "fromFileForLoop"},
     {fromFileFind, "fromFileFind"},
+    {fromFileStrchr, "fromFileStrchr"},
+    {fromFileMemchr, "fromFileMemchr"},
     {fromFileCPP, "fromFileCPP"},
-    {utils::fromFileP, "utils::fromFileC"},
+    {utils::fromFileP, "utils::fromFileP"},
 #if BOOST_OS_WINDOWS
     {utils::fromWinAPI, "utils::fromWinAPI"},
 #endif
@@ -128,6 +138,8 @@ BOOST_AUTO_TEST_CASE( Test_parseContent ) {
     long t2 = run( fromFileForLoop );
     long t1 = run( fromFileUtils );
     long tf = run( fromFileFind );
+    long ts = run( fromFileStrchr );
+    long tm = run( fromFileMemchr );
     printf( "\n" );
     BOOST_CHECK_LT( t1, t2 );
 }
