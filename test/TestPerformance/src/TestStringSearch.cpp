@@ -6,6 +6,7 @@
 #include "licence.hpp"
 #include "mischasan.hpp"
 #include "stdstr.hpp"
+#include "ssefind.hpp"
 
 BOOST_AUTO_TEST_CASE( Test_find ) {
     printf( "String search\n" );
@@ -61,8 +62,13 @@ material under section 10.
             ptr = ( char* )memmem( text.data(), text.size(), term.data(), term.size() );
         }, checks );
 
-        long t_ssestr = timed1000( "ssestr", [&text, &term, &ptr] {
+        long t_mischasan = timed1000( "mischasan", [&text, &term, &ptr] {
             ptr = mischasan::scanstrN( text.data(), text.size(), term.data(), term.size() );
+        }, checks );
+
+        long t_sseown = timed1000( "sseown", [&text, &term, &ptr] {
+            auto v = sse::find( text.data(), text.size(), term.data(), term.size() );
+            ptr = nullptr;
         }, checks );
 #endif
 
