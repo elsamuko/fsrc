@@ -14,7 +14,7 @@
 
 std::vector<search::Match> Searcher::caseSensitiveSearch( const std::string_view& content ) {
 #if FIND_ALGO == FIND_SSE_OWN
-    return sse::find( content.data(), content.size(), term.data(), term.size() );
+    return sse::find( content, term );
 #else
 
     std::vector<search::Match> matches;

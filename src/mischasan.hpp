@@ -25,20 +25,12 @@
 #include <cstdint>
 #include <emmintrin.h>
 
+#include "winutils.hpp"
+
 #define compxm(a,b) _mm_movemask_epi8(_mm_cmpeq_epi8((a), (b)))
 #define xmload(p)   _mm_load_si128((__m128i const *)(p))
 #define load16(p)   (*(uint16_t const*)(p))
 #define load32(p)   (*(uint32_t const*)(p))
-
-#ifdef _WIN32
-#include <intrin.h>
-#pragma intrinsic(_BitScanForward)
-inline unsigned long ffs( const unsigned long mask ) {
-    unsigned long rv = 0;
-    _BitScanForward( &rv, mask );
-    return rv;
-}
-#endif
 
 namespace  {
 
