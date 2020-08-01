@@ -57,5 +57,4 @@ BOOST_AUTO_TEST_CASE( Test_ThreadPool ) {
     printf( "              own : %6ld us\n", ns_own / 1000 );
     printf( "            boost : %6ld us\n", ns_asio / 1000 );
     printf( "            async : %6ld us\n\n", ns_async / 1000 );
-    BOOST_CHECK_GT( ns_asio / 1000, ns_own / 1000 ); // assume own tp is faster than boost::asio
 }

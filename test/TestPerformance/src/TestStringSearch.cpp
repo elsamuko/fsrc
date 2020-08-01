@@ -2,6 +2,8 @@
 #include "boost/algorithm/searching/boyer_moore_horspool.hpp"
 #include "boost/algorithm/searching/knuth_morris_pratt.hpp"
 
+#include <string>
+
 #include "PerformanceUtils.hpp"
 #include "licence.hpp"
 #include "mischasan.hpp"
@@ -12,23 +14,21 @@ BOOST_AUTO_TEST_CASE( Test_find ) {
     printf( "String search\n" );
 
     std::string term = "t4tb7qfSFb2";
-    std::string full( ( const char* )licence, sizeof( licence ) );
-    std::string small = R"gpl(
-Moreover, your license from a particular copyright holder is
-reinstated permanently if the copyright holder notifies you of the
-violation by some reasonable means, this is the first time you have
-received notice of violation of this License (for any work) from that
-copyright holder, and you cure the violation prior to 30 days after
-your receipt of the notice.
+    std::string largeText( ( const char* )licence, sizeof( licence ) );
+    std::string smallText = "Moreover, your license from a particular copyright holder is\n"
+                            "reinstated permanently if the copyright holder notifies you of the\n"
+                            "violation by some reasonable means, this is the first time you have\n"
+                            "received notice of violation of this License (for any work) from that\n"
+                            "copyright holder, and you cure the violation prior to 30 days after\n"
+                            "your receipt of the notice.\n"
+                            "\n"
+                            "  Termination of your rights under this section does not terminate the\n"
+                            "licenses of parties who have received copies or rights from you under\n"
+                            "this License.  If your rights have been terminated and not permanently\n"
+                            "reinstated, you do not qualify to receive new licenses for the same\n"
+                            "material under section 10.\n";
 
-  Termination of your rights under this section does not terminate the
-licenses of parties who have received copies or rights from you under
-this License.  If your rights have been terminated and not permanently
-reinstated, you do not qualify to receive new licenses for the same
-material under section 10.
-)gpl";
-
-    for( std::string text : { small, full } ) {
+    for( const std::string& text : { smallText, largeText } ) {
         std::string_view view( text );
 
         // init with correct values
@@ -66,9 +66,8 @@ material under section 10.
             timed1000( "mischasan", [&text, &term, &ptr] {
                 ptr = mischasan::scanstrN( text.data(), text.size(), term.data(), term.size() );
             }, checks ),
-
-            timed1000( "sseown", [&text, &term, &ptr] {
-                auto v = sse::find( text.data(), text.size(), term.data(), term.size() );
+            timed1000( "sseown", [&view, &term, &ptr] {
+                auto v = sse::find( view, term );
                 ptr = nullptr;
             }, checks ),
 #endif

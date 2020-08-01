@@ -27,6 +27,9 @@ INCLUDEPATH += $${MAIN_DIR}/src
 HEADERS += $${MAIN_DIR}/src/utils.hpp
 SOURCES += $${MAIN_DIR}/src/utils.cpp
 
+HEADERS += $${MAIN_DIR}/src/pipes.hpp
+SOURCES += $${MAIN_DIR}/src/pipes.cpp
+
 HEADERS += $${MAIN_DIR}/src/mischasan.hpp
 HEADERS += $${MAIN_DIR}/src/stdstr.hpp
 
