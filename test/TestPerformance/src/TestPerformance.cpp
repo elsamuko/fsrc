@@ -64,20 +64,14 @@ utils::FileView fromFileMemchr( const sys_string& filename ) {
     return fromFileParser( filename, parseContentMemchr );
 }
 
-using fromFileFunc = utils::FileView( const sys_string& filename );
 
-std::map<fromFileFunc*, const char*> names = {
+std::map<fromFileFunc*, const char*> testsIO = {
+    // I/O tests
     {fromFileMmap, "fromFileMmap"},
     {fromFileLocal, "fromFileLocal"},
     {fromFileString, "fromFileString"},
     {fromFileLSeek, "fromFileLSeek"},
     {fromFileTwoFread, "fromFileTwoFread"},
-    {fromFileCPP, "fromFileCPP"},
-    {fromFileUtils, "fromFileUtils"},
-    {fromFileForLoop, "fromFileForLoop"},
-    {fromFileFind, "fromFileFind"},
-    {fromFileStrchr, "fromFileStrchr"},
-    {fromFileMemchr, "fromFileMemchr"},
     {fromFileCPP, "fromFileCPP"},
     {utils::fromFileP, "utils::fromFileP"},
 #if BOOST_OS_WINDOWS
@@ -85,63 +79,38 @@ std::map<fromFileFunc*, const char*> names = {
 #endif
 };
 
-long run( fromFileFunc fromFile ) {
-    size_t sum = 0;
-    size_t lineCount = 0;
-    size_t files = 0;
-
-    //! \note Windows is slow in I/O
-#if BOOST_OS_WINDOWS
-    fs::path include = "../../../../libs/boost/include/boost/asio";
-#else
-    fs::path include = "../../../../libs/boost";
-#endif
-
-    long ns = 0;
-    STOPWATCH
-    START
-
-    utils::recurseDir( include.native(), [&sum, &lineCount, &files, fromFile]( const sys_string & filename ) {
-        auto view = fromFile( filename );
-        files++;
-        sum += view.size;
-        lineCount += view.lines.size();
-    } );
-
-    STOP( ns );
-
-    printf( "%17s : %zu files, %5zu kB and %zu lines in %ld ms\n",
-            names[fromFile], files, sum / 1024, lineCount, ns / 1000000 );
-    return ns / 1000000;
-}
+std::map<fromFileFunc*, const char*> testsNewline = {
+    {fromFileUtils, "fromFileUtils"},
+    {fromFileForLoop, "fromFileForLoop"},
+    {fromFileFind, "fromFileFind"},
+    {fromFileStrchr, "fromFileStrchr"},
+    {fromFileMemchr, "fromFileMemchr"},
+};
 
 // test file I/O
 BOOST_AUTO_TEST_CASE( Test_fromFile ) {
     printf( "I/O\n" );
-    size_t t2 = run( fromFileCPP );
-    /*long tS = */run( fromFileString );
-    /*long tL = */run( fromFileLocal );
-    /*long tF = */run( fromFileLSeek );
-    /*long tM = */run( fromFileMmap );
-    /*long tO = */run( fromFileTwoFread );
-#if BOOST_OS_WINDOWS
-    /*long tW = */run( utils::fromWinAPI );
-#endif
-    long t1 = run( utils::fromFileP );
+    std::vector<Result> results;
+
+    for( const auto& test : testsIO ) {
+        results.emplace_back( run( test.first, test.second ) );
+    }
+
+    printSorted( results );
     printf( "\n" );
-    BOOST_CHECK_LT( t1, t2 ); // assume FILE* is faster than std::ifstream
 }
 
 // test newline parsing
 BOOST_AUTO_TEST_CASE( Test_parseContent ) {
     printf( "Newline\n" );
-    long t2 = run( fromFileForLoop );
-    long t1 = run( fromFileUtils );
-    long tf = run( fromFileFind );
-    long ts = run( fromFileStrchr );
-    long tm = run( fromFileMemchr );
+    std::vector<Result> results;
+
+    for( const auto& test : testsNewline ) {
+        results.emplace_back( run( test.first, test.second ) );
+    }
+
+    printSorted( results );
     printf( "\n" );
-    BOOST_CHECK_LT( t1, t2 );
 }
 
 // test printing
@@ -157,39 +126,35 @@ BOOST_AUTO_TEST_CASE( Test_printf ) {
 #endif
 
     auto reset = [file] { fseek( file, 0, SEEK_SET ); };
-
-    /*long t_write = */timed1000( "write", [file, text] {
-        std::string data = "[" + text + "]\n";
-        write( fileno( file ), data.c_str(), data.size() );
-    }, reset );
-
-    long t_printf = timed1000( "fprintf", [file, text] {
-        fprintf( file, "%s%s]\n", "[", text.c_str() );
-    }, reset );
-
-    /*long t_fputs = */timed1000( "fputs", [file, text] {
-        fputs( ( "[" + text + "]\n" ).c_str(), file );
-    }, reset );
-
+    std::vector<Result> results = {
+        timed1000( "write", [file, text] {
+            std::string data = "[" + text + "]\n";
+            write( fileno( file ), data.c_str(), data.size() );
+        }, reset ),
+        timed1000( "fprintf", [file, text] {
+            fprintf( file, "%s%s]\n", "[", text.c_str() );
+        }, reset ),
+        timed1000( "fputs", [file, text] {
+            fputs( ( "[" + text + "]\n" ).c_str(), file );
+        }, reset ),
 #ifdef __linux__
-    /* long t_fputs_unlocked = */timed1000( "fputs_unlocked", [file, text] {
-        fputs_unlocked( ( "[" + text + "]\n" ).c_str(), file );
-    }, reset );
+        timed1000( "fputs_unlocked", [file, text] {
+            fputs_unlocked( ( "[" + text + "]\n" ).c_str(), file );
+        }, reset ),
 #endif
-
-    long t_fwrite = timed1000( "fwrite", [file, text] {
-        std::string data = "[" + text + "]\n";
-        fwrite( data.c_str(), 1, data.size(), file );
-    }, reset );
-
+        timed1000( "fwrite", [file, text] {
+            std::string data = "[" + text + "]\n";
+            fwrite( data.c_str(), 1, data.size(), file );
+        }, reset ),
 #ifdef __linux__
-    /*long t_fwrite_unlocked = */timed1000( "fwrite_unlocked", [file, text] {
-        std::string data = "[" + text + "]\n";
-        fwrite_unlocked( data.c_str(), 1, data.size(), file );
-    }, reset );
+        timed1000( "fwrite_unlocked", [file, text] {
+            std::string data = "[" + text + "]\n";
+            fwrite_unlocked( data.c_str(), 1, data.size(), file );
+        }, reset )
 #endif
+    };
 
+    printSorted( results );
     fclose( file );
-    BOOST_CHECK_LT( t_fwrite, t_printf ); // assume fwrite is faster than printf
     printf( "\n" );
 }

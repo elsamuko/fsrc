@@ -2,7 +2,6 @@
 #include <experimental/filesystem>
 #endif
 #include <system_error>
-#include <fcntl.h>
 
 #include "boost/test/unit_test.hpp"
 #include "boost/filesystem.hpp"
@@ -12,6 +11,8 @@
 #include "utils.hpp"
 #include "nftwwalker.hpp"
 #include "ftswalker.hpp"
+
+#include "PerformanceUtils.hpp"
 
 namespace withBoost {
 void recurseDir( const sys_string& filename, const std::function<void( const sys_string& filename )>& callback ) {
@@ -59,47 +60,20 @@ void recurseDir( const sys_string& filename, const std::function<void( const sys
 }
 #endif
 
-long runDirWalkerTest( const std::string& name, const decltype( utils::recurseDir )& func ) {
-    std::atomic_size_t files = 0;
-    std::atomic_size_t bytes = 0;
-    fs::path include = "../../../../libs/boost/include";
-
-    long ns = 0;
-    {
-        POOL;
-        STOPWATCH
-        START
-
-        func( include.native(), [&pool, &bytes, &files]( const sys_string & filename ) {
-            pool.add( [&bytes, &files, filename] {
-                int fd = open( filename.c_str(), O_RDONLY | O_BINARY );
-
-                if( fd != -1 ) {
-                    files++;
-                    bytes += utils::fileSize( fd );
-                    close( fd );
-                }
-            } );
-        } );
-
-        STOP( ns )
-    }
-
-    printf( "   %20s : %zu files with %zu kB in %ld ms\n", name.c_str(), files.load(), bytes.load() / 1024, ns / 1000000 );
-    return ns;
-}
 
 BOOST_AUTO_TEST_CASE( Test_DirWalker ) {
     printf( "DirWalker\n" );
 
-    long nsFTS   = runDirWalkerTest( "withFTS", withFTS::recurseDir );
-    long nsNftw  = runDirWalkerTest( "withNFTW", withNFTW::recurseDir );
-    long nsUtils = runDirWalkerTest( "utils", utils::recurseDir );
-    long nsBoost = runDirWalkerTest( "withBoost", withBoost::recurseDir );
+    std::vector<Result> results = {
+        runDirWalkerTest( "withFTS", withFTS::recurseDir ),
+        runDirWalkerTest( "withNFTW", withNFTW::recurseDir ),
+        runDirWalkerTest( "utils", utils::recurseDir ),
+        runDirWalkerTest( "withBoost", withBoost::recurseDir ),
 #ifndef __APPLE__
-    long nsStdFS = runDirWalkerTest( "withStd", withStd::recurseDir );
+        runDirWalkerTest( "withStd", withStd::recurseDir ),
 #endif
+    };
 
-    // assume, that readdir is faster than nftw
-    BOOST_CHECK_LT( nsUtils, nsNftw );
+    printSorted( results );
+    printf( "\n" );
 }

@@ -99,23 +99,26 @@ BOOST_AUTO_TEST_CASE( Test_regex ) {
         BOOST_CHECK_EQUAL( count, 116 );
     };
 
+    std::vector<Result> results = {
 #if !BOOST_OS_WINDOWS
-    long t_posix = timed1000( "posix", [&text, &term, &count] {
-        count = posixRegex( text, term );
-    }, check );
+        timed1000( "posix", [&text, &term, &count] {
+            count = posixRegex( text, term );
+        }, check ),
 #endif
 
-    long t_boost = timed1000( "boost::regex", [&text, &term, &count] {
-        count = boostRegex( text, term );
-    }, check );
+        timed1000( "boost::regex", [&text, &term, &count] {
+            count = boostRegex( text, term );
+        }, check ),
 
-    long t_xpressive = timed1000( "boost::xpressive", [&text, &term, &count] {
-        count = boostXpressive( text, term );
-    }, check );
+        timed1000( "boost::xpressive", [&text, &term, &count] {
+            count = boostXpressive( text, term );
+        }, check ),
 
-    long t_std = timed1000( "std::regex", [&text, &term, &count] {
-        count = stdRegex( text, term );
-    }, check );
+        timed1000( "std::regex", [&text, &term, &count] {
+            count = stdRegex( text, term );
+        }, check ),
+    };
 
-    BOOST_CHECK_GT( t_std, t_boost );
+    printSorted( results );
+    printf( "\n" );
 }

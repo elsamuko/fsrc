@@ -45,48 +45,48 @@ material under section 10.
             BOOST_REQUIRE_EQUAL( it - text.cbegin(), text.size() );
         };
 
-        long t_find = timed1000( "find", [&text, &term, &pos] {
-            pos = text.find( term );
-        }, checks );
+        std::vector<Result> results = {
+            timed1000( "find", [&text, &term, &pos] {
+                pos = text.find( term );
+            }, checks ),
 
-        long t_std = timed1000( "fromStd", [&text, &term, &ptr] {
-            ptr = fromStd::strstr( text.data(), text.size(), term.data(), term.size() );
-        }, checks );
+            timed1000( "fromStd", [&text, &term, &ptr] {
+                ptr = fromStd::strstr( text.data(), text.size(), term.data(), term.size() );
+            }, checks ),
 
-        long t_view = timed1000( "view", [&view, &term, &pos] {
-            pos = view.find( term );
-        }, checks );
+            timed1000( "view", [&view, &term, &pos] {
+                pos = view.find( term );
+            }, checks ),
 
 #if !BOOST_OS_WINDOWS
-        long t_memmem = timed1000( "memmem", [&text, &term, &ptr] {
-            ptr = ( char* )memmem( text.data(), text.size(), term.data(), term.size() );
-        }, checks );
+            timed1000( "memmem", [&text, &term, &ptr] {
+                ptr = ( char* )memmem( text.data(), text.size(), term.data(), term.size() );
+            }, checks ),
 
-        long t_mischasan = timed1000( "mischasan", [&text, &term, &ptr] {
-            ptr = mischasan::scanstrN( text.data(), text.size(), term.data(), term.size() );
-        }, checks );
+            timed1000( "mischasan", [&text, &term, &ptr] {
+                ptr = mischasan::scanstrN( text.data(), text.size(), term.data(), term.size() );
+            }, checks ),
 
-        long t_sseown = timed1000( "sseown", [&text, &term, &ptr] {
-            auto v = sse::find( text.data(), text.size(), term.data(), term.size() );
-            ptr = nullptr;
-        }, checks );
+            timed1000( "sseown", [&text, &term, &ptr] {
+                auto v = sse::find( text.data(), text.size(), term.data(), term.size() );
+                ptr = nullptr;
+            }, checks ),
 #endif
 
-        long t_strstr = timed1000( "strstr", [&text, &term, &ptr] {
-            ptr = strstr( text.data(), term.data() );
-        }, checks );
+            timed1000( "strstr", [&text, &term, &ptr] {
+                ptr = strstr( text.data(), term.data() );
+            }, checks ),
 
-        long t_BMH = timed1000( "BMH search", [&text, &it, &bmh] {
-            it = bmh( text.cbegin(), text.cend() ).first;
-        }, checks );
+            timed1000( "BMH search", [&text, &it, &bmh] {
+                it = bmh( text.cbegin(), text.cend() ).first;
+            }, checks ),
 
-        long t_KMP = timed1000( "KMP search", [&text, &it, &kmp] {
-            it = kmp( text.cbegin(), text.cend() ).first;
-        }, checks );
+            timed1000( "KMP search", [&text, &it, &kmp] {
+                it = kmp( text.cbegin(), text.cend() ).first;
+            }, checks ),
+        };
 
-
-        BOOST_CHECK_GT( t_find, t_strstr ); // assume find is slower than strstr
-        BOOST_CHECK_LT( t_BMH, t_find ); // assume bmh is slower than find
+        printSorted( results );
         printf( "\n" );
     }
 }
