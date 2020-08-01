@@ -38,10 +38,8 @@ inline std::vector<search::Match> find( const char* text, size_t s1, const char*
         // ... and one left
         __m128i shift  = comp2 << 1;
 
-        // set last byte to ff, if first char from next block is 2nd char
-        if( text[i + 16] == term[1] ) {
-            shift = _mm_or_si128( shift, lastOne );
-        }
+        // set last byte to ff, checking is faster than branching
+        shift = _mm_or_si128( shift, lastOne );
 
         // if both have hits
         const __m128i comp3  = comp1 & shift;
