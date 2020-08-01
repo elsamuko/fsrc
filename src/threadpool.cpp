@@ -48,7 +48,7 @@ void ThreadPool::initialize() {
                 if( count ) {
                     this->workOff();
                 } else {
-                    std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
+                    std::this_thread::sleep_for( std::chrono::microseconds( 1 ) );
                 }
 
                 if( !( running || count ) ) {
