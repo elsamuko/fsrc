@@ -12,6 +12,7 @@ set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 # sources
 file(GLOB_RECURSE SOURCES "../src/*.cpp" "../src/*.hpp")
 add_executable(${PROJECT} ${SOURCES})
+target_include_directories(${PROJECT} PRIVATE "../src")
 
 if(WIN32)
     include(win.cmake)
