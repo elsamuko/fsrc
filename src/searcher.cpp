@@ -7,6 +7,12 @@
 #include "stdstr.hpp"
 #include "printer/printer.hpp"
 
+
+#define FIND_MISCHASAN    0
+#define FIND_SSE_OWN      1
+#define FIND_TRAITS       2
+#define FIND_STRSTR       3
+
 std::vector<search::Match> Searcher::caseInsensitiveSearch( const std::string_view& content ) {
     std::vector<search::Match> matches;
 
@@ -24,28 +30,6 @@ std::vector<search::Match> Searcher::caseInsensitiveSearch( const std::string_vi
     return matches;
 }
 
-#if BOOST_OS_WINDOWS
-std::vector<search::Match> Searcher::caseSensitiveSearch( const std::string_view& content ) {
-    std::vector<search::Match> matches;
-
-    search::Iter pos = content.cbegin();
-    const char* start = content.data();
-    const char* ptr = start;
-
-    while( ( ptr = strstr( ptr, term.data() ) ) ) {
-        search::Iter from = pos + ( ptr - start );
-        search::Iter to = from + term.size();
-        matches.emplace_back( from, to );
-        ptr += term.size();
-    }
-
-    return matches;
-}
-#else
-
-#define FIND_MISCHASAN    0
-#define FIND_SSE_OWN      1
-#define FIND_TRAITS       2
 std::vector<search::Match> Searcher::caseSensitiveSearch( const std::string_view& content ) {
 #if FIND_ALGO == FIND_SSE_OWN
     return sse::find( content.data(), content.size(), term.data(), term.size() );
@@ -61,9 +45,12 @@ std::vector<search::Match> Searcher::caseSensitiveSearch( const std::string_view
 #if FIND_ALGO == FIND_MISCHASAN
 
     while( ( ptr = mischasan::scanstrN( ptr, end - ptr, term.data(), term.size() ) ) )
-#else
+#elif FIND_ALGO == FIND_MISCHASAN
 
     while( ( ptr = fromStd::strstr( ptr, end - ptr, term.data(), term.size() ) ) )
+#elif FIND_ALGO == FIND_STRSTR
+
+    while( ( ptr = strstr( ptr, term.data() ) ) )
 #endif
 
     {
@@ -76,7 +63,6 @@ std::vector<search::Match> Searcher::caseSensitiveSearch( const std::string_view
     return matches;
 #endif
 }
-#endif
 
 std::vector<search::Match> Searcher::regexSearch( const std::string_view& content ) {
     std::vector<search::Match> matches;
