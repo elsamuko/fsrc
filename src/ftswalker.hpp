@@ -10,7 +10,8 @@ namespace withFTS {
 //! \sa https://git.savannah.gnu.org/cgit/findutils.git/tree/find/ftsfind.c
 //! \sa https://github.com/skuhl/sys-prog-examples/blob/master/simple-examples/fts.c
 //! \sa https://rosettacode.org/wiki/Walk_a_directory/Recursively#Library:_BSD_libc
-void recurseDir( const sys_string& filename, const std::function<void( const sys_string& filename )>& callback ) {
+template<class CB>
+inline void recurseDir( const sys_string& filename, const CB& callback ) {
 
     char* paths[2] = { ( char* )filename.data(), nullptr };
 
