@@ -18,7 +18,7 @@ struct PrettyPrinter : public Printer {
     }
     virtual ~PrettyPrinter() override {}
     inline void ellipsis() {
-        prints.emplace_back( utils::printFunc( cgray, std::string( "..." ) ) );
+        prints.emplace_back( utils::printFunc( cgray, "..." ) );
     }
 
     Color cred;
