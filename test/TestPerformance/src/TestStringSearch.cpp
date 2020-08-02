@@ -3,6 +3,7 @@
 #include "boost/algorithm/searching/knuth_morris_pratt.hpp"
 
 #include <string>
+#include <functional>
 
 #include "PerformanceUtils.hpp"
 #include "licence.hpp"
@@ -38,6 +39,8 @@ BOOST_AUTO_TEST_CASE( Test_find ) {
 
         boost::algorithm::boyer_moore_horspool bmh( term.begin(), term.end() );
         boost::algorithm::knuth_morris_pratt kmp( term.begin(), term.end() );
+        std::boyer_moore_searcher bms( term.begin(), term.end() );
+        std::boyer_moore_horspool_searcher bmhs( term.begin(), term.end() );
 
         auto checks = [&] {
             BOOST_REQUIRE_EQUAL( pos, std::string::npos );
@@ -83,6 +86,15 @@ BOOST_AUTO_TEST_CASE( Test_find ) {
             timed1000( "KMP search", [&text, &it, &kmp] {
                 it = kmp( text.cbegin(), text.cend() ).first;
             }, checks ),
+
+            timed1000( "BMS search", [&text, &it, &bms] {
+                it = bms( text.cbegin(), text.cend() ).first;
+            }, checks ),
+
+            timed1000( "BMHS search", [&text, &it, &bmhs] {
+                it = bmhs( text.cbegin(), text.cend() ).first;
+            }, checks ),
+
         };
 
         printSorted( results );
