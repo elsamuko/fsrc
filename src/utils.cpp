@@ -334,7 +334,7 @@ void utils::recurseDir( const sys_string& filename, const std::function<void ( c
             continue;
         }
 
-        if( data.dwFileAttributes & FILE_ATTRIBUTE_ARCHIVE ) {
+        if( data.dwFileAttributes & ( FILE_ATTRIBUTE_ARCHIVE | FILE_ATTRIBUTE_NORMAL ) ) {
             callback( filename + L"\\" + data.cFileName );
             continue;
         }
