@@ -12,7 +12,7 @@ struct SearchOptions {
     bool html = false;
     std::string term;
     fs::path path;
-    std::string prefix;
+    sys_string prefix;
     bool piped = pipes::stdoutIsPipe();
     bool colorized = !piped;
     operator bool() const { return success; }

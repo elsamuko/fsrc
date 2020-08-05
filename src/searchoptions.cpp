@@ -117,7 +117,7 @@ SearchOptions SearchOptions::parseArgs( int argc, char* argv[] ) {
 
     // set prefix for clickable paths
     opts.path = fs::canonical( opts.path );
-    opts.prefix = opts.path.string();
+    opts.prefix = opts.path.native();
 
     if( opts.prefix.back() != '/' ) {
         opts.prefix.push_back( '/' );
