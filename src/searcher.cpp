@@ -108,7 +108,7 @@ void Searcher::onGitFiles() {
     utils::gitLsFiles( opts.path, [&pool, this]( const sys_string & filename ) {
         pool.add( [filename, this] {
             stats.filesSearched++;
-            search( filename );
+            search( opts.prefix + filename );
         } );
     } );
 

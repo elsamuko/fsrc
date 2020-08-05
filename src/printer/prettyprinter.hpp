@@ -33,9 +33,9 @@ void PrettyPrinter::collectPrints( const sys_string& path, const std::vector<sea
 
     // print file path
 #ifdef _WIN32
-    prints.emplace_back( utils::printFunc( cgreen, std::string( path.cbegin(), path.cend() ) ) );
+    prints.emplace_back( utils::printFunc( cgreen, "file:///" + std::string( path.cbegin(), path.cend() ) ) );
 #else
-    prints.emplace_back( utils::printFunc( cgreen, path ) );
+    prints.emplace_back( utils::printFunc( cgreen, "file://" + path ) );
 #endif
 
     // parse file for newlines until last match
