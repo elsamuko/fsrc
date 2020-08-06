@@ -18,4 +18,6 @@ SRC_DIR=$${MAIN_DIR}/src
 INCLUDEPATH += $${SRC_DIR}
 HEADERS += $${SRC_DIR}/utils.hpp
 SOURCES += $${SRC_DIR}/utils.cpp
+HEADERS += $${SRC_DIR}/pipes.hpp
+SOURCES += $${SRC_DIR}/pipes.cpp
 macx: SOURCES += $${SRC_DIR}/macutils.mm
