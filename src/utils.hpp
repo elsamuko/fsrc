@@ -136,6 +136,7 @@ inline std::function<void()> printFunc( Color color, const std::string text ) {
 //! opens file with platforms standard program
 bool openFile( const sys_string& filename );
 
+//! \note on windows, filename must end with a path separator
 void recurseDir( const sys_string& filename, const std::function<void( const sys_string& filename )>& callback );
 
 sys_string absolutePath( const sys_string& filename = DOT );
