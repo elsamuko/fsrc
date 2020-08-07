@@ -78,13 +78,7 @@ void utils::printColor( Color color, const std::string& text ) {
 // git ls-files -zco --exclude-standard | tr '\0' '\n'
 void utils::gitLsFiles( const fs::path& path, const std::function<void( const sys_string& filename )>& callback ) {
 
-    boost::system::error_code ec;
-
-    if( !fs::is_directory( path, ec ) ) { return; }
-
-    fs::current_path( path, ec );
-
-    if( ec ) { return; }
+    fs::current_path( path );
 
 #ifdef _WIN32
     std::string nullDevice = "NUL";
