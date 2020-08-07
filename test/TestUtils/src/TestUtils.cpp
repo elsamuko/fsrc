@@ -92,3 +92,37 @@ BOOST_AUTO_TEST_CASE( Test_recurseGit ) {
 
     BOOST_CHECK_EQUAL( counter, 100 );
 }
+
+#if 0
+BOOST_AUTO_TEST_CASE( Test_fs ) {
+
+    fs::path pwd = fs::current_path();
+    BOOST_CHECK( fs::exists( pwd ) );
+
+    pwd = fs::canonical( pwd );
+    BOOST_CHECK( fs::exists( pwd ) );
+
+    pwd = pwd.make_preferred();
+    BOOST_CHECK( fs::exists( pwd ) );
+
+}
+#endif
+
+BOOST_AUTO_TEST_CASE( Test_absolute ) {
+    fs::path pwd = fs::current_path();
+    sys_string absolute = utils::absolutePath( pwd.native() );
+    sys_string pwd2 = utils::absolutePath();
+    BOOST_CHECK( !absolute.empty() );
+    BOOST_CHECK( !pwd2.empty() );
+
+    std::wcout << absolute << std::endl;
+    std::wcout << pwd2 << std::endl;
+
+    sys_string slash     =  utils::absolutePath( L"test/hase/" );
+    sys_string backslash = utils::absolutePath( L"test\\hase\\" );
+    sys_string noslash   = utils::absolutePath( L"test/hase" );
+    std::wcout << slash << std::endl;
+    std::wcout << backslash << std::endl;
+    std::wcout << noslash << std::endl;
+}
+
