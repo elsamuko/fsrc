@@ -9,19 +9,19 @@ namespace printerfactory {
 
 std::function<Printer*()> printerFunc( const SearchOptions& opts ) {
     if( opts.html ) {
-        return [opts] {
+        return [&opts] {
             HtmlPrinter* printer = new HtmlPrinter( opts );
             return printer;
         };
     }
 
     if( opts.piped ) {
-        return [opts] {
+        return [&opts] {
             PipedPrinter* printer = new PipedPrinter( opts );
             return printer;
         };
     } else {
-        return [opts] {
+        return [&opts] {
             PrettyPrinter* printer = new PrettyPrinter( opts );
             return printer;
         };

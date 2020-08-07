@@ -8,7 +8,7 @@
 #include "searchoptions.hpp"
 
 struct Printer {
-    SearchOptions opts;
+    const SearchOptions& opts;
     Printer( const SearchOptions& opts ) : opts( opts ) {}
     //! collect what is printed
     virtual void collectPrints( const sys_string& path, const std::vector<search::Match>& matches, const std::string_view& content ) = 0;
