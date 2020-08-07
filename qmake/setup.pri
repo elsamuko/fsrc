@@ -3,6 +3,7 @@
 CONFIG(debug, debug|release) {
     COMPILE_FLAG=d
     COMPILE_MODE=debug
+    DEFINES += _DEBUG
 }
 
 CONFIG(release, debug|release) {
