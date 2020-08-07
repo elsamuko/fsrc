@@ -12,8 +12,9 @@ int main( int argc, char* argv[] ) {
 
     if( !opts ) { return EXIT_FAILURE; }
 
-    if( !fs::exists( opts.path ) ) {
-        printf( "Dir \"%s\" does not exist.\n", opts.path.string().c_str() );
+    // checks
+    if( !fs::is_directory( opts.path ) ) {
+        printf( "\"%s\" is not a directory.\n", opts.path.string().c_str() );
         exit( -1 );
     }
 
