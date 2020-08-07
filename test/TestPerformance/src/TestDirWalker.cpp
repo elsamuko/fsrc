@@ -1,5 +1,5 @@
 #ifndef __APPLE__
-#include <experimental/filesystem>
+#include <filesystem>
 #endif
 #include <system_error>
 
@@ -9,8 +9,11 @@
 #include "threadpool.hpp"
 #include "stopwatch.hpp"
 #include "utils.hpp"
+
+#if !BOOST_OS_WINDOWS
 #include "nftwwalker.hpp"
 #include "ftswalker.hpp"
+#endif
 
 #include "PerformanceUtils.hpp"
 
@@ -37,7 +40,7 @@ void recurseDir( const sys_string& filename, const std::function<void( const sys
 
 #ifndef __APPLE__
 namespace withStd {
-namespace stdfs = std::experimental::filesystem;
+namespace stdfs = std::filesystem;
 void recurseDir( const sys_string& filename, const std::function<void( const sys_string& filename )>& callback ) {
     std::error_code ec;
     auto start = stdfs::recursive_directory_iterator( filename, ec );
@@ -65,8 +68,10 @@ BOOST_AUTO_TEST_CASE( Test_DirWalker ) {
     printf( "DirWalker\n" );
 
     std::vector<Result> results = {
+#if !BOOST_OS_WINDOWS
         runDirWalkerTest( "withFTS", withFTS::recurseDir ),
         runDirWalkerTest( "withNFTW", withNFTW::recurseDir ),
+#endif
         runDirWalkerTest( "utils", utils::recurseDir ),
         runDirWalkerTest( "withBoost", withBoost::recurseDir ),
 #ifndef __APPLE__

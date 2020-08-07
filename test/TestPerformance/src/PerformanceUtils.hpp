@@ -41,7 +41,7 @@ inline Result timed1000( const std::string& name, const std::function<void()>& f
 inline Result runDirWalkerTest( const std::string& name, const decltype( utils::recurseDir )& func ) {
     std::atomic_size_t files = 0;
     std::atomic_size_t bytes = 0;
-    fs::path include = "../../../../libs/boost/include";
+    fs::path include = "../../../../libs/boost/include/";
 
     long ns = 0;
     {
@@ -74,7 +74,7 @@ inline Result run( fromFileFunc fromFile, const char* name ) {
 
     //! \note Windows is slow in I/O
 #if BOOST_OS_WINDOWS
-    fs::path include = "../../../../libs/boost/include/boost/asio";
+    fs::path include = "../../../../libs/boost/include/boost/asio/";
 #else
     fs::path include = "../../../../libs/boost";
 #endif
