@@ -324,12 +324,12 @@ void utils::recurseDir( const sys_string& filename, const std::function<void ( c
 
             if( !wcscmp( data.cFileName, L".hg" ) ) { continue; }
 
-            recurseDir( filename + L"\\" + data.cFileName, callback );
+            recurseDir( filename + data.cFileName + L"\\", callback );
             continue;
         }
 
         if( data.dwFileAttributes & ( FILE_ATTRIBUTE_ARCHIVE | FILE_ATTRIBUTE_NORMAL ) ) {
-            callback( filename + L"\\" + data.cFileName );
+            callback( filename + data.cFileName );
             continue;
         }
     }
