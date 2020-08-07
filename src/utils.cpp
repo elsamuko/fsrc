@@ -378,7 +378,8 @@ sys_string utils::absolutePath( const sys_string& filename ) {
 sys_string utils::absolutePath( const sys_string& filename ) {
     sys_string rv( PATH_MAX, '\0' );
     ::realpath( filename.c_str(), rv.data() );
-    rv.resize( strlen( rv.data() ) );
+    rv.resize( 1 + strlen( rv.data() ) );
+    rv.back() = '/';
     return rv;
 }
 #endif
