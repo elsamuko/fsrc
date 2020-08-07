@@ -1,6 +1,7 @@
 #pragma once
 
 #include "printer.hpp"
+#include "boost/algorithm/string/replace.hpp"
 
 #define CUT_OFF 200
 
@@ -34,6 +35,7 @@ void PrettyPrinter::collectPrints( const sys_string& path, const std::vector<sea
     // print file path
 #ifdef _WIN32
     sys_string complete = opts.prefix + path;
+    boost::algorithm::replace_all( complete, L"\\", L"/" );
     prints.emplace_back( utils::printFunc( cgreen, "file:///" + std::string( complete.cbegin(), complete.cend() ) ) );
 #else
     prints.emplace_back( utils::printFunc( cgreen, "file://" + opts.prefix + path ) );
