@@ -17,10 +17,12 @@
 #define O_RDONLY _O_RDONLY
 #define O_BINARY _O_BINARY
 #define O_RB L"rb"
+#define DOT L".\\"
 #else
 #define _read read
 #define O_RB "rb"
 #define O_BINARY 0
+#define DOT "./"
 #endif
 
 #include "boost/predef.h"
@@ -135,5 +137,7 @@ inline std::function<void()> printFunc( Color color, const std::string text ) {
 bool openFile( const sys_string& filename );
 
 void recurseDir( const sys_string& filename, const std::function<void( const sys_string& filename )>& callback );
+
+sys_string absolutePath( const sys_string& filename = DOT );
 
 }

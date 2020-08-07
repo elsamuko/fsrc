@@ -366,3 +366,19 @@ bool utils::openFile( const sys_string& filename ) {
 #else
 // mac's impl is in macutils.mm
 #endif
+
+#if BOOST_OS_WINDOWS
+sys_string utils::absolutePath( const sys_string& filename ) {
+    sys_string rv( 1024, '\0' );
+    DWORD size = ::GetFullPathNameW( filename.c_str(), rv.size(), rv.data(), nullptr );
+    rv.resize( size );
+    return rv;
+}
+#else
+sys_string utils::absolutePath( const sys_string& filename ) {
+    sys_string rv( PATH_MAX, '\0' );
+    ::realpath( filename.c_str(), rv.data() );
+    rv.resize( strlen( rv.data() ) );
+    return rv;
+}
+#endif

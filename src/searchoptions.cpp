@@ -1,6 +1,7 @@
 #include "searchoptions.hpp"
 
 #include "boost/program_options.hpp"
+#include "boost/algorithm/string/replace.hpp"
 namespace po = boost::program_options;
 
 void usage( const std::string& description ) {
@@ -55,7 +56,24 @@ SearchOptions SearchOptions::parseArgs( int argc, char* argv[] ) {
 
     // search in dir
     if( args.count( "dir" ) ) {
-        fs::path dir = args["dir"].as<std::string>();
+        std::string dir = args["dir"].as<std::string>();
+#if BOOST_OS_WINDOWS
+
+        boost::algorithm::replace_all( dir, "/", "\\" );
+
+        if( dir.back() != '\\' ) {
+            dir.push_back( '\\' );
+        }
+
+#else
+
+        if( dir.back() != '/' ) {
+            dir.push_back( '/' );
+        }
+
+#endif
+
+
         opts.path = dir;
     } else {
         opts.path = fs::current_path();
@@ -113,14 +131,6 @@ SearchOptions SearchOptions::parseArgs( int argc, char* argv[] ) {
         std::stringstream help;
         desc.print( help );
         usage( help.str() );
-    }
-
-    // set prefix for clickable paths
-    opts.path = fs::canonical( opts.path );
-    opts.prefix = opts.path.native();
-
-    if( opts.prefix.back() != '/' ) {
-        opts.prefix.push_back( '/' );
     }
 
     return opts;
