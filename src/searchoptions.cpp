@@ -76,7 +76,7 @@ SearchOptions SearchOptions::parseArgs( int argc, char* argv[] ) {
 
         opts.path = dir;
     } else {
-        opts.path = fs::current_path();
+        opts.path = utils::absolutePath();
     }
 
     // disable ls-files
