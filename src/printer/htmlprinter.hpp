@@ -19,7 +19,7 @@ const std::string css = R"css(<style>
         font-size: 1.3em;
     }
     .result {
-        white-space: pre;
+        white-space: pre-wrap;
         font-family: monospace;
     }
     .file {
