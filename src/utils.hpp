@@ -44,6 +44,10 @@ enum class Color {
     Reset
 };
 
+inline std::string fromSysString( const sys_string& sys ) {
+    return std::string( sys.cbegin(), sys.cend() );
+}
+
 constexpr unsigned long long int operator "" _MB( unsigned long long int in ) {
     return in * 1024 * 1024;
 }
