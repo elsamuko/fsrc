@@ -74,7 +74,7 @@ struct Searcher {
 
     //! search with strcasestr
     std::vector<search::Match> caseInsensitiveSearch( const std::string_view& content );
-    //! search with strstr or string_view::find
+    //! search with strstr
     std::vector<search::Match> caseSensitiveSearch( const std::string_view& content );
     //! search with boost::regex
     std::vector<search::Match> regexSearch( const std::string_view& content );
