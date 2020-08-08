@@ -32,6 +32,9 @@ const std::string css = R"css(<style>
     .match {
         color:red;
     }
+    .gray {
+        color:gray;
+    }
     .code {
         color:#eee;
     }
@@ -107,6 +110,9 @@ struct HtmlPrinter : public Printer {
             } );
         } );
     }
+    inline void ellipsis() {
+        result << "<span class=\"gray\">...</span>";
+    }
 };
 
 std::once_flag HtmlPrinter::oneHeader;
@@ -158,7 +164,13 @@ void HtmlPrinter::collectPrints( const sys_string& path, const std::vector<searc
 
             // code in neutral
             if( line.cbegin() < match->first ) {
-                result << "<span class=\"code\">" << HTML::encode( std::string( line.cbegin(), match->first ) ) << "</span>";
+                // elide left if line is too long
+                if( match->first - line.cbegin() > CUT_OFF ) {
+                    this->ellipsis();
+                    result << "<span class=\"code\">" << HTML::encode( std::string( match->first - CUT_OFF, match->first ) ) << "</span>";
+                } else {
+                    result << "<span class=\"code\">" << HTML::encode( std::string( line.cbegin(), match->first ) ) << "</span>";
+                }
             }
         }
 
@@ -172,7 +184,14 @@ void HtmlPrinter::collectPrints( const sys_string& path, const std::vector<searc
         // and exit search for this file
         if( std::next( match ) == end ) {
             if( from < line.cend() ) {
-                result << "<span class=\"code\">" << HTML::encode( std::string( from, line.cend() ) ) << "</span>\n";
+                // elide right if line is too long
+                if( line.cend() - from > CUT_OFF ) {
+                    result << "<span class=\"code\">" << HTML::encode( std::string( from, from + CUT_OFF ) ) << "</span>";
+                    this->ellipsis();
+                } else {
+                    result << "<span class=\"code\">" << HTML::encode( std::string( from, line.cend() ) ) << "</span>\n";
+                }
+
             }
 
             goto end;
@@ -182,11 +201,25 @@ void HtmlPrinter::collectPrints( const sys_string& path, const std::vector<searc
 
         // if next match is within this line, print code in neutral until next match
         if( match->first < line.cend() ) {
-            result << "<span class=\"code\">" << HTML::encode( std::string( from, match->first ) ) << "</span>";
+            if( match->first - from > CUT_OFF ) {
+                // elide middle if line is too long
+                result << "<span class=\"code\">" << HTML::encode( std::string( from, from + CUT_OFF / 2 ) ) << "</span>";
+                this->ellipsis();
+                result << "<span class=\"code\">" << HTML::encode( std::string( match->first - CUT_OFF / 2, match->first ) ) << "</span>";
+            } else {
+                result << "<span class=\"code\">" << HTML::encode( std::string( from, match->first ) ) << "</span>";
+            }
+
         }
         // else print code in neutral until end
         else {
-            result << "<span class=\"code\">" << HTML::encode( std::string( from, line.cend() ) ) << "</span>\n";
+            // elide right if line is too long
+            if( line.cend() - from > CUT_OFF ) {
+                result << "<span class=\"code\">" << HTML::encode( std::string( from, from + CUT_OFF ) ) << "</span>";
+                this->ellipsis();
+            } else {
+                result << "<span class=\"code\">" << HTML::encode( std::string( from, line.cend() ) ) << "</span>\n";
+            }
         }
     }
 
