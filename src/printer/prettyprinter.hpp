@@ -3,8 +3,6 @@
 #include "printer.hpp"
 #include "boost/algorithm/string/replace.hpp"
 
-#define CUT_OFF 200
-
 struct PrettyPrinter : public Printer {
     using Print = std::function<void()>;
     std::vector<Print> prints;

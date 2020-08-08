@@ -7,6 +7,8 @@
 #include "types.hpp"
 #include "searchoptions.hpp"
 
+#define CUT_OFF 200
+
 struct Printer {
     const SearchOptions& opts;
     Printer( const SearchOptions& opts ) : opts( opts ) {}
