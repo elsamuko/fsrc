@@ -120,16 +120,16 @@ fs::path HtmlPrinter::html;
 
 void HtmlPrinter::collectPrints( const sys_string& path, const std::vector<search::Match>& matches, const std::string_view& content ) {
     result.str( std::string() );
-    fs::path file( path );
+    std::string uri = HTML::encode( "file://" + fromSysString( opts.prefix + path ) );
 
     // open result
     result << "<div class=\"result\">\n";
 
     // print file path
-    result << "<a class=\"file\" href=\"file://"
-           << HTML::encode( fs::absolute( file ).string() )
+    result << "<a class=\"file\" href=\""
+           << uri
            << "\" download>"
-           << HTML::encode( file.string() ) <<
+           << uri <<
            "</a>\n";
 
     // parse file for newlines until last match
