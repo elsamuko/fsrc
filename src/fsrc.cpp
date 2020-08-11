@@ -27,9 +27,6 @@ int main( int argc, char* argv[] ) {
 
         searcher.onGitFiles();
     } else {
-        // set prefix for clickable paths
-        opts.prefix = utils::absolutePath();
-
         searcher.onAllFiles();
     }
 

@@ -74,7 +74,7 @@ SearchOptions SearchOptions::parseArgs( int argc, char* argv[] ) {
 #endif
 
 
-        opts.path = dir;
+        opts.path = utils::absolutePath( sys_string( dir.cbegin(), dir.cend() ) );
     } else {
         opts.path = utils::absolutePath();
     }
