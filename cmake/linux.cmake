@@ -7,4 +7,6 @@ if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_link_options(${PROJECT} BEFORE PRIVATE -flto)
 endif()
 
+target_link_options(${PROJECT} BEFORE PRIVATE -static-libstdc++ -static-libgcc)
+
 target_link_libraries(${PROJECT} LINK_PRIVATE pthread)
