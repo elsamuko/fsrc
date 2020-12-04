@@ -84,11 +84,12 @@ function buildBoost {
 function buildFsrc {
     ( 
         cd "$BUILD_DIR" || exit 1
+
         # configure
-        "$CMAKE" -S .. &> "$TMP_DIR/cmake.log"
+        "$CMAKE" -S .. -DCMAKE_BUILD_TYPE:STRING=Release &> "$TMP_DIR/cmake.log"
 
         # build
-        "$CMAKE" --build . --parallel --config Release &> "$TMP_DIR/cmake.log"
+        "$CMAKE" --build . --parallel &>> "$TMP_DIR/cmake.log"
     )
 }
 
@@ -99,11 +100,11 @@ function buildFsrcWin {
 
         # configure
         "$HELPER" \
-        "$CMAKE" -S .. &> "$TMP_DIR/cmake.log"
+        "$CMAKE" -S .. -DCMAKE_BUILD_TYPE:STRING=Release &> "$TMP_DIR/cmake.log"
 
         # build
         "$HELPER" \
-        "$CMAKE" --build . --parallel --config Release &> "$TMP_DIR/cmake.log"
+        "$CMAKE" --build . --parallel &>> "$TMP_DIR/cmake.log"
     )
 }
 
