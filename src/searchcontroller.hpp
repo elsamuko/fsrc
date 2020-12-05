@@ -26,7 +26,7 @@ struct Stats {
     std::atomic_llong t_print = {0};   // time to print
 };
 
-struct Searcher {
+struct SearchController {
     std::mutex m;
     std::string term;
     rx::regex regex;
@@ -35,7 +35,7 @@ struct Searcher {
     Stats stats;
     Color gray = Color::Gray;
 
-    Searcher( const SearchOptions& opts, std::function<Printer*()> printer ):
+    SearchController( const SearchOptions& opts, std::function<Printer*()> printer ):
         opts( opts ),
         makePrinter( printer ) {
 
@@ -60,7 +60,7 @@ struct Searcher {
         }
     }
 
-    ~Searcher() {}
+    ~SearchController() {}
 
     void onAllFiles();
     void onGitFiles();

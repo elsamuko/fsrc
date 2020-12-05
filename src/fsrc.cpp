@@ -1,4 +1,4 @@
-#include "searcher.hpp"
+#include "searchcontroller.hpp"
 #include "printer/printerfactory.hpp"
 #include "stopwatch.hpp"
 #include "exitqueue.hpp"
@@ -19,7 +19,7 @@ int main( int argc, char* argv[] ) {
     }
 
     std::function<Printer*()> makePrinter = printerfactory::printerFunc( opts );
-    Searcher searcher( opts, makePrinter );
+    SearchController searcher( opts, makePrinter );
 
     if( !opts.noGit && fs::exists( opts.path / ".git" ) ) {
         // set prefix for clickable paths

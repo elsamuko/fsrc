@@ -1,7 +1,7 @@
 #include <iterator>
 
 #include "threadpool.hpp"
-#include "searcher.hpp"
+#include "searchcontroller.hpp"
 #include "mischasan.hpp"
 #include "ssefind.hpp"
 #include "stdstr.hpp"
@@ -12,7 +12,7 @@
 #define FIND_TRAITS       2
 #define FIND_STRSTR       3
 
-std::vector<search::Match> Searcher::caseSensitiveSearch( const std::string_view& content ) {
+std::vector<search::Match> SearchController::caseSensitiveSearch( const std::string_view& content ) {
 #if FIND_ALGO == FIND_SSE_OWN
     return sse::find( content, term );
 #else
@@ -46,7 +46,7 @@ std::vector<search::Match> Searcher::caseSensitiveSearch( const std::string_view
 #endif
 }
 
-std::vector<search::Match> Searcher::caseInsensitiveSearch( const std::string_view& content ) {
+std::vector<search::Match> SearchController::caseInsensitiveSearch( const std::string_view& content ) {
     std::vector<search::Match> matches;
 
     search::Iter pos = content.cbegin();
@@ -63,7 +63,7 @@ std::vector<search::Match> Searcher::caseInsensitiveSearch( const std::string_vi
     return matches;
 }
 
-std::vector<search::Match> Searcher::regexSearch( const std::string_view& content ) {
+std::vector<search::Match> SearchController::regexSearch( const std::string_view& content ) {
     std::vector<search::Match> matches;
 
     // https://www.boost.org/doc/libs/1_70_0/libs/regex/doc/html/boost_regex/ref/match_flag_type.html
@@ -81,7 +81,7 @@ std::vector<search::Match> Searcher::regexSearch( const std::string_view& conten
     return matches;
 }
 
-void Searcher::onAllFiles() {
+void SearchController::onAllFiles() {
     this->printHeader();
 
     POOL;
@@ -98,7 +98,7 @@ void Searcher::onAllFiles() {
     STOP( stats.t_recurse )
 }
 
-void Searcher::onGitFiles() {
+void SearchController::onGitFiles() {
     this->printGitHeader();
 
     POOL;
@@ -115,19 +115,19 @@ void Searcher::onGitFiles() {
     STOP( stats.t_recurse );
 }
 
-void Searcher::printHeader() {
+void SearchController::printHeader() {
     if( !opts.piped ) {
         utils::printColor( gray, utils::format( "Searching for \"%s\" in folder:\n\n", opts.term.c_str() ) );
     }
 }
 
-void Searcher::printGitHeader() {
+void SearchController::printGitHeader() {
     if( !opts.piped ) {
         utils::printColor( gray, utils::format( "Searching for \"%s\" in git repo:\n\n", opts.term.c_str() ) );
     }
 }
 
-void Searcher::printStats() {
+void SearchController::printStats() {
     if( !opts.piped ) {
         utils::printColor( gray, utils::format(
                                "Times: Recurse %ld ms, Read %ld ms, Search %ld ms, Collect %ld ms, Print %ld ms\n",
@@ -140,7 +140,7 @@ void Searcher::printStats() {
     }
 }
 
-void Searcher::printFooter( const StopWatch::ns_type& ms ) {
+void SearchController::printFooter( const StopWatch::ns_type& ms ) {
     if( !opts.piped ) {
         utils::printColor( gray, utils::format(
                                "Found %lu matches in %lu/%lu files (%lu kB) in %ld ms\n",
@@ -152,7 +152,7 @@ void Searcher::printFooter( const StopWatch::ns_type& ms ) {
     }
 }
 
-void Searcher::search( const sys_string& path ) {
+void SearchController::search( const sys_string& path ) {
 
     STOPWATCH
     START
