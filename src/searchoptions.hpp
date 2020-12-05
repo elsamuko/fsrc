@@ -3,6 +3,9 @@
 #include "utils.hpp"
 #include "pipes.hpp"
 
+#include "boost/regex.hpp"
+namespace rx = boost;
+
 struct SearchOptions {
     bool success = false;
     bool noGit = false;
@@ -11,6 +14,7 @@ struct SearchOptions {
     bool quiet = false;
     bool html = false;
     std::string term;
+    rx::regex regex;
     fs::path path;
     sys_string prefix;
     bool piped = pipes::stdoutIsPipe();

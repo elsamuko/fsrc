@@ -1,85 +1,8 @@
-#include <iterator>
 
 #include "threadpool.hpp"
 #include "searchcontroller.hpp"
-#include "mischasan.hpp"
-#include "ssefind.hpp"
-#include "stdstr.hpp"
 #include "printer/printer.hpp"
-
-#define FIND_MISCHASAN    0
-#define FIND_SSE_OWN      1
-#define FIND_TRAITS       2
-#define FIND_STRSTR       3
-
-std::vector<search::Match> SearchController::caseSensitiveSearch( const std::string_view& content ) {
-#if FIND_ALGO == FIND_SSE_OWN
-    return sse::find( content, term );
-#else
-
-    std::vector<search::Match> matches;
-
-    search::Iter pos = content.cbegin();
-    const char* start = content.data();
-    const char* ptr = start;
-    const char* end = start + content.size();
-
-#if FIND_ALGO == FIND_MISCHASAN
-
-    while( ( ptr = mischasan::scanstrN( ptr, end - ptr, term.data(), term.size() ) ) )
-#elif FIND_ALGO == FIND_MISCHASAN
-
-    while( ( ptr = fromStd::strstr( ptr, end - ptr, term.data(), term.size() ) ) )
-#elif FIND_ALGO == FIND_STRSTR
-
-    while( ( ptr = strstr( ptr, term.data() ) ) )
-#endif
-
-    {
-        search::Iter from = pos + ( ptr - start );
-        search::Iter to = from + term.size();
-        matches.emplace_back( from, to );
-        ptr += term.size();
-    }
-
-    return matches;
-#endif
-}
-
-std::vector<search::Match> SearchController::caseInsensitiveSearch( const std::string_view& content ) {
-    std::vector<search::Match> matches;
-
-    search::Iter pos = content.cbegin();
-    const char* start = content.data();
-    const char* ptr = start;
-
-    while( ( ptr = strcasestr( ptr, term.data() ) ) ) {
-        search::Iter from = pos + ( ptr - start );
-        search::Iter to = from + term.size();
-        matches.emplace_back( from, to );
-        ptr += term.size();
-    }
-
-    return matches;
-}
-
-std::vector<search::Match> SearchController::regexSearch( const std::string_view& content ) {
-    std::vector<search::Match> matches;
-
-    // https://www.boost.org/doc/libs/1_70_0/libs/regex/doc/html/boost_regex/ref/match_flag_type.html
-    rx::regex_constants::match_flags flags = rx::regex_constants::match_not_dot_newline;
-
-    auto begin = rx::cregex_iterator( &content.front(), 1 + &content.back(), regex, flags );
-    auto end   = rx::cregex_iterator();
-
-    for( rx::cregex_iterator match = begin; match != end; ++match ) {
-        search::Iter from = content.cbegin() + match->position();
-        search::Iter to = from + match->length();
-        matches.emplace_back( from, to );
-    }
-
-    return matches;
-}
+#include "searcher/searcher.hpp"
 
 void SearchController::onAllFiles() {
     this->printHeader();
@@ -157,6 +80,7 @@ void SearchController::search( const sys_string& path ) {
     STOPWATCH
     START
 
+    // read file
 #ifndef _WIN32
     utils::FileView view = utils::fromFileP( path );
 #else
@@ -170,18 +94,10 @@ void SearchController::search( const sys_string& path ) {
 
     // collect matches
     START
-    const std::string_view& content = view.content;
-    std::vector<search::Match> matches;
 
-    if( !opts.isRegex ) {
-        if( opts.ignoreCase ) {
-            matches = caseInsensitiveSearch( content );
-        } else {
-            matches = caseSensitiveSearch( content );
-        }
-    } else {
-        matches = regexSearch( content );
-    }
+    const std::string_view& content = view.content;
+    static thread_local std::unique_ptr<Searcher> searcher( makeSearcher() );
+    std::vector<search::Match> matches = searcher->search( content );
 
     STOP( stats.t_search );
 

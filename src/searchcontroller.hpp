@@ -3,15 +3,13 @@
 #include <mutex>
 #include <atomic>
 
-#include "boost/regex.hpp"
-namespace rx = boost;
-
 #include "utils.hpp"
 #include "types.hpp"
 #include "stopwatch.hpp"
 #include "searchoptions.hpp"
 
 struct Printer;
+struct Searcher;
 
 struct Stats {
     std::atomic_size_t matches = {0};
@@ -29,34 +27,21 @@ struct Stats {
 struct SearchController {
     std::mutex m;
     std::string term;
-    rx::regex regex;
     SearchOptions opts;
+    std::function<Searcher*()> makeSearcher;
     std::function<Printer*()> makePrinter;
     Stats stats;
     Color gray = Color::Gray;
 
-    SearchController( const SearchOptions& opts, std::function<Printer*()> printer ):
+    SearchController( const SearchOptions& opts, std::function<Searcher*()> searcher, std::function<Printer*()> printer ):
         opts( opts ),
+        makeSearcher( searcher ),
         makePrinter( printer ) {
 
         term = opts.term;
 
         if( !opts.colorized ) {
             gray = Color::Neutral;
-        }
-
-        // use regex only for complex searches
-        if( opts.isRegex ) {
-            rx::regex::flag_type flags = rx::regex::normal;
-
-            if( opts.ignoreCase ) { flags ^= rx::regex::icase; }
-
-            try {
-                regex.assign( term, flags );
-            } catch( const rx::regex_error& e ) {
-                LOG( "Invalid regex: " << e.what() );
-                exit( EXIT_FAILURE );
-            }
         }
     }
 
@@ -71,11 +56,4 @@ struct SearchController {
     void printFooter( const StopWatch::ns_type& ms );
 
     void search( const sys_string& path );
-
-    //! search with strcasestr
-    std::vector<search::Match> caseInsensitiveSearch( const std::string_view& content );
-    //! search with strstr
-    std::vector<search::Match> caseSensitiveSearch( const std::string_view& content );
-    //! search with boost::regex
-    std::vector<search::Match> regexSearch( const std::string_view& content );
 };
