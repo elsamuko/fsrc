@@ -13,8 +13,8 @@ SOURCES += $${SRC_DIR}/utils.cpp
 HEADERS += $${SRC_DIR}/pipes.hpp
 SOURCES += $${SRC_DIR}/pipes.cpp
 
-HEADERS += $${SRC_DIR}/searcher.hpp
-SOURCES += $${SRC_DIR}/searcher.cpp
+HEADERS += $${SRC_DIR}/searchcontroller.hpp
+SOURCES += $${SRC_DIR}/searchcontroller.cpp
 
 HEADERS += $${SRC_DIR}/searchoptions.hpp
 SOURCES += $${SRC_DIR}/searchoptions.cpp
@@ -30,6 +30,12 @@ HEADERS += $${SRC_DIR}/printer/prettyprinter.hpp
 HEADERS += $${SRC_DIR}/printer/htmlprinter.hpp
 HEADERS += $${SRC_DIR}/printer/pipedprinter.hpp
 HEADERS += $${SRC_DIR}/printer/printerfactory.hpp
+
+HEADERS += $${SRC_DIR}/searcher/searcher.hpp
+HEADERS += $${SRC_DIR}/searcher/casesensitivesearcher.hpp
+HEADERS += $${SRC_DIR}/searcher/caseinsensitivesearcher.hpp
+HEADERS += $${SRC_DIR}/searcher/regexsearcher.hpp
+HEADERS += $${SRC_DIR}/searcher/searcherfactory.hpp
 
 macx:   SOURCES += $${SRC_DIR}/macutils.mm
 
