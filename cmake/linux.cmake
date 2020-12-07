@@ -1,10 +1,8 @@
 set(PLATFORM linux)
 
 if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
-    target_compile_options(${PROJECT} BEFORE PRIVATE -Ofast)
-    target_compile_options(${PROJECT} BEFORE PRIVATE -msse2)
-
-    target_link_options(${PROJECT} BEFORE PRIVATE -flto)
+    target_compile_options(${PROJECT} BEFORE PRIVATE -msse2 -Ofast -flto=8 -fuse-linker-plugin)
+    target_link_options(${PROJECT} BEFORE PRIVATE -msse2 -Ofast -flto=8 -fuse-linker-plugin)
 endif()
 
 target_link_options(${PROJECT} BEFORE PRIVATE -static-libstdc++ -static-libgcc)
