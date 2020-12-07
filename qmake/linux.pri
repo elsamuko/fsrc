@@ -1,6 +1,6 @@
 
-QMAKE_CXXFLAGS_RELEASE += -msse2 -Ofast
-QMAKE_LFLAGS_RELEASE += -flto
+QMAKE_CXXFLAGS_RELEASE += -msse2 -Ofast -flto=8 -fuse-linker-plugin
+QMAKE_LFLAGS_RELEASE += -msse2 -Ofast -flto=8 -fuse-linker-plugin
 QMAKE_LFLAGS += -static-libstdc++ -static-libgcc
 
 LIBS += -lstdc++fs -lpthread -lrt
