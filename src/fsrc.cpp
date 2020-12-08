@@ -6,8 +6,10 @@
 
 int main( int argc, char* argv[] ) {
 
+#if DETAILED_STATS
     StopWatch total;
     total.start();
+#endif
 
     SearchOptions opts = SearchOptions::parseArgs( argc, argv );
 
@@ -32,12 +34,11 @@ int main( int argc, char* argv[] ) {
         searcher.onAllFiles();
     }
 
-    auto ms = total.stop() / 1000000;
-
 #if DETAILED_STATS
+    auto ms = total.stop() / 1000000;
     searcher.printStats();
-#endif
     searcher.printFooter( ms );
+#endif
 
     ExitQueue::call();
     return 0;

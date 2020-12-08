@@ -13,7 +13,9 @@ void SearchController::onAllFiles() {
 
     utils::recurseDir( opts.path.native(), [&pool, this]( const sys_string & filename ) {
         pool.add( [filename, this] {
+#if DETAILED_STATS
             stats.filesSearched++;
+#endif
             search( filename );
         } );
     } );
@@ -30,7 +32,9 @@ void SearchController::onGitFiles() {
 
     utils::gitLsFiles( opts.path, [&pool, this]( const sys_string & filename ) {
         pool.add( [filename, this] {
+#if DETAILED_STATS
             stats.filesSearched++;
+#endif
             search( filename );
         } );
     } );
@@ -50,6 +54,7 @@ void SearchController::printGitHeader() {
     }
 }
 
+#if DETAILED_STATS
 void SearchController::printStats() {
     if( !opts.piped ) {
         utils::printColor( gray, utils::format(
@@ -74,6 +79,7 @@ void SearchController::printFooter( const StopWatch::ns_type& ms ) {
                                ms ) );
     }
 }
+#endif
 
 void SearchController::search( const sys_string& path ) {
 
@@ -87,7 +93,9 @@ void SearchController::search( const sys_string& path ) {
     utils::FileView view = utils::fromWinAPI( path );
 #endif
 
+#if DETAILED_STATS
     stats.bytesRead += view.size;
+#endif
     STOP( stats.t_read )
 
     if( !view.size ) { return; }
@@ -103,8 +111,10 @@ void SearchController::search( const sys_string& path ) {
 
     // handle matches
     if( !matches.empty() ) {
+#if DETAILED_STATS
         stats.filesMatched++;
         stats.matches += matches.size();
+#endif
 
         START
         static thread_local std::unique_ptr<Printer> printer( makePrinter() );

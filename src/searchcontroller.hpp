@@ -30,7 +30,9 @@ struct SearchController {
     SearchOptions opts;
     std::function<Searcher*()> makeSearcher;
     std::function<Printer*()> makePrinter;
+#if DETAILED_STATS
     Stats stats;
+#endif
     Color gray = Color::Gray;
 
     SearchController( const SearchOptions& opts, std::function<Searcher*()> searcher, std::function<Printer*()> printer ):
