@@ -104,7 +104,7 @@ function buildFsrcWin {
 
         # build
         "$HELPER" \
-        "$CMAKE" --build . --parallel &>> "$TMP_DIR/cmake.log"
+        "$CMAKE" --build . --parallel --config Release &>> "$TMP_DIR/cmake.log"
     )
 }
 
