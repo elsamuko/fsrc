@@ -89,7 +89,7 @@ function buildFsrc {
         "$CMAKE" -S .. -DCMAKE_BUILD_TYPE:STRING=Release &> "$TMP_DIR/cmake.log"
 
         # build
-        "$CMAKE" --build . --parallel &>> "$TMP_DIR/cmake.log"
+        "$CMAKE" --build . --parallel >> "$TMP_DIR/cmake.log" 2>&1
     )
 }
 
@@ -104,7 +104,7 @@ function buildFsrcWin {
 
         # build
         "$HELPER" \
-        "$CMAKE" --build . --parallel --config Release &>> "$TMP_DIR/cmake.log"
+        "$CMAKE" --build . --parallel --config Release >> "$TMP_DIR/cmake.log" 2>&1
     )
 }
 
