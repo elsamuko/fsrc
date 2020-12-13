@@ -113,7 +113,7 @@ function linuxBuild {
 
     # release
     ./b2 -j 8 --disable-icu --stagedir=stage_release toolset=gcc-10 variant=release optimization=speed \
-        cxxflags="-std=c++17 -msse2 -oFast" linkflags="-flto" \
+        cxxflags="-std=c++17 -msse2 -oFast" linkflags="-msse2 -oFast -flto" \
         $B2_OPTIONS \
         $NEEDED_LIBS
 }
