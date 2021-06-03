@@ -16,9 +16,9 @@ case $(uname) in
 esac
 
 PROJECT=boost
-VERSION="1.75.0"
+VERSION="1.76.0"
 VERSION_DL="${VERSION//./_}"
-DL_URL="https://dl.bintray.com/boostorg/release/${VERSION}/source/boost_${VERSION_DL}.tar.gz" 
+DL_URL="https://boostorg.jfrog.io/artifactory/main/release/${VERSION}/source/boost_${VERSION_DL}.tar.gz"
 
 B2_OPTIONS="cxxstd=17 link=static threading=multi address-model=64"
 # ./b2 --show-libraries
