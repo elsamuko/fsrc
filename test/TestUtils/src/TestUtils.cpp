@@ -115,6 +115,7 @@ BOOST_AUTO_TEST_CASE( Test_absolute ) {
     BOOST_CHECK( !absolute.empty() );
     BOOST_CHECK( !pwd2.empty() );
 
+#if BOOST_OS_WINDOWS
     std::wcout << absolute << std::endl;
     std::wcout << pwd2 << std::endl;
 
@@ -124,5 +125,6 @@ BOOST_AUTO_TEST_CASE( Test_absolute ) {
     std::wcout << slash << std::endl;
     std::wcout << backslash << std::endl;
     std::wcout << noslash << std::endl;
+#endif
 }
 
