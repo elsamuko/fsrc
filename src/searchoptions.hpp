@@ -14,6 +14,7 @@ struct SearchOptions {
     bool quiet = false;
     bool html = false;
     std::string term;
+    std::string glob;
     rx::regex regex;
     fs::path path;
     sys_string prefix;

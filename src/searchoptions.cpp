@@ -17,15 +17,17 @@ SearchOptions SearchOptions::parseArgs( int argc, char* argv[] ) {
 
     po::options_description desc( "Options" );
     desc.add_options()
-    ( "help,h", "Help" )
     ( "dir,d", po::value<std::string>(), "Search folder" )
+    ( "ext,e", po::value<std::string>(), "Search only in files with extension <arg>, equiv. to --glob '*.ext'" )
+    ( "glob,g", po::value<std::string>(), "Search only in files filtered by <arg> glob, e.g. '*.txt'; overrides --ext" )
+    ( "help,h", "Help" )
+    ( "html", "open web page with results" )
     ( "ignore-case,i", "Case insensitive search" )
-    ( "regex,r", "Regex search (slower)" )
     ( "no-git", "Disable search with 'git ls-files'" )
     ( "no-colors", "Disable colorized output" )
     ( "no-piped", "Disable piped output" )
-    ( "html", "open web page with results" )
     ( "quiet,q", "only print status" )
+    ( "regex,r", "Regex search (slower)" )
     ;
 
     po::options_description hidden( "Hidden options" );
@@ -112,6 +114,16 @@ SearchOptions SearchOptions::parseArgs( int argc, char* argv[] ) {
     // enable regex search
     if( args.count( "regex" ) ) {
         opts.isRegex = true;
+    }
+
+    // filter by extension
+    if( args.count( "ext" ) ) {
+        opts.glob = "*." + args["ext"].as<std::string>();
+    }
+
+    // filter by glob
+    if( args.count( "glob" ) ) {
+        opts.glob = args["glob"].as<std::string>();
     }
 
     // term
