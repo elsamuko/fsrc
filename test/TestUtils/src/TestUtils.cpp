@@ -3,6 +3,8 @@
 #include <boost/test/unit_test.hpp>
 
 #include "utils.hpp"
+#include "globmatcher.hpp"
+
 #include <fstream>
 
 BOOST_AUTO_TEST_CASE( Test_isTextFile ) {
@@ -128,3 +130,14 @@ BOOST_AUTO_TEST_CASE( Test_absolute ) {
 #endif
 }
 
+BOOST_AUTO_TEST_CASE( Test_glob ) {
+    GlobMatcher matcher( "*.tmp" );
+    BOOST_CHECK( matcher.matches( "/hase/blume.tmp" ) );
+    BOOST_CHECK( !matcher.matches( "/hase/blume.txt" ) );
+    BOOST_CHECK( !matcher.matches( "/hase/blume.tmp.txt" ) );
+
+    GlobMatcher matcher2( "prefix_*.tmp" );
+    BOOST_CHECK( matcher.matches( "/hase/prefix_blume.tmp" ) );
+    BOOST_CHECK( !matcher.matches( "/hase/prefix_blume.txt" ) );
+    BOOST_CHECK( !matcher.matches( "/hase/prefix_blume.tmp.txt" ) );
+}
