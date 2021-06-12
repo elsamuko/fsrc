@@ -19,6 +19,9 @@ SOURCES += $${SRC_DIR}/searchcontroller.cpp
 HEADERS += $${SRC_DIR}/searchoptions.hpp
 SOURCES += $${SRC_DIR}/searchoptions.cpp
 
+HEADERS += $${SRC_DIR}/globmatcher.hpp
+SOURCES += $${SRC_DIR}/globmatcher.cpp
+
 HEADERS += $${SRC_DIR}/stopwatch.hpp
 
 HEADERS += $${SRC_DIR}/exitqueue.hpp
