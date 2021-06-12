@@ -7,8 +7,9 @@ namespace rx = boost;
 
 class GlobMatcher {
     public:
-        GlobMatcher( std::string glob );
+        explicit GlobMatcher( std::string glob );
         bool matches( const sys_string& filename );
+        operator bool() const { return !regex.empty(); }
     private:
         rx::regex regex;
 };
