@@ -48,6 +48,10 @@ inline std::string fromSysString( const sys_string& sys ) {
     return std::string( sys.cbegin(), sys.cend() );
 }
 
+inline sys_string toSysString( const std::string& string ) {
+    return sys_string( string.cbegin(), string.cend() );
+}
+
 constexpr unsigned long long int operator "" _MB( unsigned long long int in ) {
     return in * 1024 * 1024;
 }
