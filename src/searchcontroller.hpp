@@ -7,6 +7,7 @@
 #include "types.hpp"
 #include "stopwatch.hpp"
 #include "searchoptions.hpp"
+#include "globmatcher.hpp"
 
 struct Printer;
 struct Searcher;
@@ -28,6 +29,7 @@ struct SearchController {
     std::mutex m;
     std::string term;
     SearchOptions opts;
+    GlobMatcher glob;
     std::function<Searcher*()> makeSearcher;
     std::function<Printer*()> makePrinter;
 #if DETAILED_STATS
@@ -37,6 +39,7 @@ struct SearchController {
 
     SearchController( const SearchOptions& opts, std::function<Searcher*()> searcher, std::function<Printer*()> printer ):
         opts( opts ),
+        glob( opts.glob ),
         makeSearcher( searcher ),
         makePrinter( printer ) {
 

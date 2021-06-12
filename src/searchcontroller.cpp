@@ -12,6 +12,8 @@ void SearchController::onAllFiles() {
     START
 
     utils::recurseDir( opts.path.native(), [&pool, this]( const sys_string & filename ) {
+        if( glob && !glob.matches( filename ) ) { return; }
+
         pool.add( [filename, this] {
 #if DETAILED_STATS
             stats.filesSearched++;
@@ -31,6 +33,8 @@ void SearchController::onGitFiles() {
     START
 
     utils::gitLsFiles( opts.path, [&pool, this]( const sys_string & filename ) {
+        if( glob && !glob.matches( filename ) ) { return; }
+
         pool.add( [filename, this] {
 #if DETAILED_STATS
             stats.filesSearched++;
