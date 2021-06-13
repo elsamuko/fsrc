@@ -7,6 +7,7 @@ GlobMatcher::GlobMatcher( std::string glob ) {
         boost::algorithm::replace_all( glob, ".", "\\." );
         boost::algorithm::replace_all( glob, "*", ".*" );
         boost::algorithm::replace_all( glob, "?", "." );
+        glob = ".*" + glob;
 #if BOOST_OS_WINDOWS
         this->regex.assign( toSysString( glob ), rx::regex::normal );
 #else
