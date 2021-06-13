@@ -106,13 +106,13 @@ function linuxBuild {
     echo "using gcc : 10 : /usr/bin/g++-10 ; " >> tools/build/src/user-config.jam
 
     # debug
-    ./b2 -j 8 --disable-icu --stagedir=stage_debug toolset=gcc-10 variant=debug \
+    ./b2 -j 16 --disable-icu --stagedir=stage_debug toolset=gcc-10 variant=debug \
         cxxflags="-std=c++17" \
         $B2_OPTIONS \
         $NEEDED_LIBS
 
     # release
-    ./b2 -j 8 --disable-icu --stagedir=stage_release toolset=gcc-10 variant=release optimization=speed \
+    ./b2 -j 16 --disable-icu --stagedir=stage_release toolset=gcc-10 variant=release optimization=speed \
         cxxflags="-std=c++17 -msse2 -oFast" linkflags="-msse2 -oFast -flto" \
         $B2_OPTIONS \
         $NEEDED_LIBS
