@@ -137,7 +137,10 @@ BOOST_AUTO_TEST_CASE( Test_glob ) {
     BOOST_CHECK( !matcher.matches( "/hase/blume.tmp.txt" ) );
 
     GlobMatcher matcher2( "prefix_*.tmp" );
-    BOOST_CHECK( matcher.matches( "/hase/prefix_blume.tmp" ) );
-    BOOST_CHECK( !matcher.matches( "/hase/prefix_blume.txt" ) );
-    BOOST_CHECK( !matcher.matches( "/hase/prefix_blume.tmp.txt" ) );
+    BOOST_CHECK( matcher2.matches( "/hase/prefix_blume.tmp" ) );
+    BOOST_CHECK( !matcher2.matches( "/hase/prefix_blume.txt" ) );
+    BOOST_CHECK( !matcher2.matches( "/hase/prefix_blume.tmp.txt" ) );
+
+    GlobMatcher matcher3( "boost*.cmake" );
+    BOOST_CHECK( matcher3.matches( "/tmp/cmake/boost.cmake" ) );
 }
