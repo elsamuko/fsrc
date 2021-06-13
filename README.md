@@ -8,17 +8,21 @@ The string search is sse2 optimized code from [mischasan](https://mischasan.word
 user@home:/usr/include/boost$ fsrc
 Usage  : fsrc [options] term
 Options:
-  -h [ --help ]         Help
   -d [ --dir ] arg      Search folder
+  -e [ --ext ] arg      Search only in files with extension <arg>, equiv. to 
+                        --glob '*.ext'
+  -g [ --glob ] arg     Search only in files filtered by <arg> glob, e.g. 
+                        '*.txt'; overrides --ext
+  -h [ --help ]         Help
+  --html                open web page with results
   -i [ --ignore-case ]  Case insensitive search
-  -r [ --regex ]        Regex search (slower)
   --no-git              Disable search with 'git ls-files'
   --no-colors           Disable colorized output
   --no-piped            Disable piped output
-  --html                open web page with results
   -q [ --quiet ]        only print status
+  -r [ --regex ]        Regex search (slower)
 
-Build : v0.18 from Jul 31 2020
+Build : v0.23 from Jun 12 2021
 Web   : https://github.com/elsamuko/fsrc
 user@home:/usr/include/boost$ fsrc filesystem
 Searching for "filesystem" in folder:
@@ -45,6 +49,7 @@ user@home:/usr/include/boost$
   * folders are set with `-d`
   * when printing a match in a long line, only 100 chars context are printed, which makes searching in minified sources easier
   * with `--html` you get the results as web page
+  * with `--glob` you can filter filenames by glob
 
 ## Architecture
 fsrc has a simple architecture: https://elsamuko.github.io/fsrc/architecture.html
