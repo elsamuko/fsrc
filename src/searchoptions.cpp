@@ -19,6 +19,7 @@ SearchOptions SearchOptions::parseArgs( int argc, char* argv[] ) {
     desc.add_options()
     ( "dir,d", po::value<std::string>(), "Search folder" )
     ( "ext,e", po::value<std::string>(), "Search only in files with extension <arg>, equiv. to --glob '*.ext'" )
+    ( "files,f", "Only print filenames" )
     ( "glob,g", po::value<std::string>(), "Search only in files filtered by <arg> glob, e.g. '*.txt'; overrides --ext" )
     ( "help,h", "Help" )
     ( "html", "open web page with results" )
@@ -130,6 +131,11 @@ SearchOptions SearchOptions::parseArgs( int argc, char* argv[] ) {
     // filter by glob
     if( args.count( "glob" ) ) {
         opts.glob = args["glob"].as<std::string>();
+    }
+
+    // only print filenames
+    if( args.count( "files" ) ) {
+        opts.onlyFiles = true;
     }
 
     // term

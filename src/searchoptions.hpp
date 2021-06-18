@@ -13,6 +13,7 @@ struct SearchOptions {
     bool isRegex = false;
     bool quiet = false;
     bool html = false;
+    bool onlyFiles = false;
     std::string term;
     std::string glob;
     rx::regex regex;

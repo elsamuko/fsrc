@@ -39,6 +39,12 @@ void PrettyPrinter::collectPrints( const sys_string& path, const std::vector<sea
     prints.emplace_back( utils::printFunc( cgreen, "file://" + opts.prefix + path ) );
 #endif
 
+
+    if( opts.onlyFiles ) [[unlikely]] {
+        prints.emplace_back( utils::printFunc( Color::Neutral, "\n\n" ) );
+        return;
+    }
+
     // parse file for newlines until last match
     long long stop = matches.back().second - content.cbegin();
     const utils::Lines lines = utils::parseContent( content.data(), content.size(), stop );
