@@ -8,20 +8,19 @@ namespace rx = boost;
 
 struct SearchOptions {
     bool success = false;
-    bool noGit = false;
-    bool ignoreCase = false;
-    bool isRegex = false;
-    bool quiet = false;
-    bool html = false;
-    bool onlyFiles = false;
+    bool noGit = false;         // do not use git ls-files
+    bool ignoreCase = false;    // case insensitive search
+    bool isRegex = false;       // regex search
+    bool quiet = false;         // print only status
+    bool html = false;          // open results as html page
+    bool onlyFiles = false;     // print only filenames
     bool noURI = false;         // print w/out file://
+    bool piped = pipes::stdoutIsPipe(); // grep-compatible piped output
+    bool colorized = !piped; // show colors
     std::string term;
     std::string glob;
     rx::regex regex;
     fs::path path;
-    sys_string prefix;
-    bool piped = pipes::stdoutIsPipe();
-    bool colorized = !piped;
     operator bool() const { return success; }
     static SearchOptions parseArgs( int argc, char* argv[] );
 };
