@@ -11,7 +11,7 @@ CONFIG(release, debug|release) {
 }
 
 CONFIG -= qt
-CONFIG += c++1z
+CONFIG += c++latest
 CONFIG += console
 CONFIG -= app_bundle
 CONFIG += static
