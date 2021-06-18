@@ -14,7 +14,9 @@ struct PrettyPrinter : public Printer {
         cblue  = opts.colorized ? Color::Blue  : Color::Neutral;
         cgreen = opts.colorized ? Color::Green : Color::Neutral;
         cgray  = opts.colorized ? Color::Gray  : Color::Neutral;
-    }
+
+        if( opts.noURI ) [[unlikely]] { uriPrefix.clear(); }
+        }
     virtual ~PrettyPrinter() override {}
     inline void ellipsis() {
         prints.emplace_back( utils::printFunc( cgray, "..." ) );
@@ -24,6 +26,11 @@ struct PrettyPrinter : public Printer {
     Color cblue;
     Color cgreen;
     Color cgray;
+#ifdef _WIN32
+    std::string uriPrefix = "file:///";
+#else
+    std::string uriPrefix = "file://";
+#endif
 };
 
 void PrettyPrinter::collectPrints( const sys_string& path, const std::vector<search::Match>& matches, const std::string_view& content ) {
@@ -34,9 +41,9 @@ void PrettyPrinter::collectPrints( const sys_string& path, const std::vector<sea
 #ifdef _WIN32
     sys_string complete = opts.prefix + path;
     boost::algorithm::replace_all( complete, L"\\", L"/" );
-    prints.emplace_back( utils::printFunc( cgreen, "file:///" + std::string( complete.cbegin(), complete.cend() ) ) );
+    prints.emplace_back( utils::printFunc( cgreen, uriPrefix + std::string( complete.cbegin(), complete.cend() ) ) );
 #else
-    prints.emplace_back( utils::printFunc( cgreen, "file://" + opts.prefix + path ) );
+    prints.emplace_back( utils::printFunc( cgreen, uriPrefix + opts.prefix + path ) );
 #endif
 
 

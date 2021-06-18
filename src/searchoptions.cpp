@@ -27,6 +27,7 @@ SearchOptions SearchOptions::parseArgs( int argc, char* argv[] ) {
     ( "no-git", "Disable search with 'git ls-files'" )
     ( "no-colors", "Disable colorized output" )
     ( "no-piped", "Disable piped output" )
+    ( "no-uri", "Print w/out file:// prefix" )
     ( "piped", "Enable piped output" )
     ( "quiet,q", "only print status" )
     ( "regex,r", "Regex search (slower)" )
@@ -101,6 +102,11 @@ SearchOptions SearchOptions::parseArgs( int argc, char* argv[] ) {
     // disable colors
     if( args.count( "no-colors" ) ) {
         opts.colorized = false;
+    }
+
+    // disable file:// prefix
+    if( args.count( "no-uri" ) ) {
+        opts.noURI = true;
     }
 
     // don't print findings

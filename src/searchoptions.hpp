@@ -14,6 +14,7 @@ struct SearchOptions {
     bool quiet = false;
     bool html = false;
     bool onlyFiles = false;
+    bool noURI = false;         // print w/out file://
     std::string term;
     std::string glob;
     rx::regex regex;
