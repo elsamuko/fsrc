@@ -120,7 +120,7 @@ fs::path HtmlPrinter::html;
 
 void HtmlPrinter::collectPrints( const sys_string& path, const std::vector<search::Match>& matches, const std::string_view& content ) {
     result.str( std::string() );
-    std::string uri = HTML::encode( "file://" + fromSysString( opts.prefix + path ) );
+    std::string uri = HTML::encode( "file://" + fromSysString( opts.pathPrefix + path ) );
 
     // open result
     result << "<div class=\"result\">\n";

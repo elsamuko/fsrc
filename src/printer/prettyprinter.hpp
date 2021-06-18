@@ -43,7 +43,7 @@ void PrettyPrinter::collectPrints( const sys_string& path, const std::vector<sea
     boost::algorithm::replace_all( complete, L"\\", L"/" );
     prints.emplace_back( utils::printFunc( cgreen, uriPrefix + std::string( complete.cbegin(), complete.cend() ) ) );
 #else
-    prints.emplace_back( utils::printFunc( cgreen, uriPrefix + opts.prefix + path ) );
+    prints.emplace_back( utils::printFunc( cgreen, uriPrefix + opts.pathPrefix + path ) );
 #endif
 
 

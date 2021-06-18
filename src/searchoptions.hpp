@@ -21,6 +21,7 @@ struct SearchOptions {
     std::string glob;
     rx::regex regex;
     fs::path path;
+    sys_string pathPrefix;
     operator bool() const { return success; }
     static SearchOptions parseArgs( int argc, char* argv[] );
 };

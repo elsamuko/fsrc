@@ -27,7 +27,7 @@ int main( int argc, char* argv[] ) {
 
     if( !opts.noGit && fs::exists( opts.path / ".git" ) ) {
         // set prefix for clickable paths
-        opts.prefix = utils::absolutePath( opts.path.native() );
+        opts.pathPrefix = utils::absolutePath( opts.path.native() );
 
         searcher.onGitFiles();
     } else {
