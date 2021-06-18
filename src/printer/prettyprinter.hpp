@@ -39,7 +39,7 @@ void PrettyPrinter::collectPrints( const sys_string& path, const std::vector<sea
 
     // print file path
 #ifdef _WIN32
-    sys_string complete = opts.prefix + path;
+    sys_string complete = opts.pathPrefix + path;
     boost::algorithm::replace_all( complete, L"\\", L"/" );
     prints.emplace_back( utils::printFunc( cgreen, uriPrefix + std::string( complete.cbegin(), complete.cend() ) ) );
 #else
