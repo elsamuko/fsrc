@@ -11,6 +11,7 @@ Options:
   -d [ --dir ] arg      Search folder
   -e [ --ext ] arg      Search only in files with extension <arg>, equiv. to 
                         --glob '*.ext'
+  -f [ --files ]        Only print filenames
   -g [ --glob ] arg     Search only in files filtered by <arg> glob, e.g. 
                         '*.txt'; overrides --ext
   -h [ --help ]         Help
@@ -19,10 +20,12 @@ Options:
   --no-git              Disable search with 'git ls-files'
   --no-colors           Disable colorized output
   --no-piped            Disable piped output
+  --no-uri              Print w/out file:// prefix
+  --piped               Enable piped output
   -q [ --quiet ]        only print status
   -r [ --regex ]        Regex search (slower)
 
-Build : v0.23 from Jun 12 2021
+Build : v0.24 from Jun 18 2021
 Web   : https://github.com/elsamuko/fsrc
 user@home:/usr/include/boost$ fsrc filesystem
 Searching for "filesystem" in folder:
