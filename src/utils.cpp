@@ -204,7 +204,7 @@ utils::FileView utils::fromFileP( const sys_string& filename ) {
     IF_RET( offset != bytes );
 
     // check first 300 bytes for binary
-    IF_RET( !utils::isTextFile( std::string_view( ptr, std::min<size_t>( offset, 300ul ) ) ) );
+    IF_RET( !utils::isTextFile( std::string_view( ptr, std::min<size_t>( offset, 300UL ) ) ) );
 
     // read rest
     if( view.size > offset ) {
