@@ -14,7 +14,7 @@ GlobMatcher::GlobMatcher( std::string glob ) {
 #if BOOST_OS_WINDOWS
         this->regex.assign( toSysString( glob ), rx::regex::normal );
 #else
-        this->regex.assign( glob, rx::regex::normal );
+        this->regex.assign( glob, rx::regex::normal | rx::regex::icase );
 #endif
 
     }

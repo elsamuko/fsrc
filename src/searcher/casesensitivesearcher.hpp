@@ -32,7 +32,7 @@ std::vector<search::Match> CaseSensitiveSearcher::search( const std::string_view
 #if FIND_ALGO == FIND_MISCHASAN
 
     while( ( ptr = mischasan::scanstrN( ptr, end - ptr, opts.term.data(), opts.term.size() ) ) )
-#elif FIND_ALGO == FIND_MISCHASAN
+#elif FIND_ALGO == FIND_TRAITS
 
     while( ( ptr = fromStd::strstr( ptr, end - ptr, opts.term.data(), opts.term.size() ) ) )
 #elif FIND_ALGO == FIND_STRSTR
