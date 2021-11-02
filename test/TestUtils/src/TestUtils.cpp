@@ -20,11 +20,20 @@ BOOST_AUTO_TEST_CASE( Test_isTextFile ) {
 }
 
 BOOST_AUTO_TEST_CASE( Test_printFunc ) {
-    utils::printFunc( Color::Red, "Red" )();
-    utils::printFunc( Color::Green, "Green" )();
-    utils::printFunc( Color::Blue, "Blue" )();
-    utils::printFunc( Color::Neutral, "\n" )();
-    BOOST_CHECK( true );
+    FILE* cache = fopen( "stdout.tmp", "w" );
+    utils::setTarget( cache );
+    {
+        utils::printFunc( Color::Red, "Red" )();
+        utils::printFunc( Color::Green, "Green" )();
+        utils::printFunc( Color::Blue, "Blue" )();
+        utils::printFunc( Color::Neutral, "\n" )();
+    }
+    utils::setTarget( stdout );
+    fclose( cache );
+
+    utils::FileView content = utils::fromFileP( "stdout.tmp" );
+
+    BOOST_TEST( "\033[1;31mRed\033[0m\033[1;32mGreen\033[0m\033[1;34mBlue\033[0m\n" == content.content );
 }
 
 BOOST_AUTO_TEST_CASE( Test_parseContent ) {
