@@ -37,6 +37,8 @@ const std::map<Color, WORD> winColors = {
 
 #endif
 
+static FILE* target_ = stdout;
+
 const std::map<Color, std::string> bashColors = {
     {Color::Red,     "\033[1;31m"},
     {Color::Green,   "\033[1;32m"},
@@ -45,15 +47,19 @@ const std::map<Color, std::string> bashColors = {
     {Color::Reset,   "\033[0m"},
 };
 
+void utils::setTarget( FILE* target ) {
+    target_ = target;
+}
+
 void utils::printColor( Color color, const std::string& text ) {
     if( color == Color::Neutral ) {
-        fwrite( text.c_str(), 1, text.size(), stdout );
+        fwrite( text.c_str(), 1, text.size(), target_ );
     } else {
 #ifdef _WIN32
 
         if( pipes::stdoutIsPipedPty() ) {
             std::string data = bashColors.at( color ) + text + bashColors.at( Color::Reset );
-            fwrite( data.c_str(), 1, data.size(), stdout );
+            fwrite( data.c_str(), 1, data.size(), target_ );
         } else {
 
             const HANDLE h = ::GetStdHandle( STD_OUTPUT_HANDLE );
@@ -64,13 +70,13 @@ void utils::printColor( Color color, const std::string& text ) {
             }( h );
             const static WORD background = attributes & ( 0x00F0 );
             ::SetConsoleTextAttribute( h, background | winColors.at( color ) | FOREGROUND_INTENSITY );
-            fwrite( text.c_str(), 1, text.size(), stdout );
+            fwrite( text.c_str(), 1, text.size(), target_ );
             ::SetConsoleTextAttribute( h, attributes );
         }
 
 #else
         std::string data = bashColors.at( color ) + text + bashColors.at( Color::Reset );
-        fwrite( data.c_str(), 1, data.size(), stdout );
+        fwrite( data.c_str(), 1, data.size(), target_ );
 #endif
     }
 }

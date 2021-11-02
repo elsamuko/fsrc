@@ -101,6 +101,9 @@ struct FileView {
 //! prints text in color to stdout
 void printColor( Color color, const std::string& text );
 
+//! reassign printf target
+void setTarget( FILE* target );
+
 //! runs shell command
 //! \returns output of command as vector
 void gitLsFiles( const boost::filesystem::path& path, const std::function<void( const sys_string& filename )>& callback );
