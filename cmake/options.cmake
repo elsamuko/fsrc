@@ -2,7 +2,7 @@
 if(APPLE)
     # on macOS, use own threadpool
     add_definitions(-DTHREADPOOL=OWN_THREADPOOL)
-    add_definitions(-DFIND_ALGO=FIND_MISCHASAN)
+    add_definitions(-DFIND_ALGO=FIND_STRSTR)
 endif()
 
 if(UNIX AND NOT APPLE)
