@@ -95,6 +95,7 @@ void utils::gitLsFiles( const fs::path& path, const std::function<void( const sy
     // -c Show cached files in the output (default)
     // -o Show other (i.e. untracked) files in the output
     // -z \0 line termination on output and do not quote filenames
+    // --exclude-standard follow .gitignore rules
     const std::string command = "git ls-files -coz --exclude-standard 2> " + nullDevice;
 
     const size_t size = 1_kB;
