@@ -2,14 +2,18 @@
 
 #include "searcher.hpp"
 
-#include "mischasan.hpp"
-#include "ssefind.hpp"
-#include "stdstr.hpp"
-
 #define FIND_MISCHASAN    0
 #define FIND_SSE_OWN      1
 #define FIND_TRAITS       2
 #define FIND_STRSTR       3
+
+#if FIND_ALGO == FIND_MISCHASAN
+#include "mischasan.hpp"
+#endif
+#if FIND_ALGO == FIND_SSE_OWN
+#include "ssefind.hpp"
+#endif
+#include "stdstr.hpp"
 
 struct CaseSensitiveSearcher : public Searcher {
     CaseSensitiveSearcher( const SearchOptions& opts ) : Searcher( opts ) {}
