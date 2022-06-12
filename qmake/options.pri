@@ -11,7 +11,7 @@ win32: DEFINES += 'THREADPOOL=ASYNC_THREADPOOL'
 # FIND_SSE_OWN, use own sse optimized string search
 # FIND_TRAITS, use traits search from basic_string.tcc
 # FIND_STRSTR, use builtin strstr
-macx:  DEFINES += 'FIND_ALGO=FIND_MISCHASAN'
+macx:  DEFINES += 'FIND_ALGO=FIND_STRSTR'
 linux: DEFINES += 'FIND_ALGO=FIND_STRSTR'
 win32: DEFINES += 'FIND_ALGO=FIND_STRSTR'
 
