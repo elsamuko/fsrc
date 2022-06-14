@@ -49,6 +49,9 @@ HEADERS += $${SRC_DIR}/mischasan.hpp
 # via https://github.com/gcc-mirror/gcc/blob/master/libstdc%2B%2B-v3/include/bits/basic_string.tcc#L1199
 HEADERS += $${SRC_DIR}/stdstr.hpp
 
+# own try
+HEADERS += $${SRC_DIR}/ssefind.hpp
+
 # version
 DEFINES += 'GIT_TAG=\\\"$$system(git describe --abbrev=0)\\\"'
 
