@@ -23,7 +23,11 @@
 
 #include <cstring>
 #include <cstdint>
+#ifdef __x86_64__
 #include <emmintrin.h>
+#else
+#include "sse2neon.h"
+#endif
 
 #include "winutils.hpp"
 

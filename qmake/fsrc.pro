@@ -41,6 +41,7 @@ HEADERS += $${SRC_DIR}/searcher/regexsearcher.hpp
 HEADERS += $${SRC_DIR}/searcher/searcherfactory.hpp
 
 macx:   SOURCES += $${SRC_DIR}/macutils.mm
+macx:   HEADERS += $${SRC_DIR}/sse2neon.h
 
 # via https://mischasan.wordpress.com/2011/07/16/convergence-sse2-and-strstr/
 HEADERS += $${SRC_DIR}/mischasan.hpp
