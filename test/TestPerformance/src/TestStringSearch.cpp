@@ -3,13 +3,21 @@
 #include "boost/algorithm/searching/knuth_morris_pratt.hpp"
 
 #include <string>
+#ifndef __APPLE__
 #include <functional>
+#else
+#include <experimental/functional>
+#endif
 
 #include "PerformanceUtils.hpp"
 #include "licence.hpp"
 #include "mischasan.hpp"
 #include "stdstr.hpp"
 #include "ssefind.hpp"
+
+#ifdef __APPLE__
+namespace std { using namespace experimental; }
+#endif
 
 BOOST_AUTO_TEST_CASE( Test_find ) {
     printf( "String search\n" );
