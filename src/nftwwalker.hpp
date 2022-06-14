@@ -15,7 +15,7 @@ namespace {
 
 std::function<void( const sys_string& filename )> callback;
 
-int process( const char* file, const struct stat* sb, int flag, struct FTW* ) {
+int process( const char* file, const struct stat* /*sb*/, int flag, struct FTW* ) {
     if( flag == FTW_F ) { callback( file ); }
 
     return 0;

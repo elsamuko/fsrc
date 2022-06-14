@@ -38,7 +38,7 @@ inline Result timed1000( const std::string& name, const std::function<void()>& f
     return { ns, utils::format( "%17s : %6ld us\n", name.c_str(), ns / 1000 ) };
 }
 
-inline Result runDirWalkerTest( const std::string& name, const decltype( utils::recurseDir )& func ) {
+inline Result runDirWalkerTest( const std::string& name, decltype( utils::recurseDir )& func ) {
     std::atomic_size_t files = 0;
     std::atomic_size_t bytes = 0;
     fs::path include = "../../../../libs/boost/include/";
