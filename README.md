@@ -1,7 +1,8 @@
 # fsrc (fast code search)
 
 This tool is meant to search large codebases for text snippets. It uses a threadpool to open and search in all text files in the current folder.
-The string search is sse2 optimized code from [mischasan](https://mischasan.wordpress.com/2011/07/16/convergence-sse2-and-strstr/).
+The string search is sse2 optimized code from [mischasan](https://mischasan.wordpress.com/2011/07/16/convergence-sse2-and-strstr/).  
+On macOS with Mx CPUs, [sse2neon](https://github.com/DLTcollab/sse2neon) is used to map SSE2 to ARM.
 
 ## Usage
 ```console
@@ -9,10 +10,9 @@ user@home:/usr/include/boost$ fsrc
 Usage  : fsrc [options] term
 Options:
   -d [ --dir ] arg      Search folder
-  -e [ --ext ] arg      Search only in files with extension <arg>, equiv. to 
+  -e [ --ext ] arg      Search only in files with extension <arg>, equiv. to
                         --glob '*.ext'
-  -f [ --files ]        Only print filenames
-  -g [ --glob ] arg     Search only in files filtered by <arg> glob, e.g. 
+  -g [ --glob ] arg     Search only in files filtered by <arg> glob, e.g.
                         '*.txt'; overrides --ext
   -h [ --help ]         Help
   --html                open web page with results
@@ -21,11 +21,12 @@ Options:
   --no-colors           Disable colorized output
   --no-piped            Disable piped output
   --no-uri              Print w/out file:// prefix
+  --only-files          Only print filenames
   --piped               Enable piped output
   -q [ --quiet ]        only print status
   -r [ --regex ]        Regex search (slower)
 
-Build : v0.24 from Jun 18 2021
+Build : v0.25 from Jun 14 2022
 Web   : https://github.com/elsamuko/fsrc
 user@home:/usr/include/boost$ fsrc filesystem
 Searching for "filesystem" in folder:
