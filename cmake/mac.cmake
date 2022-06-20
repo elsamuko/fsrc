@@ -1,10 +1,10 @@
 set(PLATFORM mac)
 
-target_compile_options(${PROJECT} BEFORE PRIVATE -mmacosx-version-min=10.13 -Wshadow)
+target_compile_options(${PROJECT} BEFORE PRIVATE -mmacosx-version-min=12.0 -Wshadow)
 
 if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
-    target_compile_options(${PROJECT} BEFORE PRIVATE -msse2 -Ofast -flto)
-    target_link_options(${PROJECT} BEFORE PRIVATE -msse2 -Ofast -flto)
+    target_compile_options(${PROJECT} BEFORE PRIVATE -Ofast -flto)
+    target_link_options(${PROJECT} BEFORE PRIVATE -Ofast -flto)
 endif()
 
 target_link_options(${PROJECT} BEFORE PRIVATE "SHELL:-framework Appkit")
