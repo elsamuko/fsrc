@@ -64,13 +64,13 @@ function macBuild {
 
     # debug
     ./b2 -j 8 --stagedir=stage_debug toolset=clang variant=debug \
-        cxxflags="-std=c++1z -stdlib=libc++ -mmacosx-version-min=10.10" linkflags="-lc++" \
+        cxxflags="-std=c++20 -stdlib=libc++ -mmacosx-version-min=13.0" linkflags="-lc++" \
         $B2_OPTIONS \
         $NEEDED_LIBS
 
     # release
     ./b2 -j 8 --stagedir=stage_release toolset=clang variant=release optimization=speed \
-        cxxflags="-std=c++1z -msse2 -oFast -stdlib=libc++ -mmacosx-version-min=10.10" linkflags="-lc++ -flto" \
+        cxxflags="-std=c++20 -Ofast -flto -stdlib=libc++ -mmacosx-version-min=13.0" linkflags="-lc++ -flto" \
         $B2_OPTIONS \
         $NEEDED_LIBS
 }
