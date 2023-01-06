@@ -2,6 +2,7 @@
 
 #include "boost/program_options.hpp"
 #include "boost/algorithm/string/replace.hpp"
+#include "boost/algorithm/string/join.hpp"
 namespace po = boost::program_options;
 
 void usage( const std::string& description ) {
@@ -35,7 +36,7 @@ SearchOptions SearchOptions::parseArgs( int argc, char* argv[] ) {
 
     po::options_description hidden( "Hidden options" );
     hidden.add_options()
-    ( "term,t", po::value<std::string>()->required(), "Search term" );
+    ( "term,t", po::value<std::vector<std::string>>()->multitoken()->required(), "Search term" );
 
     po::positional_options_description last;
     last.add( "term", -1 );
@@ -146,7 +147,8 @@ SearchOptions SearchOptions::parseArgs( int argc, char* argv[] ) {
 
     // term
     if( args.count( "term" ) ) {
-        opts.term = args["term"].as<std::string>();
+        auto terms = args["term"].as<std::vector<std::string>>();
+        opts.term = boost::algorithm::join(terms, " ");
         opts.success = !opts.term.empty();
     } else {
         opts.success = false;
