@@ -4,6 +4,7 @@
 #include <sstream>
 
 #include "boost/filesystem.hpp"
+#include "boost/filesystem/fstream.hpp"
 
 #include "printer.hpp"
 #include "utils.hpp"
