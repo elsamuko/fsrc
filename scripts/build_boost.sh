@@ -16,11 +16,11 @@ case $(uname) in
 esac
 
 PROJECT=boost
-VERSION="1.74.0"
+VERSION="1.81.0"
 VERSION_DL="${VERSION//./_}"
 DL_URL="https://boostorg.jfrog.io/artifactory/main/release/${VERSION}/source/boost_${VERSION_DL}.tar.gz"
 
-B2_OPTIONS="cxxstd=17 link=static threading=multi address-model=64"
+B2_OPTIONS="cxxstd=20 link=static threading=multi address-model=64"
 # ./b2 --show-libraries
 NEEDED_LIBS="--with-system --with-filesystem --with-date_time --with-chrono --with-timer --with-test --with-program_options --with-regex --with-iostreams"
 
@@ -99,21 +99,17 @@ function winBuild {
 function linuxBuild {
     cd "$BUILD_DIR"
     
-    alias g++=g++-10
     ./bootstrap.sh --without-icu
 
-    # https://stackoverflow.com/a/5346531
-    echo "using gcc : 10 : /usr/bin/g++-10 ; " >> tools/build/src/user-config.jam
-
     # debug
-    ./b2 -j 16 --disable-icu --stagedir=stage_debug toolset=gcc-10 variant=debug \
-        cxxflags="-std=c++17" \
+    ./b2 -j 16 --disable-icu --stagedir=stage_debug toolset=gcc-11 variant=debug \
+        cxxflags="-std=c++20" \
         $B2_OPTIONS \
         $NEEDED_LIBS
 
     # release
-    ./b2 -j 16 --disable-icu --stagedir=stage_release toolset=gcc-10 variant=release optimization=speed \
-        cxxflags="-std=c++17 -msse2 -oFast" linkflags="-msse2 -oFast -flto" \
+    ./b2 -j 16 --disable-icu --stagedir=stage_release toolset=gcc-11 variant=release optimization=speed \
+        cxxflags="-std=c++20 -msse2 -oFast -flto" linkflags="-msse2 -oFast -flto" \
         $B2_OPTIONS \
         $NEEDED_LIBS
 }
