@@ -10,6 +10,10 @@
 #include "utils.hpp"
 #include "exitqueue.hpp"
 
+#if BOOST_OS_LINUX
+#include "linuxutils.hpp"
+#endif
+
 namespace  HTML {
 const std::string css = R"css(<style>
     body {
@@ -106,6 +110,12 @@ struct HtmlPrinter : public Printer {
                 }
 
                 of.close();
+
+#if BOOST_OS_LINUX
+                //! copy file to snap dir, if it's a snap package browser
+                //! else it won't open the html file
+                html = copyToSnapDir( html );
+#endif
                 utils::printColor( gray, utils::format( "\nOpening \"%s\".\n", html.string().c_str() ) );
                 utils::openFile( html.native() );
             } );
