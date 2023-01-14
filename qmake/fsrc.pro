@@ -43,6 +43,11 @@ HEADERS += $${SRC_DIR}/searcher/searcherfactory.hpp
 macx:   SOURCES += $${SRC_DIR}/macutils.mm
 macx:   HEADERS += $${SRC_DIR}/sse2neon.h
 
+linux:  SOURCES += $${SRC_DIR}/linuxutils.cpp
+linux:  HEADERS += $${SRC_DIR}/linuxutils.hpp
+
+win32:  HEADERS += $${SRC_DIR}/windowsutils.hpp
+
 # via https://mischasan.wordpress.com/2011/07/16/convergence-sse2-and-strstr/
 HEADERS += $${SRC_DIR}/mischasan.hpp
 
