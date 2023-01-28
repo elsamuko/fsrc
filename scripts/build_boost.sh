@@ -81,14 +81,14 @@ function winBuild {
     cmd /c bootstrap.bat
 
     # debug
-    ./b2.exe -j 8 --stagedir=stage_debug   toolset=msvc-14.2 variant=debug runtime-link=static \
+    ./b2.exe -j 8 --stagedir=stage_debug   toolset=msvc-14.3 variant=debug runtime-link=static \
         define='_HAS_ITERATOR_DEBUGGING=0' \
         define='BOOST_REGEX_NO_W32' \
         $B2_OPTIONS \
         $NEEDED_LIBS
 
     # release
-    ./b2.exe -j 8 --stagedir=stage_release toolset=msvc-14.2 variant=release runtime-link=static optimization=speed \
+    ./b2.exe -j 8 --stagedir=stage_release toolset=msvc-14.3 variant=release runtime-link=static optimization=speed \
         cxxflags="/Qpar /O2 /Oi /Ot /Oy /GT /GL /Gw /fp:fast" linkflags="/LTCG /OPT:REF /OPT:ICF" \
         define='_HAS_ITERATOR_DEBUGGING=0' \
         define='BOOST_REGEX_NO_W32' \
