@@ -26,7 +26,7 @@ Options:
   -q [ --quiet ]        only print status
   -r [ --regex ]        Regex search (slower)
 
-Build : v0.25 from Jun 14 2022
+Build : v0.27 from Jan 29 2023
 Web   : https://github.com/elsamuko/fsrc
 user@home:/usr/include/boost$ fsrc filesystem
 Searching for "filesystem" in folder:
@@ -45,11 +45,11 @@ user@home:/usr/include/boost$
 ```
 
 ## Behaviour
-  * If there is a .git folder in the main search folder, it uses git ls-files to get all files to search in
+  * If there is a .git folder in the main search folder, it uses `git ls-files` to get all files to search in
   * a .git folder is never searched
   * hidden folders and files are searched
   * binaries are 'detected', if they contain two binary 0's within the first 100 bytes or are PDF or PostScript files.
-  * it supports one option-less argument as search term
+  * all option-less arguments are the search term
   * folders are set with `-d`
   * when printing a match in a long line, only 100 chars context are printed, which makes searching in minified sources easier
   * with `--html` you get the results as web page
@@ -61,13 +61,13 @@ fsrc has a simple architecture: https://elsamuko.github.io/fsrc/architecture.htm
 ## Building
 
 ### Windows
-You need [VS2019](https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2017) and [cygwin](https://www.cygwin.com/).
+You need [VS2022](https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2022) and [cygwin](https://www.cygwin.com/).
 
 ### Linux
-You need g++ 9 or newer.
+You need g++ 11 or newer.
 
 ### macOS
-You need [XCode 10](https://developer.apple.com/xcode/) or later.
+You need [XCode 14](https://developer.apple.com/xcode/) or later.
 
 # General
 You need bash, cmake, curl and zip available from the command line.  
