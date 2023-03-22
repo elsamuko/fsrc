@@ -141,14 +141,14 @@ SearchOptions SearchOptions::parseArgs( int argc, char* argv[] ) {
     }
 
     // only print filenames
-    if( args.count( "files" ) ) {
+    if( args.count( "only-files" ) ) {
         opts.onlyFiles = true;
     }
 
     // term
     if( args.count( "term" ) ) {
         auto terms = args["term"].as<std::vector<std::string>>();
-        opts.term = boost::algorithm::join(terms, " ");
+        opts.term = boost::algorithm::join( terms, " " );
         opts.success = !opts.term.empty();
     } else {
         opts.success = false;
