@@ -129,7 +129,7 @@ BOOST_AUTO_TEST_CASE( Test_printf ) {
     std::vector<Result> results = {
         timed1000( "write", [file, text] {
             std::string data = "[" + text + "]\n";
-            write( fileno( file ), data.c_str(), data.size() );
+            ( void )!( write( fileno( file ), data.c_str(), data.size() ) );
         }, reset ),
         timed1000( "fprintf", [file, text] {
             fprintf( file, "%s%s]\n", "[", text.c_str() );
