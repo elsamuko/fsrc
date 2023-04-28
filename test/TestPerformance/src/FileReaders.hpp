@@ -1,5 +1,8 @@
 #pragma once
 
+#include <fstream>
+#include <fcntl.h>
+#include <sys/mman.h>
 #include "utils.hpp"
 
 #if !BOOST_OS_WINDOWS
