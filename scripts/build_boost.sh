@@ -16,7 +16,7 @@ case $(uname) in
 esac
 
 PROJECT=boost
-VERSION="1.81.0"
+VERSION="1.82.0"
 VERSION_DL="${VERSION//./_}"
 DL_URL="https://boostorg.jfrog.io/artifactory/main/release/${VERSION}/source/boost_${VERSION_DL}.tar.gz"
 
@@ -102,13 +102,13 @@ function linuxBuild {
     ./bootstrap.sh --without-icu
 
     # debug
-    ./b2 -j 16 --disable-icu --stagedir=stage_debug toolset=gcc-11 variant=debug \
+    ./b2 -j 16 --disable-icu --stagedir=stage_debug toolset=gcc-12 variant=debug \
         cxxflags="-std=c++20" \
         $B2_OPTIONS \
         $NEEDED_LIBS
 
     # release
-    ./b2 -j 16 --disable-icu --stagedir=stage_release toolset=gcc-11 variant=release optimization=speed \
+    ./b2 -j 16 --disable-icu --stagedir=stage_release toolset=gcc-12 variant=release optimization=speed \
         cxxflags="-std=c++20 -msse2 -oFast -flto" linkflags="-msse2 -oFast -flto" \
         $B2_OPTIONS \
         $NEEDED_LIBS
