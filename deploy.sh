@@ -34,14 +34,14 @@ FSRC_BIN="$MAIN_DIR/fsrc$EXT"
 HELPER="$BUILD_DIR/compile.bat"
 
 function createHelper {
-    local VERSIONS=("2019")
+    local VERSIONS=("2022")
     local EDITIONS=("BuildTools" "Community" "Professional" "Enterprise")
     
     echo -ne '@echo off\r\n\r\n' > "$HELPER"
 
     for VERSION in "${VERSIONS[@]}"; do
         for EDITION in "${EDITIONS[@]}"; do
-            local VCVARS_DIR="C:/Program Files (x86)/Microsoft Visual Studio/$VERSION/$EDITION/VC/Auxiliary/Build"
+            local VCVARS_DIR="C:/Program Files/Microsoft Visual Studio/$VERSION/$EDITION/VC/Auxiliary/Build"
             if [ -d "$VCVARS_DIR" ]; then
                 export VSNEWCOMNTOOLS="${VCVARS_DIR////\\}"
                 break 2
@@ -53,7 +53,7 @@ function createHelper {
     if [ -n "$VSNEWCOMNTOOLS" ]; then
         echo -ne "call \"$VSNEWCOMNTOOLS\\\\vcvars64.bat\"" >> "$HELPER"
     else
-        echo "Could not find Visual Studio 2019"
+        echo "Could not find Visual Studio 2022"
         exit 1
     fi
     
