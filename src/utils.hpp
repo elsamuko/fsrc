@@ -141,7 +141,7 @@ std::string format( const char* format, Args const& ... args ) {
 
 //! \returns function, which prints format in color to stdout
 inline std::function<void()> printFunc( Color color, const std::string text ) {
-    return [color, text{move( text )}] { printColor( color, text ); };
+    return [color, text{std::move( text )}] { printColor( color, text ); };
 }
 
 //! opens file with platforms standard program
