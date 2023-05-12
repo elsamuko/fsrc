@@ -18,6 +18,7 @@ SOURCES += ../src/TestStringSearch.cpp
 SOURCES += ../src/TestRegexSearch.cpp
 SOURCES += ../src/TestThreadpool.cpp
 SOURCES += ../src/TestDirWalker.cpp
+SOURCES += ../src/TestQueues.cpp
 HEADERS += ../src/licence.hpp
 HEADERS += ../src/PerformanceUtils.hpp
 HEADERS += ../src/FileReaders.hpp
