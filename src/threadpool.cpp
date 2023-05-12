@@ -11,6 +11,7 @@ ThreadPool::~ThreadPool() {
     join();
 }
 
+#if QUEUE_TYPE == QUEUE_TYPE_BOOST
 void ThreadPool::workOff() {
     Job* job = nullptr;
 
@@ -28,6 +29,24 @@ bool ThreadPool::add( const Job& job ) {
     count++;
     return true;
 }
+#else
+void ThreadPool::workOff() {
+    Job job;
+
+    if( jobs.try_dequeue( job ) && job ) {
+        job();
+        // decrement _after_ job is done
+        count--;
+    }
+}
+
+bool ThreadPool::add( const Job& job ) {
+    std::call_once( initialized, [this] { this->initialize(); } );
+    jobs.enqueue( job );
+    count++;
+    return true;
+}
+#endif
 
 void ThreadPool::join() {
     if( running ) {
