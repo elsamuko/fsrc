@@ -9,6 +9,10 @@
 # FIND_TRAITS, use traits search from basic_string.tcc
 # FIND_STRSTR, use builtin strstr
 
+# QUEUE_TYPE_BOOST, boost::lockfree::queue
+# QUEUE_TYPE_MOODY, moodycamel::ConcurrentQueue
+# QUEUE_TYPE_ATOMIC, atomic_queue::AtomicQueueB
+
 if(APPLE)
     # on macOS, use own threadpool
     add_definitions(-DTHREADPOOL=OWN_THREADPOOL)
@@ -27,4 +31,5 @@ if(WIN32)
     add_definitions(-DFIND_ALGO=FIND_STRSTR)
 endif()
 
+add_definitions(-DQUEUE_TYPE=QUEUE_TYPE_ATOMIC)
 add_definitions(-DDETAILED_STATS=1) # if 1, print detailed times
