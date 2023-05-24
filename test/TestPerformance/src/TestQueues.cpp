@@ -2,6 +2,7 @@
 
 #include "boost/lockfree/queue.hpp"
 #include "concurrentqueue.h"
+#include "atomic/atomic_queue.h"
 
 #include "boost/asio/thread_pool.hpp"
 #include "boost/asio/post.hpp"
@@ -10,6 +11,7 @@ BOOST_AUTO_TEST_CASE( Test_queue ) {
     typedef std::function<void()> Job;
     boost::lockfree::queue<Job*> jobs_boost( 0 );
     moodycamel::ConcurrentQueue<Job> jobs_moody;
+    atomic_queue::AtomicQueueB<Job*> jobs_atomic( 0 );
 
     bool stop = false;
     std::atomic_size_t counter = 0;
@@ -78,4 +80,38 @@ BOOST_AUTO_TEST_CASE( Test_queue ) {
     pool2.join();
 
     printf( "moody: %zu\n", counter.load() );
+
+    stop = false;
+    counter = 0;
+
+    boost::asio::thread_pool pool3{ 8u };
+
+    for( int i = 0; i < 4; ++i ) {
+        boost::asio::post( pool3, [&] {
+            while( !stop ) {
+                Job* job = nullptr;
+
+                if( jobs_atomic.try_pop( job ) && job && *job ) {
+                    ( *job )();
+                    delete job;
+                }
+            }
+        } );
+    }
+
+    for( int i = 0; i < 4; ++i ) {
+        boost::asio::post( pool3, [&] {
+            while( !stop ) {
+                jobs_atomic.push( new Job( [&] {
+                    counter++;
+                } ) );
+            }
+        } );
+    }
+
+    std::this_thread::sleep_for( std::chrono::seconds( 1 ) );
+    stop = true;
+    pool3.join();
+
+    printf( "atomic: %zu\n", counter.load() );
 }
