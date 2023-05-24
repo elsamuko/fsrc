@@ -11,14 +11,17 @@
 #define BOOST_THREADPOOL 2
 #define ASYNC_THREADPOOL 3
 
-#define QUEUE_TYPE_BOOST 0
-#define QUEUE_TYPE_MOODY 1
-#define QUEUE_TYPE QUEUE_TYPE_MOODY
+#define QUEUE_TYPE_BOOST  0
+#define QUEUE_TYPE_MOODY  1
+#define QUEUE_TYPE_ATOMIC 2
 
 #if QUEUE_TYPE == QUEUE_TYPE_BOOST
 #include "boost/lockfree/queue.hpp"
-#else
+#elif QUEUE_TYPE == QUEUE_TYPE_MOODY
 #include "concurrentqueue.h"
+#elif QUEUE_TYPE == QUEUE_TYPE_ATOMIC
+#include "atomic/atomic_queue.h"
+#else
 #endif
 #if THREADPOOL == BOOST_THREADPOOL
 #include "boost/asio/thread_pool.hpp"
@@ -78,8 +81,10 @@ class ThreadPool {
 
 #if QUEUE_TYPE == QUEUE_TYPE_BOOST
         boost::lockfree::queue<Job*> jobs;
-#else
+#elif QUEUE_TYPE == QUEUE_TYPE_MOODY
         moodycamel::ConcurrentQueue<Job> jobs;
+#elif QUEUE_TYPE == QUEUE_TYPE_ATOMIC
+        atomic_queue::AtomicQueueB<Job*> jobs;
 #endif
         std::atomic_int count = {0};
 

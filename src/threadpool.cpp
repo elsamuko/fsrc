@@ -29,7 +29,7 @@ bool ThreadPool::add( const Job& job ) {
     count++;
     return true;
 }
-#else
+#elif QUEUE_TYPE == QUEUE_TYPE_MOODY
 void ThreadPool::workOff() {
     Job job;
 
@@ -43,6 +43,24 @@ void ThreadPool::workOff() {
 bool ThreadPool::add( const Job& job ) {
     std::call_once( initialized, [this] { this->initialize(); } );
     jobs.enqueue( job );
+    count++;
+    return true;
+}
+#elif QUEUE_TYPE == QUEUE_TYPE_ATOMIC
+void ThreadPool::workOff() {
+    Job* job = nullptr;
+
+    if( jobs.try_pop( job ) && job && *job ) {
+        ( *job )();
+        // decrement _after_ job is done
+        count--;
+        delete job;
+    }
+}
+
+bool ThreadPool::add( const Job& job ) {
+    std::call_once( initialized, [this] { this->initialize(); } );
+    jobs.push( new Job( job ) );
     count++;
     return true;
 }
