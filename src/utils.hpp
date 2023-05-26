@@ -109,7 +109,7 @@ void setTarget( FILE* target );
 void gitLsFiles( const boost::filesystem::path& path, const std::function<void( const sys_string& filename )>& callback );
 
 //! \returns true, if filename has no "\0\0" in the first 1000 bytes
-bool isTextFile( const std::string_view& content );
+bool isTextFile( const std::string_view content );
 
 #define IF_RET( A ) if( A ) { view.size = 0; return view; }
 
@@ -140,7 +140,7 @@ std::string format( const char* format, Args const& ... args ) {
 }
 
 //! \returns function, which prints format in color to stdout
-inline std::function<void()> printFunc( Color color, const std::string text ) {
+inline std::function<void()> printFunc( Color color, const std::string& text ) {
     return [color, text{std::move( text )}] { printColor( color, text ); };
 }
 
