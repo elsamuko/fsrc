@@ -150,7 +150,7 @@ end:
 }
 
 // binary files have usually zero padding
-bool utils::isTextFile( const std::string_view& content ) {
+bool utils::isTextFile( const std::string_view content ) {
     //! \note https://en.wikipedia.org/wiki/List_of_file_signatures
 
     if( content.size() >= 4 ) {
