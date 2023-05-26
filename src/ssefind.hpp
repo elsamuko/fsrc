@@ -9,7 +9,9 @@
 #endif
 
 #include "types.hpp"
+#ifdef _WIN32
 #include "winutils.hpp"
+#endif
 
 #define SSE128 16
 
