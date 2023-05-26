@@ -37,7 +37,7 @@ struct SearchController {
 #endif
     Color gray = Color::Gray;
 
-    SearchController( const SearchOptions& opts, std::function<Searcher*()> searcher, std::function<Printer*()> printer ):
+    SearchController( const SearchOptions& opts, const std::function<Searcher*()>& searcher, const std::function<Printer*()>& printer ):
         opts( opts ),
         glob( opts.glob ),
         makeSearcher( searcher ),
