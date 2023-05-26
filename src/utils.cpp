@@ -173,7 +173,7 @@ utils::Lines utils::parseContent( const char* data, const size_t size, const lon
     if( size == 0 ) { return lines; }
 
     const char* c_old = data;
-    const char* c_new = c_old;
+    const char* c_new;
     const char* c_end = c_old + size;
 
     while( ( c_new = std::char_traits<char>::find( c_old, c_end - c_old, '\n' ) ) ) {
