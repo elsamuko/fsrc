@@ -72,7 +72,7 @@ void SearchController::printStats() {
     }
 }
 
-void SearchController::printFooter( const StopWatch::ns_type& ms ) {
+void SearchController::printFooter( const StopWatch::ns_type ms ) {
     if( !opts.piped ) {
         utils::printColor( gray, utils::format(
                                "Found %lu matches in %lu/%lu files (%lu kB) in %ld ms\n",

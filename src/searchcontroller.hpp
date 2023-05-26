@@ -58,7 +58,7 @@ struct SearchController {
     void printHeader();
     void printGitHeader();
     void printStats();
-    void printFooter( const StopWatch::ns_type& ms );
+    void printFooter( const StopWatch::ns_type ms );
 
     void search( const sys_string& path );
 };
