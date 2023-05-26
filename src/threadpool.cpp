@@ -5,7 +5,7 @@
 // heavily influenced by
 // https://github.com/progschj/ThreadPool
 
-ThreadPool::ThreadPool( size_t threads ) : threads( threads ), jobs( 0 ) {}
+ThreadPool::ThreadPool( size_t threads ) : jobs( 0 ), threads( threads ) {}
 
 ThreadPool::~ThreadPool() {
     join();

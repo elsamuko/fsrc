@@ -76,9 +76,6 @@ class ThreadPool {
         void initialize();
         void workOff();
 
-        size_t threads = 4;
-        std::vector<std::thread> workers;
-
 #if QUEUE_TYPE == QUEUE_TYPE_BOOST
         boost::lockfree::queue<Job*> jobs;
 #elif QUEUE_TYPE == QUEUE_TYPE_MOODY
@@ -86,6 +83,8 @@ class ThreadPool {
 #elif QUEUE_TYPE == QUEUE_TYPE_ATOMIC
         atomic_queue::AtomicQueueB<Job*> jobs;
 #endif
+        size_t threads = 8;
+        std::vector<std::thread> workers;
         std::atomic_int count = {0};
 
         std::once_flag initialized;
