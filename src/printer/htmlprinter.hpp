@@ -45,7 +45,7 @@ const std::string css = R"css(<style>
 </style>
 )css";
 
-std::string encode( const std::string text ) {
+std::string encode( const std::string& text ) {
     std::stringstream encoded;
 
     for( const char c : text ) {
