@@ -17,7 +17,7 @@ using boost::asio::post;
 #include "NewlineParser.hpp"
 #include "FileReaders.hpp"
 
-using parseContentFunc = utils::Lines( const char* data, const size_t size );
+using parseContentFunc = utils::Lines( const char* data, const size_t size, const long long stop );
 
 //! POSIX API with custom parseContent function
 utils::FileView fromFileParser( const sys_string& filename, parseContentFunc parse ) {
@@ -40,12 +40,12 @@ utils::FileView fromFileParser( const sys_string& filename, parseContentFunc par
     IF_RET( !utils::isTextFile( std::string_view( ptr, std::min<size_t>( view.size, 100ul ) ) ) );
 
     view.content = std::string_view( ptr, view.size );
-    view.lines = parse( ptr, view.size );
+    view.lines = parse( ptr, view.size, view.size );
     return view;
 }
 
 utils::FileView fromFileUtils( const sys_string& filename ) {
-    return fromFileParser( filename, []( const char* data, const size_t size ) { return utils::parseContent( data, size, size ); } );
+    return fromFileParser( filename, utils::parseContent );
 }
 
 utils::FileView fromFileForLoop( const sys_string& filename ) {

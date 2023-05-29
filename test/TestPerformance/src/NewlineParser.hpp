@@ -2,7 +2,7 @@
 
 #include "utils.hpp"
 
-utils::Lines parseContentForLoop( const char* data, const size_t size ) {
+utils::Lines parseContentForLoop( const char* data, const size_t size, const long long stop ) {
     utils::Lines lines;
 
     if( size == 0 ) { return lines; }
@@ -23,6 +23,9 @@ utils::Lines parseContentForLoop( const char* data, const size_t size ) {
             lines.emplace_back( c_old, c_new - c_old );
             c_old = c_new + 1;
         }
+
+        // only parse newlines until stop bytes
+        if( ( c_old - data ) > stop ) { c_old = c_end; break; }
     }
 
     if( c_old != c_end ) {
@@ -33,7 +36,7 @@ utils::Lines parseContentForLoop( const char* data, const size_t size ) {
     return lines;
 }
 
-utils::Lines parseContentFind( const char* data, const size_t size ) {
+utils::Lines parseContentFind( const char* data, const size_t size, const long long stop ) {
     utils::Lines lines;
 
     if( size == 0 ) { return lines; }
@@ -43,10 +46,15 @@ utils::Lines parseContentFind( const char* data, const size_t size ) {
     std::string_view view( data, size );
     size_t pos_old = 0;
     size_t pos_new = view.find( '\n' );
+    size_t pos_end = size;
 
     while( pos_new != std::string::npos ) {
         lines.emplace_back( data + pos_old, pos_new - pos_old );
         pos_old = pos_new + 1;
+
+        // only parse newlines until stop bytes
+        if( ( pos_old - pos_new ) > stop ) { pos_old = pos_end; break; }
+
         pos_new = view.find( '\n', pos_old );
     }
 
@@ -58,7 +66,7 @@ utils::Lines parseContentFind( const char* data, const size_t size ) {
     return lines;
 }
 
-utils::Lines parseContentStrchr( const char* data, const size_t size ) {
+utils::Lines parseContentStrchr( const char* data, const size_t size, const long long stop ) {
     utils::Lines lines;
 
     if( size == 0 ) { return lines; }
@@ -72,6 +80,9 @@ utils::Lines parseContentStrchr( const char* data, const size_t size ) {
     while( ( c_new = strchr( c_old, '\n' ) ) ) {
         lines.emplace_back( c_old, c_new - c_old );
         c_old = c_new + 1;
+
+        // only parse newlines until stop bytes
+        if( ( c_old - data ) > stop ) { c_old = c_end; break; }
     }
 
     if( c_old != c_end ) {
@@ -82,7 +93,7 @@ utils::Lines parseContentStrchr( const char* data, const size_t size ) {
     return lines;
 }
 
-utils::Lines parseContentMemchr( const char* data, const size_t size ) {
+utils::Lines parseContentMemchr( const char* data, const size_t size, const long long stop ) {
     utils::Lines lines;
 
     if( size == 0 ) { return lines; }
@@ -90,12 +101,15 @@ utils::Lines parseContentMemchr( const char* data, const size_t size ) {
     lines.reserve( 128 );
 
     const char* c_old = data;
-    const char* c_new = c_old;
+    const char* c_new;
     const char* c_end = c_old + size;
 
     while( ( c_new = static_cast<const char*>( memchr( c_old, '\n', c_end - c_old ) ) ) ) {
         lines.emplace_back( c_old, c_new - c_old );
         c_old = c_new + 1;
+
+        // only parse newlines until stop bytes
+        if( ( c_old - data ) > stop ) { c_old = c_end; break; }
     }
 
     if( c_old != c_end ) {
