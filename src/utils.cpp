@@ -168,9 +168,10 @@ bool utils::isTextFile( const std::string_view content ) {
 // splits content on newline
 utils::Lines utils::parseContent( const char* data, const size_t size, const long long stop ) {
     Lines lines;
-    lines.reserve( 128 );
 
     if( size == 0 ) { return lines; }
+
+    lines.reserve( 128 );
 
     const char* c_old = data;
     const char* c_new;
