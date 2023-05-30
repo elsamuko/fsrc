@@ -91,6 +91,10 @@ std::map<fromFileFunc*, const char*> testsNewline = {
 BOOST_AUTO_TEST_CASE( Test_fromFile ) {
     printf( "I/O\n" );
     std::vector<Result> results;
+    results.reserve( testsIO.size() );
+
+    // warmup
+    run( utils::fromFileP, "utils::fromFileP" );
 
     for( const auto& test : testsIO ) {
         results.emplace_back( run( test.first, test.second ) );
@@ -104,6 +108,10 @@ BOOST_AUTO_TEST_CASE( Test_fromFile ) {
 BOOST_AUTO_TEST_CASE( Test_parseContent ) {
     printf( "Newline\n" );
     std::vector<Result> results;
+    results.reserve( testsNewline.size() );
+
+    // warmup
+    run( fromFileMemchr, "fromFileMemchr" );
 
     for( const auto& test : testsNewline ) {
         results.emplace_back( run( test.first, test.second ) );
