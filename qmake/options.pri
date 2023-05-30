@@ -10,7 +10,7 @@ win32: DEFINES += 'THREADPOOL=ASYNC_THREADPOOL'
 # QUEUE_TYPE_BOOST, boost::lockfree::queue
 # QUEUE_TYPE_MOODY, moodycamel::ConcurrentQueue
 # QUEUE_TYPE_ATOMIC, atomic_queue::AtomicQueueB
-DEFINES += 'QUEUE_TYPE=QUEUE_TYPE_ATOMIC'
+DEFINES += 'QUEUE_TYPE=QUEUE_TYPE_MOODY'
 
 # FIND_MISCHASAN, use mischasan's sse optimized string search
 # FIND_SSE_OWN, use own sse optimized string search

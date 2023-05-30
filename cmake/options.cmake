@@ -31,5 +31,5 @@ if(WIN32)
     add_definitions(-DFIND_ALGO=FIND_STRSTR)
 endif()
 
-add_definitions(-DQUEUE_TYPE=QUEUE_TYPE_ATOMIC)
+add_definitions(-DQUEUE_TYPE=QUEUE_TYPE_MOODY)
 add_definitions(-DDETAILED_STATS=1) # if 1, print detailed times
