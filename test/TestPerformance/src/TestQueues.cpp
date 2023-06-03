@@ -81,6 +81,7 @@ BOOST_AUTO_TEST_CASE( Test_queue ) {
 
     printf( "moody: %zu\n", counter.load() );
 
+#if 0
     stop = false;
     counter = 0;
 
@@ -114,4 +115,5 @@ BOOST_AUTO_TEST_CASE( Test_queue ) {
     pool3.join();
 
     printf( "atomic: %zu\n", counter.load() );
+#endif
 }
