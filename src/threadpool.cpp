@@ -77,8 +77,9 @@ void ThreadPool::join() {
 }
 
 void ThreadPool::initialize() {
+    workers.reserve( threads );
+
     while( threads-- ) {
-        workers.reserve( threads );
         workers.emplace_back( [this] {
             for( ;; ) {
 
