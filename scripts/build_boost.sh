@@ -16,7 +16,7 @@ case $(uname) in
 esac
 
 PROJECT=boost
-VERSION="1.84.0"
+VERSION="1.85.0"
 VERSION_DL="${VERSION//./_}"
 DL_URL="https://boostorg.jfrog.io/artifactory/main/release/${VERSION}/source/boost_${VERSION_DL}.tar.gz"
 
