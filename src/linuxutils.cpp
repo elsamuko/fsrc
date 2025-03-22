@@ -1,10 +1,10 @@
 #include "linuxutils.hpp"
 #if BOOST_OS_LINUX
 
-#include "boost/process/child.hpp"
-#include "boost/process/search_path.hpp"
-#include "boost/process/args.hpp"
-#include "boost/process/io.hpp"
+#include "boost/process/v1/child.hpp"
+#include "boost/process/v1/search_path.hpp"
+#include "boost/process/v1/args.hpp"
+#include "boost/process/v1/io.hpp"
 
 #include "utils.hpp"
 
