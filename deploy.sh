@@ -113,6 +113,7 @@ function buildFsrcWin {
 function check {
     if [ ! -f "$FSRC_BIN" ]; then
         echo "Failed to build fsrc"
+        cat "$TMP_DIR/cmake.log"
         exit 1
     fi
 }
