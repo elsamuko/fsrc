@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# exit on error
+set -e
+
 case $(uname) in
     Linux)
         OS=linux
@@ -16,9 +19,9 @@ case $(uname) in
 esac
 
 PROJECT=boost
-VERSION="1.85.0"
+VERSION="1.87.0"
 VERSION_DL="${VERSION//./_}"
-DL_URL="https://boostorg.jfrog.io/artifactory/main/release/${VERSION}/source/boost_${VERSION_DL}.tar.gz"
+DL_URL="https://archives.boost.io/release/${VERSION}/source/boost_${VERSION_DL}.tar.gz"
 
 B2_OPTIONS="cxxstd=20 link=static threading=multi address-model=64"
 # ./b2 --show-libraries
@@ -102,13 +105,13 @@ function linuxBuild {
     ./bootstrap.sh --without-icu
 
     # debug
-    ./b2 -j 16 --disable-icu --stagedir=stage_debug toolset=gcc-12 variant=debug \
+    ./b2 -j 16 --disable-icu --stagedir=stage_debug toolset=gcc-13 variant=debug \
         cxxflags="-std=c++20" \
         $B2_OPTIONS \
         $NEEDED_LIBS
 
     # release
-    ./b2 -j 16 --disable-icu --stagedir=stage_release toolset=gcc-12 variant=release optimization=speed \
+    ./b2 -j 16 --disable-icu --stagedir=stage_release toolset=gcc-13 variant=release optimization=speed \
         cxxflags="-std=c++20 -msse2 -oFast -flto" linkflags="-msse2 -oFast -flto" \
         $B2_OPTIONS \
         $NEEDED_LIBS
