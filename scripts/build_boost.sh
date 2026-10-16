@@ -19,7 +19,7 @@ case $(uname) in
 esac
 
 PROJECT=boost
-VERSION="1.87.0"
+VERSION="1.92.0"
 VERSION_DL="${VERSION//./_}"
 DL_URL="https://archives.boost.io/release/${VERSION}/source/boost_${VERSION_DL}.tar.gz"
 

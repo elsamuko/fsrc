@@ -11,7 +11,6 @@ if(UNIX)
     add_compile_options(-isystem "$${BOOST_DIR}/include")
     target_link_libraries(${PROJECT} LINK_PRIVATE "${BOOST_LIB_DIR}/libboost_regex.a")
     target_link_libraries(${PROJECT} LINK_PRIVATE "${BOOST_LIB_DIR}/libboost_filesystem.a")
-    target_link_libraries(${PROJECT} LINK_PRIVATE "${BOOST_LIB_DIR}/libboost_system.a")
     target_link_libraries(${PROJECT} LINK_PRIVATE "${BOOST_LIB_DIR}/libboost_program_options.a")
 
     if(UNIT_TEST)
