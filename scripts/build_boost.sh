@@ -105,13 +105,13 @@ function linuxBuild {
     ./bootstrap.sh --without-icu
 
     # debug
-    ./b2 -j 16 --disable-icu --stagedir=stage_debug toolset=gcc-13 variant=debug \
+    ./b2 -j 16 --disable-icu --stagedir=stage_debug toolset=gcc-15 variant=debug \
         cxxflags="-std=c++20" \
         $B2_OPTIONS \
         $NEEDED_LIBS
 
     # release
-    ./b2 -j 16 --disable-icu --stagedir=stage_release toolset=gcc-13 variant=release optimization=speed \
+    ./b2 -j 16 --disable-icu --stagedir=stage_release toolset=gcc-15 variant=release optimization=speed \
         cxxflags="-std=c++20 -msse2 -oFast -flto" linkflags="-msse2 -oFast -flto" \
         $B2_OPTIONS \
         $NEEDED_LIBS

@@ -12,7 +12,7 @@
 #include <sys/types.h>
 #include <pwd.h>
 
-namespace bp = boost::process;
+namespace bp = boost::process::v1;
 
 //! return dir of snap program
 //! \arg browser, e.g. "firefox"

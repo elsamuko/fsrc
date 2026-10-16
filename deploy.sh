@@ -6,8 +6,8 @@ case $(uname) in
     Linux)
         OS=linux
         CMAKE="cmake" # sudo apt install cmake
-        export CC=g++-13
-        export CXX=g++-13
+        export CC=g++-15
+        export CXX=g++-15
         ;;
     Darwin)
         OS=mac
