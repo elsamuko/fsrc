@@ -8,6 +8,8 @@
 #include "boost/asio/post.hpp"
 
 BOOST_AUTO_TEST_CASE( Test_queue ) {
+    printf( "Test_queue\n" );
+
     typedef std::function<void()> Job;
     boost::lockfree::queue<Job*> jobs_boost( 0 );
     moodycamel::ConcurrentQueue<Job> jobs_moody;
@@ -116,4 +118,6 @@ BOOST_AUTO_TEST_CASE( Test_queue ) {
 
     printf( "atomic: %zu\n", counter.load() );
 #endif
+
+    printf( "\n" );
 }
