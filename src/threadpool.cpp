@@ -23,11 +23,15 @@ void ThreadPool::workOff() {
     }
 }
 
-bool ThreadPool::add( const Job& job ) {
+bool ThreadPool::add( Job job ) {
     std::call_once( initialized, [this] { this->initialize(); } );
-    jobs.push( new Job( job ) );
+    jobs.push( new Job( std::move( job ) ) );
     count++;
     return true;
+}
+
+bool ThreadPool::empty() const {
+    return jobs.empty();
 }
 #elif QUEUE_TYPE == QUEUE_TYPE_MOODY
 void ThreadPool::workOff() {
@@ -40,11 +44,15 @@ void ThreadPool::workOff() {
     }
 }
 
-bool ThreadPool::add( const Job& job ) {
+bool ThreadPool::add( Job job ) {
     std::call_once( initialized, [this] { this->initialize(); } );
-    jobs.enqueue( job );
+    jobs.enqueue( std::move( job ) );
     count++;
     return true;
+}
+
+bool ThreadPool::empty() const {
+    return jobs.size_approx() == 0;
 }
 #elif QUEUE_TYPE == QUEUE_TYPE_ATOMIC
 void ThreadPool::workOff() {
@@ -58,11 +66,15 @@ void ThreadPool::workOff() {
     }
 }
 
-bool ThreadPool::add( const Job& job ) {
+bool ThreadPool::add( Job job ) {
     std::call_once( initialized, [this] { this->initialize(); } );
-    jobs.push( new Job( job ) );
+    jobs.push( new Job( std::move( job ) ) );
     count++;
     return true;
+}
+
+bool ThreadPool::empty() const {
+    return jobs.was_empty();
 }
 #endif
 

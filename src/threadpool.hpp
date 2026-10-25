@@ -5,6 +5,7 @@
 #include <atomic>
 #include <functional>
 #include <future>
+#include <iterator>
 
 #define NO_THREADPOOL    0
 #define OWN_THREADPOOL   1
@@ -31,18 +32,20 @@
 
 #if THREADPOOL == NO_THREADPOOL
 #define POOL struct { \
-    void add( const std::function<void()>& f ) { \
+    void add( std::function<void()> f ) { \
         f(); \
     } \
+    bool empty() const { return false; } \
     } pool;
 #endif // NO_THREADPOOL
 
 #if THREADPOOL == BOOST_THREADPOOL
 #define POOL struct ThreadPool { \
     boost::asio::thread_pool mPool{ std::min<size_t>( std::thread::hardware_concurrency(), 8u ) }; \
-    void add( const std::function<void()>& f ) { \
-        boost::asio::post( mPool, f ); \
+    void add( std::function<void()> f ) { \
+        boost::asio::post( mPool, std::move( f ) ); \
     } \
+    bool empty() const { return false; } \
     ThreadPool() {} \
     ~ThreadPool() { mPool.join(); } \
 } pool;
@@ -51,9 +54,10 @@
 #if THREADPOOL == ASYNC_THREADPOOL
 #define POOL struct ThreadPool { \
     std::vector<std::future<void>> results; \
-    void add( const std::function<void()>& f ) { \
-        results.emplace_back( std::async( std::launch::async, f ) ); \
+    void add( std::function<void()> f ) { \
+        results.emplace_back( std::async( std::launch::async, std::move( f ) ) ); \
     } \
+    bool empty() const { return false; } \
     ThreadPool() { results.reserve( 1024 ); } \
 } pool;
 #endif // BOOST_THREADPOOL
@@ -70,7 +74,9 @@ class ThreadPool {
         typedef std::function<void()> Job;
         ThreadPool( size_t threads );
         ~ThreadPool();
-        bool add( const Job& job );
+        bool add( Job job );
+        //! \returns true, if no job is waiting in the queue (approx.)
+        bool empty() const;
         void join();
     private:
         void initialize();
