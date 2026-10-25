@@ -38,55 +38,131 @@
 
 namespace  {
 
-inline char const* scanstr2( char const* tgt, char const pat[2] ) {
-    __m128i const   zero = _mm_setzero_si128();
+//! \returns c in lower case, only ASCII letters are changed
+inline char lowerAscii( const char c ) {
+    return ( c >= 'A' && c <= 'Z' ) ? c + ( 'a' - 'A' ) : c;
+}
+
+inline char upperAscii( const char c ) {
+    return ( c >= 'a' && c <= 'z' ) ? c - ( 'a' - 'A' ) : c;
+}
+
+//! \returns true, if the two bytes at tgt equal pat
+template<bool ignoreCase>
+inline bool isPair( char const* tgt, char const pat[2] ) {
+    if constexpr( ignoreCase ) {
+        return lowerAscii( tgt[0] ) == pat[0] && lowerAscii( tgt[1] ) == pat[1];
+    } else {
+        return !memcmp( tgt, pat, 2 );
+    }
+}
+
+//! \returns first position in [tgt, end - 1), where the two bytes of pat start
+//! \param pat lower case, if ignoreCase
+//! \note searches until end, NUL bytes in [tgt, end) are content, too
+//! \note loads aligned 16 byte blocks, which may reach up to 15 bytes beyond end, but never into the next page
+template<bool ignoreCase>
+inline char const* scanstr2( char const* tgt, char const* end, char const pat[2] ) {
+    // a pair needs two bytes, so the last pair starts before last
+    char const* const last = end - 1;
+
+    if( tgt >= last ) { return NULL; }
+
     __m128i const   p0   = _mm_set1_epi8( pat[0] );
     __m128i const   p1   = _mm_set1_epi8( pat[1] );
+    __m128i const   q0   = _mm_set1_epi8( upperAscii( pat[0] ) );
+    __m128i const   q1   = _mm_set1_epi8( upperAscii( pat[1] ) );
     unsigned        f    = 15 & ( intptr_t )tgt;
-    uint16_t        pair = load16( pat );
+
+    // bit i is set, if a pair starts at byte i of x (without the pair crossing into the next block)
+    auto pairs = [&]( __m128i x ) -> unsigned {
+        if constexpr( ignoreCase ) {
+            return ( compxm( p0, x ) | compxm( q0, x ) ) & ( ( compxm( p1, x ) | compxm( q1, x ) ) >> 1 );
+        } else {
+            return compxm( p0, x ) & ( compxm( p1, x ) >> 1 );
+        }
+    };
+
+    // hits are found in ascending order, so the first hit beyond the end means there is none
+    auto checked = [last]( char const * hit ) -> char const* {
+        return hit < last ? hit : NULL;
+    };
 
     if( f ) {
         __m128i  x = xmload( tgt - f );
-        unsigned u = compxm( zero, x ) >> f;
-        unsigned v = ( ( compxm( p0, x ) & ( compxm( p1, x ) >> 1 ) ) >> f ) & ~u & ( u - 1 );
+        unsigned v = pairs( x ) >> f;
 
-        if( v ) { return tgt + ffs( v ) - 1; }
-
-        if( u ) { return  NULL; }
+        if( v ) { return checked( tgt + ffs( v ) - 1 ); }
 
         tgt += 16 - f;
 
-        if( load16( tgt - 1 ) == pair ) {
+        if( tgt - 1 >= last ) { return NULL; }
+
+        if( isPair<ignoreCase>( tgt - 1, pat ) ) {
             return tgt - 1;
         }
     }
 
-    while( 1 ) {
+    while( tgt < last ) {
         __m128i  x = xmload( tgt );
-        unsigned u = compxm( zero, x );
-        unsigned v = compxm( p0, x ) & ( compxm( p1, x ) >> 1 ) & ~u & ( u - 1 );
+        unsigned v = pairs( x );
 
-        if( v ) { return tgt + ffs( v ) - 1; }
-
-        if( u ) { return  NULL; }
+        if( v ) { return checked( tgt + ffs( v ) - 1 ); }
 
         tgt += 16;
 
-        if( load16( tgt - 1 ) == pair ) {
+        if( tgt - 1 >= last ) { return NULL; }
+
+        if( isPair<ignoreCase>( tgt - 1, pat ) ) {
             return tgt - 1;
         }
     }
+
+    return NULL;
 }
 
 }
 
 namespace mischasan {
 
-inline const char* scanstrN( char const* tgt, const int size, char const* pat, int len ) {
+//! \returns first occurrence of pat in [tgt, tgt + size), or nullptr
+inline const char* scanstrN( char const* tgt, const size_t size, char const* pat, const size_t len ) {
     if( len == 1 ) { return static_cast<const char*>( memchr( tgt, pat[0], size ) ); }
 
-    for( ; ( tgt = scanstr2( tgt, pat ) ); tgt++ ) {
+    char const* const end = tgt + size;
+
+    for( ; ( tgt = scanstr2<false>( tgt, end, pat ) ); tgt++ ) {
+        if( tgt + len > end ) { return nullptr; }
+
         if( !memcmp( tgt + 2, pat + 2, len - 2 ) ) {
+            return tgt;
+        }
+    }
+
+    return nullptr;
+}
+
+//! like scanstrN, but ignores the case of ASCII letters
+//! \param pat must be lower case
+inline const char* scancasestrN( char const* tgt, const size_t size, char const* pat, const size_t len ) {
+    char const* const end = tgt + size;
+
+    if( len == 1 ) {
+        for( ; tgt < end; ++tgt ) {
+            if( lowerAscii( *tgt ) == pat[0] ) { return tgt; }
+        }
+
+        return nullptr;
+    }
+
+    for( ; ( tgt = scanstr2<true>( tgt, end, pat ) ); tgt++ ) {
+        if( tgt + len > end ) { return nullptr; }
+
+        size_t i = 2;
+
+        while( i < len && lowerAscii( tgt[i] ) == pat[i] ) { ++i; }
+
+        if( i == len ) {
             return tgt;
         }
     }
