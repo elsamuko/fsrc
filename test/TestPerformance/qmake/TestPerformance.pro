@@ -36,6 +36,7 @@ HEADERS += $${MAIN_DIR}/src/stdstr.hpp
 
 !win32: HEADERS += $${MAIN_DIR}/src/nftwwalker.hpp
 !win32: HEADERS += $${MAIN_DIR}/src/ftswalker.hpp
+!win32: HEADERS += $${MAIN_DIR}/src/openatwalker.hpp
 
 HEADERS += $${MAIN_DIR}/src/threadpool.hpp
 SOURCES += $${MAIN_DIR}/src/threadpool.cpp

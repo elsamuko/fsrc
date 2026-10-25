@@ -13,6 +13,7 @@
 #if !BOOST_OS_WINDOWS
 #include "nftwwalker.hpp"
 #include "ftswalker.hpp"
+#include "openatwalker.hpp"
 #endif
 
 #include "PerformanceUtils.hpp"
@@ -71,6 +72,7 @@ BOOST_AUTO_TEST_CASE( Test_DirWalker ) {
 #if !BOOST_OS_WINDOWS
         runDirWalkerTest( "withFTS", withFTS::recurseDir ),
         runDirWalkerTest( "withNFTW", withNFTW::recurseDir ),
+        runDirWalkerTest( "withOpenAt", withOpenAt::recurseDir ),
 #endif
         runDirWalkerTest( "utils", utils::recurseDir ),
         runDirWalkerTest( "withBoost", withBoost::recurseDir ),
