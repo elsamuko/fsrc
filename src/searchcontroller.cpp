@@ -125,16 +125,17 @@ void SearchController::search( const sys_string& path ) {
         stats.matches += matches.size();
 #endif
 
+        // quiet prints only the status, so don't collect prints, which are not printed anyway
+        if( opts.quiet ) { return; }
+
         START
         static thread_local std::unique_ptr<Printer> printer( makePrinter() );
         printer->collectPrints( path, matches, content );
         STOP( stats.t_collect );
 
-        if( !opts.quiet ) {
-            START
-            std::unique_lock<std::mutex> lock( m );
-            printer->printPrints();
-            STOP( stats.t_print );
-        }
+        START
+        std::unique_lock<std::mutex> lock( m );
+        printer->printPrints();
+        STOP( stats.t_print );
     }
 }
