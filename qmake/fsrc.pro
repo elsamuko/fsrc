@@ -25,8 +25,11 @@ SOURCES += $${SRC_DIR}/globmatcher.cpp
 HEADERS += $${SRC_DIR}/stopwatch.hpp
 
 HEADERS += $${SRC_DIR}/exitqueue.hpp
+HEADERS += $${SRC_DIR}/batcher.hpp
 HEADERS += $${SRC_DIR}/threadpool.hpp
 SOURCES += $${SRC_DIR}/threadpool.cpp
+
+HEADERS += $${SRC_DIR}/openatwalker.hpp
 
 HEADERS += $${SRC_DIR}/printer/printer.hpp
 HEADERS += $${SRC_DIR}/printer/prettyprinter.hpp

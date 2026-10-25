@@ -3,6 +3,8 @@
 #include "searchcontroller.hpp"
 #include "printer/printer.hpp"
 #include "searcher/searcher.hpp"
+#include "openatwalker.hpp"
+#include "batcher.hpp"
 
 void SearchController::onAllFiles() {
     this->printHeader();
@@ -11,16 +13,15 @@ void SearchController::onAllFiles() {
     STOPWATCH
     START
 
-    utils::recurseDir( opts.path.native(), [&pool, this]( const sys_string & filename ) {
-        pool.add( [filename{std::move( filename )}, this] {
-            if( glob && !glob.matches( filename ) ) { return; }
-
-#if DETAILED_STATS
-            stats.filesSearched++;
-#endif
-            search( filename );
-        } );
+    Batcher batcher = makeBatcher<sys_string>( pool, [this]( const sys_string & filename ) {
+        search( filename );
     } );
+
+    withOpenAt::recurseDir( opts.path.native(), [&batcher]( const sys_string & filename ) {
+        batcher.add( filename );
+    } );
+
+    batcher.flush();
 
     STOP( stats.t_recurse )
 }
@@ -32,16 +33,15 @@ void SearchController::onGitFiles() {
     STOPWATCH
     START
 
-    utils::gitLsFiles( opts.path, [&pool, this]( const sys_string & filename ) {
-        pool.add( [filename{std::move( filename )}, this] {
-            if( glob && !glob.matches( filename ) ) { return; }
-
-#if DETAILED_STATS
-            stats.filesSearched++;
-#endif
-            search( filename );
-        } );
+    Batcher batcher = makeBatcher<sys_string>( pool, [this]( const sys_string & filename ) {
+        search( filename );
     } );
+
+    utils::gitLsFiles( opts.path, [&batcher]( const sys_string & filename ) {
+        batcher.add( filename );
+    } );
+
+    batcher.flush();
 
     STOP( stats.t_recurse );
 }
@@ -86,6 +86,11 @@ void SearchController::printFooter( const StopWatch::ns_type ms ) {
 #endif
 
 void SearchController::search( const sys_string& path ) {
+    if( glob && !glob.matches( path ) ) { return; }
+
+#if DETAILED_STATS
+    stats.filesSearched++;
+#endif
 
     STOPWATCH
     START
